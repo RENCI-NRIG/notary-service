@@ -1,0 +1,10 @@
+.idea
+.DS_Store
+__pycache__/
+*.py[cod]
+venv
+.venv
+ns_core/.env
+ns_core/secrets.py
+nginx/default.conf
+ns_core.sock

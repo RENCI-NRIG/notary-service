@@ -1,0 +1,33 @@
+version: '3.6'
+services:
+
+  database:
+    image: postgres:10
+    container_name: database
+    ports:
+      - 5432:${POSTGRES_PORT:-5432}
+
+  django:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: django
+    container_name: django
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/code
+      - ./static:/code/static
+      - ./media:/code/media
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - 8080:80
+      - 8443:443
+    volumes:
+      - .:/code
+      - ./static:/code/static
+      - ./media:/code/media
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
