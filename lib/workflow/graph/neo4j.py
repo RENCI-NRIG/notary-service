@@ -79,7 +79,7 @@ class Neo4jWorkflow(AbstractWorkflow):
                 self._import_workflow(mappedFileName)
                 retry = - 1
             except neo4j.exceptions.ClientError as neo4jerr:
-                print("Unable to load, deleting graph ", id)
+                self.log.error("Unable to load, deleting graph %s", id)
                 self.delete_workflow(id)
                 retry = retry - 1
                 time.sleep(1.0)

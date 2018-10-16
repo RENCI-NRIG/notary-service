@@ -4,3 +4,9 @@
 export NEO4J_DOCKER_PATH=/imports/
 # Where the matching host path is
 export NEO4J_HOST_PATH=/Users/ibaldin/workspace-impact/impact-private/implementation/modules/notary-service/
+# Neo4j Bolt URL
+export NEO4J_BOLT_URL="bolt://localhost:7687"
+# Neo4j API User
+export NEO4J_USER="neo4j"
+# Neo4j API Password
+export NEO4J_PASS="admin"
