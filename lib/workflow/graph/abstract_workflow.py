@@ -9,7 +9,7 @@ class AbstractWorkflow(ABC):
         return None
 
     @abstractmethod
-    def validate_workflow(self, graphId: str) -> bool:
+    def validate_workflow(self, graphId: str) -> None:
         pass
 
     @abstractmethod
@@ -19,3 +19,6 @@ class AbstractWorkflow(ABC):
     @abstractmethod
     def count_nodes(self, graphId: str, nodeRole: str = None) -> int:
         pass
+
+class WorkflowException(Exception):
+    pass
