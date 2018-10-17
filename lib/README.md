@@ -2,7 +2,7 @@
 
 ## Running the unit tests
 
-The code expects a (potentially) dockerized version of Neo4j running. There is a Bash script that sets up two environment variables: 
+The code expects a (potentially) dockerized version of Neo4j running (`docker pull rencinrig/neo4j-apoc:3.4.7`). There is a Bash script that sets up two environment variables: 
 ```
 # Where Neo4J in Docker thinks external files come from 
 export NEO4J_DOCKER_PATH=/imports/
