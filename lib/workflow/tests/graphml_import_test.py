@@ -4,33 +4,28 @@ from workflow.graph.abstract_workflow import WorkflowException
 import os
 import logging
 
-
-class SingletonTestInitializer:
-    """ initialize neo4j logging but only once, no matter how many tests are run """
-
-    class __SingletonTestInitializer:
-        def __init__(self):
-            # configure neo4j workflow log
-            neo4jlog = logging.getLogger('workflow.graph.neo4j')
-            ch = logging.StreamHandler()
-            ch.setFormatter(logging.Formatter('%(name)s %(asctime)s %(message)s'))
-            neo4jlog.addHandler(ch)
-            neo4jlog.setLevel(logging.DEBUG)
-            self.log = logging.getLogger('workflow.graph.unittest')
-            ch = logging.StreamHandler()
-            ch.setFormatter(logging.Formatter('%(name)s %(asctime)s %(message)s'))
-            self.log.addHandler(ch)
-            self.log.setLevel(logging.INFO)
-
-    instance = None
+class TestLogInitializer:
+    """ initialize neo4j and unit test logging """
 
     def __init__(self):
-        if SingletonTestInitializer.instance is None:
-            SingletonTestInitializer.instance = SingletonTestInitializer.__SingletonTestInitializer()
+        # configure neo4j workflow log
+        neo4jlog = logging.getLogger('workflow.graph.neo4j')
+        ch = logging.StreamHandler()
+        ch.setFormatter(logging.Formatter('%(name)s %(asctime)s %(message)s'))
+        neo4jlog.addHandler(ch)
+        neo4jlog.setLevel(logging.DEBUG)
+
+        self.log = logging.getLogger('workflow.graph.unittest')
+        ch = logging.StreamHandler()
+        ch.setFormatter(logging.Formatter('%(name)s %(asctime)s %(message)s'))
+        self.log.addHandler(ch)
+        self.log.setLevel(logging.INFO)
 
     def logger(self):
-        return SingletonTestInitializer.instance.log
+        return self.log
 
+
+global loginit
 
 class TestGraphImport(unittest.TestCase):
     NEO4J_HOST_PATH_ENV = 'NEO4J_HOST_PATH'
@@ -45,10 +40,11 @@ class TestGraphImport(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestGraphImport, self).__init__(*args, **kwargs)
 
-        sti = SingletonTestInitializer()
+        #sti = SingletonTestInitializer()
 
         # configure my log
-        self.log = sti.logger()
+        #self.log = sti.logger()
+        self.log = loginit.logger()
 
     def setUp(self):
         if self.NEO4J_HOST_PATH_ENV not in os.environ.keys() or \
@@ -115,6 +111,6 @@ class TestGraphImport(unittest.TestCase):
         if self.gid is not None:
             self.neo4j.delete_workflow(self.gid)
 
-
 if __name__ == '__main__':
+    loginit = TestLogInitializer()
     unittest.main()
