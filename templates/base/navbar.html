@@ -1,0 +1,53 @@
+{% load staticfiles %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="{% static 'css/ns-navbar.css' %}" type="text/css">
+<nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-white">
+    <a class="navbar-brand text-secondary" href="{% url 'index' %}">
+        <img src="{% static 'img/logo/impact-logo-1600x752.png' %}" height="40">
+        NotaryService
+    </a>
+    <ul class="navbar-nav ns-navbar">
+        <li class="nav-item {{ index_page }}">
+            <a class="nav-link" href="{% url 'index' %}">
+                <i class="fa fa-fw fa-home"></i> Home</a>
+        </li>
+        <li class="nav-item {{ about_page }}">
+            <a class="nav-link" href="{% url 'about' %}">
+                <i class="fa fa-fw fa-question-circle"></i> About</a>
+        </li>
+        <li class="nav-item {{ contact_page }}">
+            <a class="nav-link" href="{% url 'contact' %}">
+                <i class="fa fa-fw fa-envelope"></i> Contact</a>
+        </li>
+        <li class="nav-item {{ search_page }}">
+            <a class="nav-link" href="{% url 'search' %}">
+                <i class="fa fa-fw fa-search"></i> Search</a>
+        </li>
+    </ul>
+    {% if user.is_authenticated %}
+    <ul class="navbar-nav ns-navbar">
+        <li class="nav-item {{ projects_page }}">
+            <a class="nav-link" href="{% url 'projects' %}">
+                <i class="fa fa-fw fa-folder-open"></i> Projects</a>
+        </li>
+        <li class="nav-item {{ profile_page }}">
+            <a class="nav-link" href="{% url 'profile' %}">
+                <i class="fa fa-fw fa-user"></i> {{ user.username }}</a>
+        </li>
+    </ul>
+    <ul class="navbar-nav ml-auto ns-navbar">
+        <li class="nav-item {{ logout_page }}">
+            <a class="nav-link" href="{% url 'logout' %}">
+                <i class="fa fa-fw fa-sign-out"></i> Logout</a>
+        </li>
+    </ul>
+    {% else %}
+    <ul class="navbar-nav ml-auto ns-navbar">
+        <li class="nav-item {{ login_page }}">
+            <a class="nav-link" href="{% url 'login' %}">
+                <i class="fa fa-fw fa-sign-in"></i> Login</a>
+        </li>
+    </ul>
+    {% endif %}
+</nav>
+

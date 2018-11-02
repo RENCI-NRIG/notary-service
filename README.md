@@ -1,5 +1,7 @@
 # Notary Service
 
+[![Requirements Status](https://requires.io/github/RENCI-NRIG/notary-service/requirements.svg?branch=master)](https://requires.io/github/RENCI-NRIG/notary-service/requirements/?branch=master)
+
 **What is the Notary Service?** - TODO
 
 **Requirements**: There are a small set of system requirements in order to run this code. If you're planning on doing additional development to this codebase, then additional requirements may be applicable.
@@ -53,7 +55,7 @@ Your project must be configured prior to running it for the first time. Example 
 
 Do not check any of your configuration files into a repository as they will contain your projects **secrets** (use `.gitignore` to exclude any files containing secrets).
 
-### `ns_core/secrets.py`
+### `base/secrets.py`
 
 A file named `dummy_secrets.py` has been provided as an exmaple.
 
@@ -63,7 +65,7 @@ $ cp dummy_secrets.py secrets.py
 
 Generate a `SECRET_KEY` and save in in this file
 
-### `ns_core/.env`
+### `base/.env`
 
 A file named `dummy.env` has been provided as an exmaple.
 
