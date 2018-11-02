@@ -1,5 +1,8 @@
 Django==2.1.2
+django-crispy-forms==1.7.2
+ldap3==2.5.1
+mozilla-django-oidc==1.1.2
 psycopg2-binary==2.7.5
 python-dotenv==0.9.1
-pytz==2018.5
+pytz==2018.7
 uWSGI==2.0.17.1

@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}ImPACT - Notary Service{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% if user.is_authenticated %}
+    <h1>Hello from the profile page</h1>
+    <h2>Current User:</h2>
+    <table border="1px solid black" cellpadding="5px">
+        <tr>
+            <td>name</td>
+            <td><b>{{ user.name }}</b></td>
+        </tr>
+        <tr>
+            <td>email</td>
+            <td><b>{{ user.email }}</b></td>
+        </tr>
+        <tr>
+            <td>given_name</td>
+            <td><b>{{ user.first_name }}</b></td>
+        </tr>
+        <tr>
+            <td>family_name</td>
+            <td><b>{{ user.last_name }}</b></td>
+        </tr>
+        <tr>
+            <td>idp</td>
+            <td><b>{{ user.idp }}</b></td>
+        </tr>
+        <tr>
+            <td>idp_name</td>
+            <td><b>{{ user.idp_name }}</b></td>
+        </tr>
+        <tr>
+            <td>sub</td>
+            <td><b>{{ user.sub }}</b></td>
+        </tr>
+        <tr>
+            <td>aud</td>
+            <td><b>{{ user.aud }}</b></td>
+        </tr>
+        <tr>
+            <td>cert_subject_dn</td>
+            <td><b>{{ user.cert_subject_dn }}</b></td>
+        </tr>
+        <tr>
+            <td>iss</td>
+            <td><b>{{ user.iss }}</b></td>
+        </tr>
+        <tr>
+            <td>oidc</td>
+            <td><b>{{ user.oidc }}</b></td>
+        </tr>
+        <tr>
+            <td>eppn</td>
+            <td><b>{{ user.eppn }}</b></td>
+        </tr>
+        <tr>
+            <td>eptid</td>
+            <td><b>{{ user.eptid }}</b></td>
+        </tr>
+        <tr>
+            <td>acr</td>
+            <td><b>{{ user.acr }}</b></td>
+        </tr>
+        <tr>
+            <td>affiliation</td>
+            <td><b>{{ user.affiliation }}</b></td>
+        </tr>
+    </table>
+    <br>
+    <form action="/profile/" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="user_id" value="{{ user.id }}">
+        <input type="submit" value="See attributes from LDAP">
+        <br>
+        {% if isMemberOf %}
+        <h2>LDAP: isMemberOf</h2>
+        <table border="1px solid black" cellpadding="5px">
+            {% for group in isMemberOf %}
+            <tr>
+                <td>{{ group.attribute }}</td>
+                <td><b>{{ group.value }}</b></td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+        {% if LDAPOther %}
+        <h2>LDAP: other attributes</h2>
+        <table border="1px solid black" cellpadding="5px">
+            {% for group in LDAPOther %}
+            <tr>
+                <td>{{ group.attribute }}</td>
+                <td><b>{{ group.value }}</b></td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+    </form>
+    <p><a href="{% url 'logout' %}">logout</a></p>
+    {% else %}
+    <div class="container">
+        <p>You are not currently logged in</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

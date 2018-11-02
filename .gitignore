@@ -4,7 +4,8 @@ __pycache__/
 *.py[cod]
 venv
 .venv
-ns_core/.env
-ns_core/secrets.py
+base/.env
+base/secrets.py
 nginx/default.conf
-ns_core.sock
+base.sock
+static

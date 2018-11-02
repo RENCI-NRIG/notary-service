@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+{% load staticfiles %}
+<link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}ImPACT - Notary Service{% endblock %}</title>
+</head>
+<body>
+{% include 'navbar.html' %}
+<main>
+    {% block content %}
+    {% endblock %}
+</main>
+</body>
+<footer>
+    {% block footer %}
+    {% include 'footer.html' %}
+    {% endblock %}
+</footer>
+</html>

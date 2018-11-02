@@ -1,0 +1,11 @@
+.ns-navbar {
+  background-color: #555;
+}
+
+.ns-navbar a:hover {
+  background-color: #D67B0B;
+}
+
+.active {
+  background-color: #107B97;
+}

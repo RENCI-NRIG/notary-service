@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+
+{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="text-center">
+        <h1>Infrastructure for Privacy-Assured CompuTations</h1>
+        <img class="rounded" width="300" src="{% static 'img/logo/impact-logo-1600x752.png' %}">
+    </div>
+    {% if user.is_authenticated %}
+    <div class="container">
+        <p>Hello <b>{{ user.name }}</b>!</p>
+        <p>You are logged in as username: <b>{{ user.username }}</b></p>
+    </div>
+    {% else %}
+    <div class="container">
+        <p>You are not currently logged in</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
