@@ -1,11 +1,16 @@
+/* Site navbar styling in addition to bootstrap */
+
+/* Set backgound color of navbar */
 .ns-navbar {
   background-color: #555;
 }
 
+/* Set hover color for navbar item */
 .ns-navbar a:hover {
   background-color: #D67B0B;
 }
 
+/* Set active color for navbar selected/active item */
 .active {
   background-color: #107B97;
 }

@@ -34,7 +34,8 @@ def login(request):
 
 
 def profile(request):
+    context = {"profile_page": "active"}
     if request.user.is_authenticated:
         return ldap_attributes(request)
     else:
-        return render(request, 'login.html', context)
+        return render(request, 'profile.html', context)

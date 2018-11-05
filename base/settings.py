@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', False)
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["*"]                # MUST be updated for production
 
 # django-crispy-forms
 # https://django-crispy-forms.readthedocs.io/en/latest/
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',        # custom user model
     'comanage.apps.ComanageConfig',  # comanage authN/authZ
     'crispy_forms',                  # django-crispy-forms
+    'django_nose',                   # django-nose test runner
 ]
 
 MIDDLEWARE = [
@@ -156,8 +157,23 @@ OIDC_RP_SCOPES = 'openid email profile org.cilogon.userinfo'
 # username algorithm
 OIDC_USERNAME_ALGO = 'comanage.auth.generate_username'
 # redirect URLs
-LOGIN_REDIRECT_URL = '/profile'
+LOGIN_REDIRECT_URL = '/profile/'
 LOGOUT_REDIRECT_URL = '/'
+
+
+# django-nose test runner
+# https://django-nose.readthedocs.io/en/latest/
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+NOSE_ARGS = [
+    '--cover-erase',
+    '--with-coverage',
+    '--cover-package=users',
+    '--exclude=lib',
+    '--cover-html',
+    '--with-xunit', # Add this and the following line
+    '--xunit-file=xunittest.xml',  # xunittest.xml could be any name
+]
+
 
 # Default Django logging is WARNINGS+ to console
 # so visible via docker-compose logs django
