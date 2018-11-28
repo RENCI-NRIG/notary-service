@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<div class="container">
+    <h1>Hello from the projects page</h1>
+</div>
+{% else %}
+<div class="container">
+    <p>You are not currently logged in</p>
+</div>
+{% endif %}
+{% endblock %}

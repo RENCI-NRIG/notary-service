@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+
+{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="text-center">
+        <h1>Infrastructure for Privacy-Assured CompuTations</h1>
+        <img class="rounded" width="300" src="{% static 'img/logo/impact-logo-1600x752.png' %}">
+    </div>
+
+
+    <h2>Our mission</h2>
+
+    <p>Scientific progress today requires multi-institutional and cross-disciplinary sharing and analysis of data. Many
+        disciplines, such as social and health-related sciences, face a web of policies and technological constraints on
+        data due to privacy concern over, for example, Personal Health Information (PHI) or Personally Identifiable
+        Information (PII).</p>
+
+    <p>Issues of privacy, safety, competition, and ownership have led to regulations controlling data location,
+        availability, movement, and access. Compliance poses obstacles to traditional data-processing practices and
+        slows research; yet, increasingly, pressing scientific and societal problems demand collaborative efforts
+        involving data from multiple stakeholders.</p>
+
+    <p>Project ImPACT (Infrastructure for Privacy-Assured CompuTations) will free researchers to focus more fully on
+        science by supporting the analysis of multi-institutional data while satisfying relevant regulations and
+        interests.</p>
+
+    <p>It is designed to facilitate secure cooperative analysis, meeting a pressing need in the research community.
+        ImPACT seeks to develop an integrative model for management of trust, deploying a collection of supportive
+        mechanisms at scale into a model cyber-infrastructure. The project develops methodologies with best practices in
+        networking, data management, security, and privacy preservation to fit a variety of use cases.</p>
+</div>
+{% endblock %}

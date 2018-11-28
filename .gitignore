@@ -4,7 +4,12 @@ __pycache__/
 *.py[cod]
 venv
 .venv
-ns_core/.env
-ns_core/secrets.py
-nginx/default.conf
-ns_core.sock
+/base/.env
+/base/secrets.py
+/nginx/default.conf
+base.sock
+/static/*
+/cover/*
+.coverage
+xunittest.xml
+migrations

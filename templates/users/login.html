@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Login with CILogon</h2>
+    <div style="border: 5px outset #696; cursor:pointer; padding:3px;
+display:inline-block;" onclick="location.href='https://cilogon.org'">
+        <a href="{% url 'oidc_authentication_init' %}"
+           style="font-family:Arial,sans-serif; font-style:italic;
+font-weight:bold; font-size:28px; color:#363;
+text-decoration:none;"><img alt=""
+                            src="https://cilogon.org/images/cilogon-logo-32x32.png"
+                            style="vertical-align:middle"/>&nbsp;CILogon&nbsp;</a>
+    </div>
+</div>
+{% endblock %}
