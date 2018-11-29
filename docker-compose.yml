@@ -20,8 +20,8 @@ services:
     - ./static:/code/static
     - ./media:/code/media
     environment:
-    - UWGSI_UID=${UWGSI_UID:-1000}
-    - UWGSI_GID=${UWSGI_GID:-1000}
+    - UWSGI_UID=${UWSGI_UID:-1000}
+    - UWSGI_GID=${UWSGI_GID:-1000}
 
   nginx:
     image: nginx:latest
