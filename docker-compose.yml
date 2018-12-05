@@ -5,7 +5,7 @@ services:
     image: postgres:10
     container_name: database
     ports:
-    - 5432:${POSTGRES_PORT:-5432}
+      - 5432:${POSTGRES_PORT:-5432}
 
   django:
     build:
@@ -14,25 +14,39 @@ services:
     image: django
     container_name: django
     ports:
-    - 8000:8000
+      - 8000:8000
     volumes:
-    - .:/code
-    - ./static:/code/static
-    - ./media:/code/media
+      - .:/code
+      - ./static:/code/static
+      - ./media:/code/media
     environment:
-    - UWSGI_UID=${UWSGI_UID:-1000}
-    - UWSGI_GID=${UWSGI_GID:-1000}
+      - UWSGI_UID=${UWSGI_UID:-1000}
+      - UWSGI_GID=${UWSGI_GID:-1000}
 
   nginx:
     image: nginx:latest
     container_name: nginx
     ports:
-    - 8080:80
-    - 8443:443
+      - 8080:80
+      - 8443:443
     volumes:
-    - .:/code
-    - ./static:/code/static
-    - ./media:/code/media
-    - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-    - ./ssl/ssl_dev.crt:/etc/ssl/SSL.crt  # SSL development certificate
-    - ./ssl/ssl_dev.key:/etc/ssl/SSL.key  # SSL development key
+      - .:/code
+      - ./static:/code/static
+      - ./media:/code/media
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./ssl/ssl_dev.crt:/etc/ssl/SSL.crt  # SSL development certificate
+      - ./ssl/ssl_dev.key:/etc/ssl/SSL.key  # SSL development key
+
+  neo4j:
+    image: rencinrig/neo4j-apoc:3.4.7
+    container_name: neo4j
+    ports:
+      - 7474:7474  # for HTTP
+      - 7473:7473  # for HTTPS
+      - 7687:7687  # for Bolt
+    volumes:
+      - ./neo4j/data:/data
+      - ./neo4j/logs:/logs
+      - ./neo4j:/imports
+    environment:
+      - NEO4J_AUTH=neo4j/neo4j123
