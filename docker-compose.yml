@@ -46,7 +46,7 @@ services:
       - 7687:7687  # for Bolt
     volumes:
       - ./neo4j/data:/data
-      - ./neo4j/logs:/logs
+      #- ./neo4j/logs:/logs
       - ./neo4j:/imports
     environment:
       - NEO4J_AUTH=neo4j/neo4j123
