@@ -1,0 +1,34 @@
+[
+    {
+      "rule": "MATCH (s {GraphID: $graphId, Type: \"Start\"}) RETURN count(*)=1",
+      "msg" : "There must be a single Start node."
+    },
+    {
+      "rule": "MATCH (s {GraphID: $graphId, Type: \"Stop\"}) RETURN count(*)=1",
+      "msg" : "There must be a single Stop node."
+    },
+    {
+      "rule": "MATCH (s {GraphID: $graphId}), p= (s) -[*]-> (s) RETURN size(collect(p))=0",
+      "msg" : "Workflow graph must not contain cycles."
+    },
+    {
+      "rule": "MATCH (s {GraphID: $graphId}), (d {GraphID: $graphId}), (e {GraphID: $graphId}) WHERE s.Type=\"Start\" AND NOT d.Type=\"Start\" and NOT e.Type=\"Start\" WITH s, d, count(e) AS TotalDest MATCH p= (s) -[*]-> (d) WITH d, count(p) AS cp, TotalDest RETURN TotalDest=size(collect(cp))",
+      "msg" : "Any node must be reachable from the Start node."
+    },
+    {
+      "rule": "MATCH (s {GraphID: $graphId}), (d {GraphID: $graphId}), (e {GraphID: $graphId}) WHERE NOT s.Type=\"Stop\" AND d.Type=\"Stop\" and NOT e.Type=\"Stop\" WITH s, d, count(e) AS TotalSrc MATCH p= (s) -[*]-> (d) WITH s, count(p) AS cp, TotalSrc RETURN TotalSrc=size(collect(cp))",
+      "msg" : "Stop node must be reachable from any node."
+    },
+    {
+      "rule": "MATCH (n {GraphID: $graphId, Type: \"Condition\"}) -[rel]-> () RETURN ALL(r IN collect(rel) WHERE r.Type IN [\"ConditionTrue\", \"ConditionFalse\"])",
+      "msg" : "Condition nodes must have two branches only (ConditionTrue and ConditionFalse)"
+    },
+    {
+      "rule": "MATCH (n {GraphID: $graphId}), (m {GraphID: $graphId}) WHERE n.ID=m.ID AND NOT id(n)=id(m) RETURN count(n) = 0",
+      "msg" : "All node IDs must be distinct."
+    },
+    {
+      "rule": "MATCH (n {GraphID: $graphId}) RETURN ALL(r IN collect(n) WHERE r.Role IN [\"None\", \"STAFF\", \"DP\", \"INP\", \"PI\", \"IG\"])",
+      "msg" : "Node roles should be \"None\", \"STAFF\", \"DP\", \"INP\", \"IG\", or \"PI\"."
+    }
+]
