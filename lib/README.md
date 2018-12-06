@@ -2,7 +2,11 @@
 
 ## Running the unit tests
 
-The code expects a (potentially) dockerized version of Neo4j running (`docker pull rencinrig/neo4j-apoc:3.4.7`). There is a Bash script that sets up two environment variables: 
+The code expects a (potentially) dockerized version of Neo4j running (`docker pull rencinrig/neo4j-apoc:3.4.7`). Then run it as
+```
+docker run --publish=7474:7474 --publish=7687:7687 --volume=/wherever/persistent/neo4j/data/resides:/data --volume=/wherever/you/want/to/import/graph/files/from:/imports rencinrig/neo4j-apoc:3.4.7
+```
+There is a Bash script that sets up two environment variables: 
 ```
 # Where Neo4J in Docker thinks external files come from 
 export NEO4J_DOCKER_PATH=/imports/
