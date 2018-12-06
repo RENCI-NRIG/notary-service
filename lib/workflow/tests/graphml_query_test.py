@@ -27,23 +27,16 @@ class TestLogInitializer:
 
 global loginit
 
-class TestGraphImport(unittest.TestCase):
+class TestGraphQuery(unittest.TestCase):
     NEO4J_HOST_PATH_ENV = 'NEO4J_HOST_PATH'
     NEO4J_DOCKER_PATH_ENV = 'NEO4J_DOCKER_PATH'
     NEO4J_BOLT_URL_ENV = 'NEO4J_BOLT_URL'
     NEO4J_USER_ENV = 'NEO4J_USER'
     NEO4J_PASS_ENG = 'NEO4J_PASS'
 
-    TEST_ASSIGNED_ID = "NEW-ID"
-    TEST_ROLE = "PI"
-
     def __init__(self, *args, **kwargs):
-        super(TestGraphImport, self).__init__(*args, **kwargs)
+        super(TestGraphQuery, self).__init__(*args, **kwargs)
 
-        #sti = SingletonTestInitializer()
-
-        # configure my log
-        #self.log = sti.logger()
         self.log = loginit.logger()
 
     def setUp(self):
@@ -62,25 +55,6 @@ class TestGraphImport(unittest.TestCase):
                                   os.environ[self.NEO4J_PASS_ENG],
                                   importHostDir=os.environ[self.NEO4J_HOST_PATH_ENV],
                                   importDir=os.environ[self.NEO4J_DOCKER_PATH_ENV])
-        self.gid = None
-
-    def test_import_workflow(self):
-        self.log.info("Importing graph with assigned ID")
-        graphmlFile = open("workflow/tests/test-graph.graphml", "r")
-        graphml = graphmlFile.read()
-        graphmlFile.close()
-        try:
-            self.gid = self.neo4j.import_workflow(graphml, self.TEST_ASSIGNED_ID)
-        except WorkflowError as wexc:
-            self.log.error(wexc)
-            self.assertTrue(False)
-        self.assertEqual(self.gid, self.TEST_ASSIGNED_ID)
-        self.log.info("Using graph id %s", self.gid)
-        self.assertEqual(self.neo4j.count_nodes(self.gid), 18)
-        self.assertEqual(self.neo4j.count_nodes(self.gid, nodeRole=self.TEST_ROLE), 8)
-
-    def test_import_workflow_auto(self):
-        self.log.info("Importing graph with self-generated ID")
         graphmlFile = open("workflow/tests/test-graph.graphml", "r")
         graphml = graphmlFile.read()
         graphmlFile.close()
@@ -88,28 +62,40 @@ class TestGraphImport(unittest.TestCase):
             self.gid = self.neo4j.import_workflow(graphml)
         except WorkflowError as wexc:
             self.log.error(wexc)
-            self.assertTrue(False)
-        self.log.info("Using graph id %s", self.gid)
-        self.assertEqual(self.neo4j.count_nodes(self.gid), 18)
-        self.assertEqual(self.neo4j.count_nodes(self.gid, nodeRole="PI"), 8)
-
-    def test_validate(self):
-        self.log.info("Testing graph validation")
-        graphmlFile = open("workflow/tests/test-graph.graphml", "r")
-        graphml = graphmlFile.read()
-        graphmlFile.close()
-        try:
-            self.gid = self.neo4j.import_workflow(graphml)
-            self.log.info("Using graph id %s", self.gid)
-            self.assertEqual(self.neo4j.count_nodes(self.gid), 18)
-            self.neo4j.validate_workflow(self.gid)
-        except WorkflowError as wexc:
-            self.log.error(wexc)
-            self.assertTrue(False)
 
     def tearDown(self):
+        self.log.info("Deleting graph %s", self.gid)
         if self.gid is not None:
             self.neo4j.delete_workflow(self.gid)
+
+    def test_query_start_node(self):
+        self.log.info("Testing searching for start node type.")
+        d = self.neo4j.find_start_node(self.gid)
+        self.assertIsNotNone(d, "Start node must be present")
+
+    def test_query_find_node(self):
+        self.log.info("Testing searching for node by id.")
+        d = self.neo4j.find_node(self.gid, "Start")
+        self.assertIsNotNone(d, "Start node must be present")
+        d = self.neo4j.find_node(self.gid, "NoCopiesPledge")
+        self.assertIsNotNone(d, "NoCopiesPledge node must be present")
+
+    def test_query_adjacent(self):
+        self.log.info("Testing searching for adjacent nodes")
+        d = self.neo4j.find_adjacent_nodes(self.gid, "Start")
+        self.assertEqual(len(d), 3, "Start node adjacent to three nodes")
+        d = self.neo4j.find_adjacent_nodes(self.gid, "Start", "PI")
+        self.assertEqual(len(d), 2, "Start node has two PI adjacent nodes")
+
+
+    def test_query_reachable(self):
+        self.log.info("Testing reachability for nodes")
+
+        d = self.neo4j.find_reachable_nodes(self.gid, "Start", "IG")
+        self.assertEqual(len(d), 1, "1 IG node reachable from start")
+
+        d = self.neo4j.find_reachable_nodes(self.gid, "RestrictAccessPledge", "PI")
+        self.assertEqual(len(d), 3, "3 IP nodes are reachable from RestrictAccessPledge")
 
 if __name__ == '__main__':
     loginit = TestLogInitializer()
