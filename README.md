@@ -1,7 +1,10 @@
 # Notary Service
 
-[![Requirements Status](https://requires.io/github/RENCI-NRIG/notary-service/requirements.svg?branch=master)](https://requires.io/github/RENCI-NRIG/notary-service/requirements/?branch=master)
-[![Coverage Status](https://coveralls.io/repos/github/RENCI-NRIG/notary-service/badge.svg?branch=master)](https://coveralls.io/github/RENCI-NRIG/notary-service?branch=master)
+### Status
+
+- [![Build Status](http://turtles.renci.org:8080/jenkins/buildStatus/icon?job=ns-test-coverage-pytest)](http://turtles.renci.org:8080/jenkins/job/ns-test-coverage-pytest)
+- [![Requirements Status](https://requires.io/github/RENCI-NRIG/notary-service/requirements.svg?branch=master)](https://requires.io/github/RENCI-NRIG/notary-service/requirements/?branch=master)
+- [![Coverage Status](https://coveralls.io/repos/github/RENCI-NRIG/notary-service/badge.svg?branch=master)](https://coveralls.io/github/RENCI-NRIG/notary-service?branch=master)
 
 **What is the Notary Service?** - TODO
 
