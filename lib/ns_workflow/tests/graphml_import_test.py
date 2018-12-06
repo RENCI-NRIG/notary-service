@@ -6,6 +6,8 @@ import logging
 
 class TestLogInitializer:
     """ initialize neo4j and unit test logging """
+    # Tell pytest to ignore
+    __test__=False
 
     def __init__(self):
         # configure neo4j workflow log
