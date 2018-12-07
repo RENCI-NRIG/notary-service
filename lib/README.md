@@ -74,20 +74,26 @@ pip install pytest
 The unit tests can be run using `pytest` as follows:
 
 ```
-pytest ns_workflow
+pytest -v ns_workflow
 ```
 
-Example run
+Example use of pytest (many other runtime options exist):
 
 ```console
-$ pytest ns_workflow
+$ pytest -v ns_workflow
 =========================================================== test session starts ============================================================
-platform darwin -- Python 3.7.1, pytest-4.0.1, py-1.7.0, pluggy-0.8.0
+platform darwin -- Python 3.7.1, pytest-4.0.1, py-1.7.0, pluggy-0.8.0 -- /Users/stealey/GitHub/nrig/notary-service/lib/venv/bin/python3.7
+cachedir: .pytest_cache
 rootdir: /Users/stealey/GitHub/nrig/notary-service, inifile: pytest.ini
 collected 7 items
 
-ns_workflow/tests/graphml_import_test.py ...                                                                                         [ 42%]
-ns_workflow/tests/graphml_query_test.py ....                                                                                         [100%]
+ns_workflow/tests/graphml_import_test.py::TestGraphImport::test_import_workflow PASSED                                               [ 14%]
+ns_workflow/tests/graphml_import_test.py::TestGraphImport::test_import_workflow_auto PASSED                                          [ 28%]
+ns_workflow/tests/graphml_import_test.py::TestGraphImport::test_validate PASSED                                                      [ 42%]
+ns_workflow/tests/graphml_query_test.py::TestGraphQuery::test_query_adjacent PASSED                                                  [ 57%]
+ns_workflow/tests/graphml_query_test.py::TestGraphQuery::test_query_find_node PASSED                                                 [ 71%]
+ns_workflow/tests/graphml_query_test.py::TestGraphQuery::test_query_reachable PASSED                                                 [ 85%]
+ns_workflow/tests/graphml_query_test.py::TestGraphQuery::test_query_start_node PASSED                                                [100%]
 
 ============================================================= warnings summary =============================================================
 venv/lib/python3.7/site-packages/networkx/classes/graph.py:23
@@ -101,7 +107,7 @@ venv/lib/python3.7/site-packages/networkx/classes/reportviews.py:95
     from collections import Mapping, Set, Iterable
 
 -- Docs: https://docs.pytest.org/en/latest/warnings.html
-=================================================== 7 passed, 3 warnings in 3.29 seconds ===================================================
+=================================================== 7 passed, 3 warnings in 3.58 seconds ===================================================
 ```
 
 ### Teardown and Cleanup
