@@ -2,9 +2,8 @@
 
 ### Status
 
-- [![Build Status](http://turtles.renci.org:8080/jenkins/buildStatus/icon?job=ns-test-coverage-pytest)](http://turtles.renci.org:8080/jenkins/job/ns-test-coverage-pytest)
-- [![Requirements Status](https://requires.io/github/RENCI-NRIG/notary-service/requirements.svg?branch=master)](https://requires.io/github/RENCI-NRIG/notary-service/requirements/?branch=master)
-- [![Coverage Status](https://coveralls.io/repos/github/RENCI-NRIG/notary-service/badge.svg?branch=master)](https://coveralls.io/github/RENCI-NRIG/notary-service?branch=master)
+[![Requirements Status](https://requires.io/github/RENCI-NRIG/notary-service/requirements.svg?branch=master)](https://requires.io/github/RENCI-NRIG/notary-service/requirements/?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/RENCI-NRIG/notary-service/badge.svg?branch=master)](https://coveralls.io/github/RENCI-NRIG/notary-service?branch=master)
 
 **What is the Notary Service?** - TODO
 
@@ -28,6 +27,7 @@
 - [Build](#build) - Building the stack
 - [Run](#run) - Running the stack
 - [Docker](#docker) - I want to do all of this in docker
+- [Lib](#libs) - Additional libraries/packages for Notary Service
 - [References](#ref) - Reference information about all the things
 
 ## <a name="tldr"></a>TL;DR
@@ -238,6 +238,15 @@ At this point the notary-service stack should be running and can be verified at 
 ## <a name="docker"></a>Docker
 
 TODO
+
+## <a name="lib"></a>Lib
+
+TODO
+
+### ns_workflow
+
+Neo4j/APOC graph database for managing Notary Service Workflows
+
 
 ## <a name="ref"></a>References
 
