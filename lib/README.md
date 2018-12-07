@@ -6,7 +6,7 @@ Testing should make use of [pytest](https://docs.pytest.org/en/latest/), and be 
 
 ## ns_workflow: Workflow Graph Library for Notary Service
 
-Location: [lib/ns_workflow](lib/)
+Location: [lib/ns_workflow](ns_workflow/)
 
 The code expects a version of Neo4j running. We've provided a docker based implemenation for testing (`docker pull rencinrig/neo4j-apoc:latest`). 
 
@@ -69,7 +69,7 @@ pip install --editable ns_workflow/
 pip install pytest
 ```
 
-## Running the unit tests
+## Testing
 
 The unit tests can be run using `pytest` as follows:
 
