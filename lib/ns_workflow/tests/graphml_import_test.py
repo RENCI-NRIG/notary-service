@@ -1,11 +1,13 @@
 import unittest
-from workflow.graph.neo4j import Neo4jWorkflow
-from workflow.graph.abstract_workflow import WorkflowError
+from ns_workflow import Neo4jWorkflow, WorkflowError
 import os
 import logging
 
+
 class TestLogInitializer:
     """ initialize neo4j and unit test logging """
+    # Tell pytest to ignore
+    __test__=False
 
     def __init__(self):
         # configure neo4j workflow log
@@ -25,7 +27,9 @@ class TestLogInitializer:
         return self.log
 
 
-global loginit
+global loginit, testdir
+testdir = os.path.dirname(os.path.dirname(__file__)) + '/tests/'
+
 
 class TestGraphImport(unittest.TestCase):
     NEO4J_HOST_PATH_ENV = 'NEO4J_HOST_PATH'
@@ -40,11 +44,12 @@ class TestGraphImport(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestGraphImport, self).__init__(*args, **kwargs)
 
-        #sti = SingletonTestInitializer()
+        # sti = SingletonTestInitializer()
 
         # configure my log
-        #self.log = sti.logger()
-        self.log = loginit.logger()
+        # self.log = sti.logger()
+        loginit = logging
+        self.log = loginit.getLogger(__name__)
 
     def setUp(self):
         if self.NEO4J_HOST_PATH_ENV not in os.environ.keys() or \
@@ -58,15 +63,15 @@ class TestGraphImport(unittest.TestCase):
                                       self.NEO4J_USER_ENV, 'and',
                                       self.NEO4J_PASS_ENG, 'must be specified']))
         self.neo4j = Neo4jWorkflow(os.environ[self.NEO4J_BOLT_URL_ENV],
-                                  os.environ[self.NEO4J_USER_ENV],
-                                  os.environ[self.NEO4J_PASS_ENG],
-                                  importHostDir=os.environ[self.NEO4J_HOST_PATH_ENV],
-                                  importDir=os.environ[self.NEO4J_DOCKER_PATH_ENV])
+                                   os.environ[self.NEO4J_USER_ENV],
+                                   os.environ[self.NEO4J_PASS_ENG],
+                                   importHostDir=os.environ[self.NEO4J_HOST_PATH_ENV],
+                                   importDir=os.environ[self.NEO4J_DOCKER_PATH_ENV])
         self.gid = None
 
     def test_import_workflow(self):
         self.log.info("Importing graph with assigned ID")
-        graphmlFile = open("workflow/tests/test-graph.graphml", "r")
+        graphmlFile = open(testdir + "test-graph.graphml", "r")
         graphml = graphmlFile.read()
         graphmlFile.close()
         try:
@@ -81,7 +86,7 @@ class TestGraphImport(unittest.TestCase):
 
     def test_import_workflow_auto(self):
         self.log.info("Importing graph with self-generated ID")
-        graphmlFile = open("workflow/tests/test-graph.graphml", "r")
+        graphmlFile = open(testdir + "test-graph.graphml", "r")
         graphml = graphmlFile.read()
         graphmlFile.close()
         try:
@@ -95,7 +100,7 @@ class TestGraphImport(unittest.TestCase):
 
     def test_validate(self):
         self.log.info("Testing graph validation")
-        graphmlFile = open("workflow/tests/test-graph.graphml", "r")
+        graphmlFile = open(testdir + "test-graph.graphml", "r")
         graphml = graphmlFile.read()
         graphmlFile.close()
         try:
@@ -110,6 +115,7 @@ class TestGraphImport(unittest.TestCase):
     def tearDown(self):
         if self.gid is not None:
             self.neo4j.delete_workflow(self.gid)
+
 
 if __name__ == '__main__':
     loginit = TestLogInitializer()

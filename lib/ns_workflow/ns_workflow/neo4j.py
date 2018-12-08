@@ -2,10 +2,11 @@ import uuid
 import networkx as nx
 import tempfile
 import os
-from neo4j.v1 import GraphDatabase
+from neo4j import GraphDatabase
 import neo4j
 from typing import Any, List, Set, Dict, Tuple, Optional
-from workflow.graph.abstract_workflow import AbstractWorkflow, WorkflowError, WorkflowImportError, WorkflowQueryError
+from .abstract_workflow import AbstractWorkflow, WorkflowError, WorkflowImportError, WorkflowQueryError
+# from workflow.graph.abstract_workflow import AbstractWorkflow, WorkflowError, WorkflowImportError, WorkflowQueryError
 import json
 import time
 import logging
@@ -125,7 +126,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         """ validate the graph imported in Neo4j according to standard Cipher rules """
         assert graphId is not None
         self.log.info('Validating workflow %s', graphId)
-        return self._validate_workflow(graphId, 'workflow/graph/rules.json')
+        return self._validate_workflow(graphId, os.path.dirname(__file__) + '/rules.json')
 
     def delete_workflow(self, graphId: str) -> None:
         """ delete a workflow with this ID from Neo4j"""
@@ -179,7 +180,7 @@ class Neo4jWorkflow(AbstractWorkflow):
                 raise WorkflowQueryError(graphId, nodeId, "Unable to find node")
             return val.data()['properties(n)']
 
-    def find_adjacent_nodes(self, graphId: str, nodeId: str, role: str = None) -> List[neo4j.v1.types.graph.Node]:
+    def find_adjacent_nodes(self, graphId: str, nodeId: str, role: str = None) -> List[neo4j.types.graph.Node]:
         """Get a list of nodes that are adjacent to the named node and optionally have a specific role
         See https://neo4j.com/docs/api/python-driver/current/types/graph.html for more info"""
         assert graphId is not None
@@ -194,7 +195,7 @@ class Neo4jWorkflow(AbstractWorkflow):
                 raise WorkflowQueryError(graphId, nodeId, "Unable to find adjacent nodes")
             return val.value()
 
-    def find_reachable_nodes(self, graphId: str, nodeId: str, role: str) ->List[neo4j.v1.types.graph.Node]:
+    def find_reachable_nodes(self, graphId: str, nodeId: str, role: str) ->List[neo4j.types.graph.Node]:
         """Get a list of nodes reachable from the specified node and have a specific role.
         See https://neo4j.com/docs/api/python-driver/current/types/graph.html for more info"""
         assert graphId is not None

@@ -1,12 +1,14 @@
 import unittest
-from workflow.graph.neo4j import Neo4jWorkflow
-from workflow.graph.abstract_workflow import WorkflowError
+from ns_workflow import Neo4jWorkflow, WorkflowError
 import os
 import logging
+
 
 class TestLogInitializer:
     """ initialize neo4j and unit test logging """
 
+    # Tell pytest to ignore
+    __test__=False
     def __init__(self):
         # configure neo4j workflow log
         neo4jlog = logging.getLogger('workflow.graph.neo4j')
@@ -25,7 +27,9 @@ class TestLogInitializer:
         return self.log
 
 
-global loginit
+global loginit, testdir
+testdir = os.path.dirname(os.path.dirname(__file__)) + '/tests/'
+
 
 class TestGraphQuery(unittest.TestCase):
     NEO4J_HOST_PATH_ENV = 'NEO4J_HOST_PATH'
@@ -37,7 +41,8 @@ class TestGraphQuery(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestGraphQuery, self).__init__(*args, **kwargs)
 
-        self.log = loginit.logger()
+        loginit = logging
+        self.log = loginit.getLogger(__name__)
 
     def setUp(self):
         if self.NEO4J_HOST_PATH_ENV not in os.environ.keys() or \
@@ -51,11 +56,11 @@ class TestGraphQuery(unittest.TestCase):
                                       self.NEO4J_USER_ENV, 'and',
                                       self.NEO4J_PASS_ENG, 'must be specified']))
         self.neo4j = Neo4jWorkflow(os.environ[self.NEO4J_BOLT_URL_ENV],
-                                  os.environ[self.NEO4J_USER_ENV],
-                                  os.environ[self.NEO4J_PASS_ENG],
-                                  importHostDir=os.environ[self.NEO4J_HOST_PATH_ENV],
-                                  importDir=os.environ[self.NEO4J_DOCKER_PATH_ENV])
-        graphmlFile = open("workflow/tests/test-graph.graphml", "r")
+                                   os.environ[self.NEO4J_USER_ENV],
+                                   os.environ[self.NEO4J_PASS_ENG],
+                                   importHostDir=os.environ[self.NEO4J_HOST_PATH_ENV],
+                                   importDir=os.environ[self.NEO4J_DOCKER_PATH_ENV])
+        graphmlFile = open(testdir + "test-graph.graphml", "r")
         graphml = graphmlFile.read()
         graphmlFile.close()
         try:
@@ -87,7 +92,6 @@ class TestGraphQuery(unittest.TestCase):
         d = self.neo4j.find_adjacent_nodes(self.gid, "Start", "PI")
         self.assertEqual(len(d), 2, "Start node has two PI adjacent nodes")
 
-
     def test_query_reachable(self):
         self.log.info("Testing reachability for nodes")
 
@@ -96,6 +100,7 @@ class TestGraphQuery(unittest.TestCase):
 
         d = self.neo4j.find_reachable_nodes(self.gid, "RestrictAccessPledge", "PI")
         self.assertEqual(len(d), 3, "3 IP nodes are reachable from RestrictAccessPledge")
+
 
 if __name__ == '__main__':
     loginit = TestLogInitializer()
