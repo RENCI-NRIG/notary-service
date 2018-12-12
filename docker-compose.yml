@@ -2,10 +2,12 @@ version: '3.6'
 services:
 
   database:
-    image: postgres:10
+    image: postgres:11
     container_name: database
     ports:
       - 5432:${POSTGRES_PORT:-5432}
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
 
   django:
     build:
@@ -38,15 +40,17 @@ services:
       - ./ssl/ssl_dev.key:/etc/ssl/SSL.key  # SSL development key
 
   neo4j:
-    image: rencinrig/neo4j-apoc:3.4.7
+    image: rencinrig/neo4j-apoc:3.5.0
     container_name: neo4j
+    user: ${NEO4J_UID:-1000}:${NEO4J_GID:-1000}
     ports:
       - 7474:7474  # for HTTP
       - 7473:7473  # for HTTPS
       - 7687:7687  # for Bolt
     volumes:
       - ./neo4j/data:/data
-      #- ./neo4j/logs:/logs
+      - ./neo4j/logs:/logs
       - ./neo4j:/imports
     environment:
-      - NEO4J_AUTH=neo4j/neo4j123
+      - NEO4J_AUTH=${NEO4J_USER:-neo4j}/${NEO4J_PASS:-neo4j123}
+

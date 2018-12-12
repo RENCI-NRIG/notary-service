@@ -168,6 +168,12 @@ Move on to the [Run](#run) section.
 
 ## <a name="run"></a>Run
 
+Be sure to source the environment variables that were configured from the `/base/.env` file.
+
+```
+source base/.env
+```
+
 ### database
 
 Start the pre-defined PostgreSQL database in Docker

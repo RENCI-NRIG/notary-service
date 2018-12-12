@@ -9,15 +9,15 @@ class ProjectsPageTests(SimpleTestCase):
 
     def test_projects_page_status_code(self):
         response = self.client.get('/projects/')
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_view_url_by_name(self):
         response = self.client.get(reverse('projects'))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_view_uses_correct_template(self):
         response = self.client.get(reverse('projects'))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'projects.html')
 
     # def test_projects_page_contains_correct_html(self):

@@ -9,15 +9,15 @@ class LoginPageTests(SimpleTestCase):
 
     def test_login_page_status_code(self):
         response = self.client.get('/login/')
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_view_url_by_name(self):
         response = self.client.get(reverse('login'))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_view_uses_correct_template(self):
         response = self.client.get(reverse('login'))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'login.html')
 
     # def test_login_page_contains_correct_html(self):
