@@ -4,7 +4,6 @@ services:
   database:
     image: postgres:11
     container_name: database
-    user: ${POSTGRES_UID:-1000}:${POSTGRES_GID:-1000}
     ports:
       - 5432:${POSTGRES_PORT:-5432}
     volumes:
