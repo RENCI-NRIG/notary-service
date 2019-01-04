@@ -32,11 +32,11 @@ testdir = os.path.dirname(os.path.dirname(__file__)) + '/tests/'
 
 
 class TestGraphImport(unittest.TestCase):
-    NEO4J_HOST_PATH_ENV = 'NEO4J_HOST_PATH'
-    NEO4J_DOCKER_PATH_ENV = 'NEO4J_DOCKER_PATH'
+    NEO4J_IMPORTS_PATH_HOST_ENV = 'NEO4J_IMPORTS_PATH_HOST'
+    NEO4J_IMPORTS_PATH_DOCKER_ENV = 'NEO4J_IMPORTS_PATH_DOCKER'
     NEO4J_BOLT_URL_ENV = 'NEO4J_BOLT_URL'
     NEO4J_USER_ENV = 'NEO4J_USER'
-    NEO4J_PASS_ENG = 'NEO4J_PASS'
+    NEO4J_PASS_ENV = 'NEO4J_PASS'
 
     TEST_ASSIGNED_ID = "NEW-ID"
     TEST_ROLE = "PI"
@@ -52,21 +52,21 @@ class TestGraphImport(unittest.TestCase):
         self.log = loginit.getLogger(__name__)
 
     def setUp(self):
-        if self.NEO4J_HOST_PATH_ENV not in os.environ.keys() or \
-                self.NEO4J_DOCKER_PATH_ENV not in os.environ.keys() or \
+        if self.NEO4J_IMPORTS_PATH_HOST_ENV not in os.environ.keys() or \
+                self.NEO4J_IMPORTS_PATH_DOCKER_ENV not in os.environ.keys() or \
                 self.NEO4J_BOLT_URL_ENV not in os.environ.keys() or \
                 self.NEO4J_USER_ENV not in os.environ.keys() or \
-                self.NEO4J_PASS_ENG not in os.environ.keys():
-            raise Exception(' '.join(['Environment variables', self.NEO4J_HOST_PATH_ENV, 'and',
-                                      self.NEO4J_DOCKER_PATH_ENV, 'and',
+                self.NEO4J_PASS_ENV not in os.environ.keys():
+            raise Exception(' '.join(['Environment variables', self.NEO4J_IMPORTS_PATH_HOST_ENV, 'and',
+                                      self.NEO4J_IMPORTS_PATH_DOCKER_ENV, 'and',
                                       self.NEO4J_BOLT_URL_ENV, 'and',
                                       self.NEO4J_USER_ENV, 'and',
-                                      self.NEO4J_PASS_ENG, 'must be specified']))
+                                      self.NEO4J_PASS_ENV, 'must be specified']))
         self.neo4j = Neo4jWorkflow(os.environ[self.NEO4J_BOLT_URL_ENV],
                                    os.environ[self.NEO4J_USER_ENV],
-                                   os.environ[self.NEO4J_PASS_ENG],
-                                   importHostDir=os.environ[self.NEO4J_HOST_PATH_ENV],
-                                   importDir=os.environ[self.NEO4J_DOCKER_PATH_ENV])
+                                   os.environ[self.NEO4J_PASS_ENV],
+                                   importHostDir=os.environ[self.NEO4J_IMPORTS_PATH_HOST_ENV],
+                                   importDir=os.environ[self.NEO4J_IMPORTS_PATH_DOCKER_ENV])
         self.gid = None
 
     def test_import_workflow(self):

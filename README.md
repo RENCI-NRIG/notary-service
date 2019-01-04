@@ -3,7 +3,7 @@
 ### Status
 
 [![Requirements Status](https://requires.io/github/RENCI-NRIG/notary-service/requirements.svg?branch=master)](https://requires.io/github/RENCI-NRIG/notary-service/requirements/?branch=master)
-[![Coverage Status](https://coveralls.io/repos/github/RENCI-NRIG/notary-service/badge.svg?branch=master)](https://coveralls.io/github/RENCI-NRIG/notary-service?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/RENCI-NRIG/notary-service/badge.svg?branch=HEAD)](https://coveralls.io/github/RENCI-NRIG/notary-service?branch=HEAD)
 
 **What is the Notary Service?** - TODO
 
@@ -45,10 +45,10 @@ If you're only wanting to run this in Docker, move on to the [Docker](#docker) s
 Create the virtual environment and install packages
 
 ```
-$ virtualenv -p $(which python3) venv
-$ source venv/bin/activate
-(venv)$ pip install --upgrade pip
-(venv)$ pip install -r requirements.txt
+virtualenv -p $(which python3) venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
 Move on to the [Configure](#configure) section.
@@ -61,51 +61,45 @@ Do not check any of your configuration files into a repository as they will cont
 
 ### `base/secrets.py`
 
-A file named `dummy_secrets.py` has been provided as an exmaple.
+A file named `base/dummy_secrets.py` has been provided as an exmaple.
 
-```console
-$ cp dummy_secrets.py secrets.py
+```
+cp base/dummy_secrets.py base/secrets.py
 ```
 
 Generate a `SECRET_KEY` and save in in this file
 
 ### `base/.env`
 
-A file named `dummy.env` has been provided as an exmaple.
+A file named `base/dummy.env` has been provided as an exmaple, and is used by Django's python-dotenv package.
 
 ```console
-$ cp dummy.env .env
+cp base/dummy.env base/.env
 ```
 
-Modify the environment varialbes in the `.env` file to coincide with the settings you'll be using in your deployment.
+Modify the environment varialbes in the `base/.env` file to coincide with the settings you'll be using in your deployment.
 
 If you're planning on doing local development with virutalenv, configure the database to be reachable from the local machine.
 
 - Update `POSTGRES_HOST` in `.env` to reflect the IP of your local machine (For example, from `export POSTGRES_HOST=database` to  `export POSTGRES_HOST=127.0.0.1`)
 
+### `.env`
+
+A file named `dummy.env` has been provided as an exmaple, and is used by the `docker-compose.yml` file.
+
+```console
+cp dummy.env .env
+```
+
+Modify the environment varialbes in the `.env` file to coincide with the settings you'll be using in your deployment.
+
 ### `docker-compose.yml`
+
+Double check that all variable references found in `.env`, or their default values are suitable for your deployment.
 
 If you're planning on doing local development with virutalenv, configure the database to be reachable from the local machine.
 
 - Ensure the `POSTGRES_PORT=5432` is properly mapped to the host in the `docker-compose.yml` file
-
-If using https wiht SSL certificates, update the nginx stanza
-
-```yaml
-  nginx:
-    image: nginx:latest
-    container_name: nginx
-    ports:
-      - 8080:80
-      - 8443:443
-    volumes:
-      - .:/code
-      - ./static:/code/static
-      - ./media:/code/media
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf # SSL configuration file
-      - PATH_TO/SSL.crt:/etc/ssl/SSL.crt                    # SSL cert file on host
-      - PATH_TO/SSL.key:/etc/ssl/SSL.key                    # SSL key file on host
-```
 
 ### `ns_core_uwsgi.ini`
 
@@ -158,8 +152,8 @@ Move on to the [Build](#build) section.
 
 Once all configuration has been done, the user can build the necessary containers by issueing:
 
-```console
-$ docker-compose build
+```
+docker-compose build
 ```
 
 Anytime a modification is made to the Django code, a new container should be built prior to launching the docker-compose definition.
@@ -179,7 +173,7 @@ source base/.env
 Start the pre-defined PostgreSQL database in Docker
 
 ```
-$ docker-compose up -d database
+docker-compose up -d database
 ```
 
 Validate that the database container is running.
@@ -198,16 +192,16 @@ Start the Django service
 - Local virtualenv
   - Launch the `run_uwsgi.sh` script from your virtualenv, passing in your UID and GID values
 
-  ```console
-  $ UWSGI_UID=$(id -u) UWSGI_GID=$(id -g) ./run_uwsgi.sh
+  ```
+  UWSGI_UID=$(id -u) UWSGI_GID=$(id -g) ./run_uwsgi.sh
   ```
   **NOTE**: The process output should remain observable in the terminal after running this command, use `ctrl-c` to end the process, or `ctrl-z` to suspend it.
 
 - Docker only
   - Launch `django` container from docker-compose
 
-  ```console
-  $ docker-compose up -d django
+  ```
+  docker-compose up -d django
   ```
   Validate that the service is running
   
