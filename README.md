@@ -3,7 +3,6 @@
 ### Status
 
 [![Requirements Status](https://requires.io/github/RENCI-NRIG/notary-service/requirements.svg?branch=master)](https://requires.io/github/RENCI-NRIG/notary-service/requirements/?branch=master)
-[![Coverage Status](https://coveralls.io/repos/github/RENCI-NRIG/notary-service/badge.svg?branch=HEAD)](https://coveralls.io/github/RENCI-NRIG/notary-service?branch=HEAD)
 
 **What is the Notary Service?** - TODO
 
@@ -32,7 +31,22 @@
 
 ## <a name="tldr"></a>TL;DR
 
-TODO
+Assuming you have OIDC Client credentials and LDAP access in a COmanage Registry.
+
+```
+cp dummy.env .env                                  # set variables accordingly
+cp base/dummy.env base/.env                        # set variables accordingly
+cp base/dummy_secrets.py base/secrets.py           # set variables accordingly
+cp nginx/ns_core_nginx_ssl.conf nginx/default.conf # configure accordingly
+source base/.env
+UWSGI_UID=$(id -u) UWSGI_GID=$(id -g) docker-compose up -d
+```
+
+Once all of the containers have completed their startup scripts, you will find the running notary service at the specified URL.
+
+Example: [https://127.0.0.1:8443/](https://127.0.0.1:8443/)
+
+<img width="80%" alt="Landing page" src="https://user-images.githubusercontent.com/5332509/50703546-7cc92400-1022-11e9-9004-924d8ed9713e.png">
 
 ## <a name="env"></a>Environment
 
@@ -245,7 +259,7 @@ TODO
 
 ### ns_workflow
 
-Neo4j/APOC graph database for managing Notary Service Workflows
+Neo4j/APOC graph database for managing Notary Service Workflows. Build information at [https://github.com/RENCI-NRIG/impact-docker-images/tree/master/neo4j](https://github.com/RENCI-NRIG/impact-docker-images/tree/master/neo4j)
 
 
 ## <a name="ref"></a>References

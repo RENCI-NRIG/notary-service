@@ -13,7 +13,6 @@ docker run --rm \
   nginx /bin/bash -c 'chown -R $UID:$GID /clean'
 docker volume prune -f
 docker network prune -f
-deactivate
 
 # remove runtime directories and __pycache__ directories
 rm -rf \
