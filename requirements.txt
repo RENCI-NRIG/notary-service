@@ -6,9 +6,9 @@ ldap3==2.5.2
 mozilla-django-oidc==1.1.2
 --editable ./lib/ns_workflow # ns-workflow==0.1
 psycopg2-binary==2.7.6.1
-pytest==4.0.2
-pytest-cov==2.6.0
+pytest==4.1.0
+pytest-cov==2.6.1
 pytest-django==3.4.4
 python-dotenv==0.10.1
-pytz==2018.7
+pytz==2018.9
 uWSGI==2.0.17.1
