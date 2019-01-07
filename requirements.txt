@@ -1,14 +1,14 @@
 coverage==4.5.2
 django-crispy-forms==1.7.2
 django-nose==1.4.6
-Django==2.1.4
-ldap3==2.5.1
+Django==2.1.5
+ldap3==2.5.2
 mozilla-django-oidc==1.1.2
 --editable ./lib/ns_workflow # ns-workflow==0.1
 psycopg2-binary==2.7.6.1
-pytest==4.0.1
-pytest-cov==2.6.0
+pytest==4.1.0
+pytest-cov==2.6.1
 pytest-django==3.4.4
-python-dotenv==0.10.0
-pytz==2018.7
+python-dotenv==0.10.1
+pytz==2018.9
 uWSGI==2.0.17.1

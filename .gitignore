@@ -3,6 +3,7 @@
 *.py[cod]
 .coverage
 .DS_Store
+.env
 .idea
 .pytest_cache
 .venv
