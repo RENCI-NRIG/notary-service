@@ -48,6 +48,15 @@ Example: [https://127.0.0.1:8443/](https://127.0.0.1:8443/)
 
 <img width="80%" alt="Landing page" src="https://user-images.githubusercontent.com/5332509/50703546-7cc92400-1022-11e9-9004-924d8ed9713e.png">
 
+## <a name="scripts"></a>Scritps
+
+A small set of convenience scripts are provided in the `scripts` directory.
+
+`setup-environment.sh` - generates the directories and environment stubs for the user to populate with their own configuration parameters
+
+`clean-and-reset.sh` - as the name suggests, 
+
+
 ## <a name="env"></a>Environment
 
 By default this project is configured to run everything in Docker which may be non-optimal for develoment. In order to enble local development using Python 3 the user must make a few small changes prior to running the code.
@@ -184,6 +193,12 @@ source base/.env
 
 ### database
 
+Create the database directories if they do not exist
+
+```
+mkdir -p pg_data/data pg_data/logs
+```
+
 Start the pre-defined PostgreSQL database in Docker
 
 ```
@@ -191,6 +206,29 @@ docker-compose up -d database
 ```
 
 Validate that the database container is running.
+
+```console
+$ docker-compose ps
+  Name                Command              State           Ports
+-------------------------------------------------------------------------
+database   docker-entrypoint.sh postgres   Up      0.0.0.0:5432->5432/tcp
+```
+
+### neo4j
+
+Create the neo4j directories if they do not exist
+
+```
+mkdir -p neo4j/data neo4j/imports neo4j/logs
+```
+
+Start the pre-defined PostgreSQL database in Docker
+
+```
+docker-compose up -d neo4j
+```
+
+Validate that the neo4j container is running.
 
 ```console
 $ docker-compose ps
