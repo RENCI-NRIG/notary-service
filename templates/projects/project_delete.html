@@ -15,7 +15,7 @@
         <b>Last Modified Date:</b> {{ project.modified_date }}<br>
         <b>Description:</b>
         <p>{{ project.description|linebreaksbr }}</p>
-        <b>COmanage Groups</b>
+        <b>Permissible Groups</b>
         <ul>
             {% for group in comanage_groups %}
             <li>{{ group.cn|slice:"7:" }}</li>
