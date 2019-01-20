@@ -6,6 +6,7 @@ python manage.py makemigrations contenttypes
 python manage.py makemigrations sessions
 python manage.py makemigrations users
 python manage.py makemigrations comanage
+python manage.py makemigrations project
 python manage.py makemigrations
 python manage.py showmigrations
 python manage.py migrate
