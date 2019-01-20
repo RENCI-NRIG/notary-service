@@ -38,6 +38,11 @@ def check_ldapother_attributes(attributelist):
         for attribute in attributelist['eduPersonPrincipalName']:
             if not LdapOther.objects.filter(value=attribute).exists():
                 LdapOther.objects.create(attribute='eduPersonPrincipalName', value=attribute)
+    # print(attributelist['employeeNumber'])
+    if attributelist['employeeNumber']:
+        for attribute in attributelist['employeeNumber']:
+            if not LdapOther.objects.filter(value=attribute).exists():
+                LdapOther.objects.create(attribute='employeeNumber', value=attribute)
     # print(attributelist['objectClass'])
     if attributelist['objectClass']:
         for attribute in attributelist['objectClass']:
@@ -58,6 +63,10 @@ def update_ldapother_ismemberof(user, attributelist):
             MembershipLdapOther.objects.create(user=user, ldapother=LdapOther.objects.get(id=attr_id))
     for attribute in attributelist['eduPersonPrincipalName']:
         attr_id = LdapOther.objects.get(attribute='eduPersonPrincipalName', value=attribute).pk
+        if not MembershipLdapOther.objects.filter(user=user.id, ldapother=attr_id).exists():
+            MembershipLdapOther.objects.create(user=user, ldapother=LdapOther.objects.get(id=attr_id))
+    for attribute in attributelist['employeeNumber']:
+        attr_id = LdapOther.objects.get(attribute='employeeNumber', value=attribute).pk
         if not MembershipLdapOther.objects.filter(user=user.id, ldapother=attr_id).exists():
             MembershipLdapOther.objects.create(user=user, ldapother=LdapOther.objects.get(id=attr_id))
     for attribute in attributelist['objectClass']:

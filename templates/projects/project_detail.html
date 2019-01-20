@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<div class="container">
+    <div class="post">
+        <h2>{{ project.name }}
+            <a href="{% url 'project_edit' uuid=project.uuid %}" title="Edit" class="fa fa-fw fa-edit"></a>
+            <a href="{% url 'project_delete' uuid=project.uuid %}" title="Delete" class="fa fa-fw fa-trash"></a>
+        </h2>
+        <b>Created Date:</b> {{ project.created_date }}<br>
+        <b>Last Modified Date:</b> {{ project.modified_date }}<br>
+        <b>Description:</b>
+        <p>{{ project.description|linebreaksbr }}</p>
+        <b>Permissible Groups</b>
+        <ul>
+            {% for group in comanage_groups %}
+            <li>{{ group.cn|slice:"7:" }}</li>
+            {% endfor %}
+        </ul>
+        <b>Workflows</b>
+        <ul>
+            {% for workflow in project_workflows %}
+            <li>{{ workflow.name }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    <div class="container">
+        <p>You are not currently logged in</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

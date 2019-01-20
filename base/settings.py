@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'comanage.apps.ComanageConfig',  # comanage authN/authZ
     'crispy_forms',                  # django-crispy-forms
     'django_nose',                   # django-nose test runner
+    'projects.apps.ProjectsConfig',  # projects for notary service
 ]
 
 MIDDLEWARE = [
@@ -72,6 +73,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'templates/base'),
             os.path.join(BASE_DIR, 'templates/users'),
             os.path.join(BASE_DIR, 'templates/comanage'),
+            os.path.join(BASE_DIR, 'templates/projects'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {

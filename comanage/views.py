@@ -1,5 +1,4 @@
 from django.shortcuts import render
-
 from comanage.models import IsMemberOf, LdapOther
 
 

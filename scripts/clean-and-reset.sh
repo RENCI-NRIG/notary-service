@@ -2,6 +2,11 @@
 
 # Remove all deployment related components and reset as clean environment
 
+# run from top level of repository
+if [[ $(pwd | rev | cut -d '/' -f1 | rev) == 'scripts' ]]; then
+  cd ../
+fi
+
 # bring down uwsgi services and docker containers
 ps -u $(id -u) | grep uwsgi | awk '{print  $  1 }' | grep -E '[0-9]' | xargs kill -9
 docker-compose stop
@@ -25,6 +30,11 @@ rm -rf \
 while read line; do
   rm -rf $line;
 done < <(find . -type d -name __pycache__)
+
+# remove migrations files
+while read line; do
+  rm -f $line/00*.py;
+done < <(find ./ -type d -not -path "*/venv*" -not -path "*/.venv*" -name migrations)
 
 # replace static directory with one from git
 git checkout \

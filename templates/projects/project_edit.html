@@ -1,11 +1,19 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
 {% if user.is_authenticated %}
 <div class="container">
-    <h1>Hello from the projects page</h1>
+    <h2>Add/Edit Project
+        <a href="{% url 'projects' %}" title="Cancel" class="fa fa-fw fa-ban"></a>
+    </h2>
+    <form method="POST" class="post-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Save">
+    </form>
 </div>
 {% else %}
 <div class="container">
