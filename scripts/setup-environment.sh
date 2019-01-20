@@ -42,4 +42,24 @@ if [[ ! -e nginx/default.conf ]]; then
   cp nginx/ns_core_nginx_ssl.conf nginx/default.conf
 fi
 
+# check for virtualenv
+if [[ ! -d venv ]]; then
+  virtualenv -p $(which python3) venv
+  source venv/bin/activate
+  pip install --upgrade pip
+  pip install -r requirements.txt
+fi
+
+# start database, neo4j and nginx if they are not running
+source base/.env
+if [[ ! $(docker-compose ps | grep database) ]]; then
+  docker-compose up -d database
+fi
+if [[ ! $(docker-compose ps | grep neo4j) ]]; then
+  docker-compose up -d neo4j
+fi
+if [[ ! $(docker-compose ps | grep nginx) ]]; then
+  docker-compose up -d nginx
+fi
+
 exit 0;

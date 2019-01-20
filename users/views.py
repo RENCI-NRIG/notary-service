@@ -23,11 +23,6 @@ def search(request):
     return render(request, 'search.html', context)
 
 
-def projects(request):
-    context = {"projects_page": "active"}
-    return render(request, 'projects.html', context)
-
-
 def login(request):
     context = {"login_page": "active"}
     return render(request, 'login.html', context)

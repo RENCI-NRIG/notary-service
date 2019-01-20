@@ -31,6 +31,11 @@ while read line; do
   rm -rf $line;
 done < <(find . -type d -name __pycache__)
 
+# remove migrations files
+while read line; do
+  rm -f $line/00*.py;
+done < <(find ./ -type d -not -path "*/venv*" -not -path "*/.venv*" -name migrations)
+
 # replace static directory with one from git
 git checkout \
   static \

@@ -6,8 +6,8 @@
 {% block content %}
 <div class="container">
     {% if user.is_authenticated %}
-    <h1>Hello from the profile page</h1>
-    <h2>Current User:</h2>
+    <h1>Profile - {{ user.name }} ({{ user.username }})</h1>
+    <h2>My Identity (CILogon)</h2>
     <table border="1px solid black" cellpadding="5px">
         <tr>
             <td>name</td>
@@ -74,10 +74,11 @@
     <form action="/profile/" method="post">
         {% csrf_token %}
         <input type="hidden" name="user_id" value="{{ user.id }}">
-        <input type="submit" value="See attributes from LDAP">
+        <input type="submit" value="Show me more">
         <br>
         {% if isMemberOf %}
-        <h2>LDAP: isMemberOf</h2>
+        <br>
+        <h2>My Memberships</h2>
         <table border="1px solid black" cellpadding="5px">
             {% for group in isMemberOf %}
             <tr>
@@ -88,7 +89,8 @@
         </table>
         {% endif %}
         {% if LDAPOther %}
-        <h2>LDAP: other attributes</h2>
+        <br>
+        <h2>My Other Attributes</h2>
         <table border="1px solid black" cellpadding="5px">
             {% for group in LDAPOther %}
             <tr>
@@ -99,7 +101,6 @@
         </table>
         {% endif %}
     </form>
-    <p><a href="{% url 'logout' %}">logout</a></p>
     {% else %}
     <div class="container">
         <p>You are not currently logged in</p>

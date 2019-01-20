@@ -22,6 +22,7 @@ urlpatterns = [
     path('users/', include('django.contrib.auth.urls')),
     path('', include('users.urls')),
     path('', include('comanage.urls')),
+    path('', include('projects.urls')),
 ]
 
 # Configure custom error pages
