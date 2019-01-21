@@ -161,23 +161,13 @@ OIDC_USERNAME_ALGO = 'comanage.auth.generate_username'
 # redirect URLs
 LOGIN_REDIRECT_URL = '/profile/'
 LOGOUT_REDIRECT_URL = '/'
+# SameSite prevents the browser from sending this cookie along with cross-site requests
+# Safari seems to need this set to None
+SESSION_COOKIE_SAMESITE = None
 
 # pytest-django as the test runner
 # https://pytest-django.readthedocs.io/en/latest/faq.html
 TEST_RUNNER = 'base.runner.PytestTestRunner'
-
-# django-nose test runner
-# https://django-nose.readthedocs.io/en/latest/
-# TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-# NOSE_ARGS = [
-#     '--cover-erase',
-#     '--with-coverage',
-#     '--cover-package=users',
-#     '--exclude=lib',
-#     '--cover-html',
-#     '--with-xunit', # Add this and the following line
-#     '--xunit-file=xunittest.xml',  # xunittest.xml could be any name
-# ]
 
 
 # Default Django logging is WARNINGS+ to console

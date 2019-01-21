@@ -8,7 +8,7 @@ if [[ $(pwd | rev | cut -d '/' -f1 | rev) == 'scripts' ]]; then
 fi
 
 # bring down uwsgi services and docker containers
-ps -u $(id -u) | grep uwsgi | awk '{print  $  1 }' | grep -E '[0-9]' | xargs kill -9
+ps -u $(id -u) -o pid,command | grep uwsgi | awk '{print  $  1 }' | grep -E '[0-9]' | xargs kill -9
 docker-compose stop
 docker-compose rm -f
 docker run --rm \
