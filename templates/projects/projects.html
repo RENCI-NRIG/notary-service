@@ -23,6 +23,7 @@
             <td><a href="{% url 'project_detail' uuid=project.uuid %}" title="Project Details">{{ project.uuid }}</a></td>
             <td>{{ project.created_date }}</td>
             <td>{{ project.modified_date }}</td>
+            <td><a href="{% url 'project_edit' uuid=project.uuid %}" title="Edit" class="fa fa-fw fa-edit"></a></td>
         {% endfor %}
     </table>
 </div>

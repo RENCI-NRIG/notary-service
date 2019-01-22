@@ -44,10 +44,9 @@
     {% else %}
     <ul class="navbar-nav ml-auto ns-navbar">
         <li class="nav-item {{ login_page }}">
-            <a class="nav-link" href="{% url 'login' %}">
+            <a class="nav-link" href="{% url 'oidc_authentication_init' %}">
                 <i class="fa fa-fw fa-sign-in"></i> Login</a>
         </li>
     </ul>
     {% endif %}
 </nav>
-

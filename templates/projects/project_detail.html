@@ -15,13 +15,21 @@
         <b>Last Modified Date:</b> {{ project.modified_date }}<br>
         <b>Description:</b>
         <p>{{ project.description|linebreaksbr }}</p>
-        <b>Permissible Groups</b>
+        <h3>Permissions</h3>
+        <b>Administrative Groups</b>
+        <ul>
+            {% for group in admin_groups %}
+            <li>{{ group.cn|slice:"7:" }}</li>
+            {% endfor %}
+        </ul>
+        <b>Membership Groups</b>
         <ul>
             {% for group in comanage_groups %}
             <li>{{ group.cn|slice:"7:" }}</li>
             {% endfor %}
         </ul>
-        <b>Workflows</b>
+        <h3>Worklflows</h3>
+        <b>Templates</b>
         <ul>
             {% for workflow in project_workflows %}
             <li>{{ workflow.name }}</li>

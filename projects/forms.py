@@ -3,10 +3,15 @@ from .models import Project, ComanageGroup
 
 
 class ProjectForm(forms.ModelForm):
-    comanage_groups = forms.ModelMultipleChoiceField(
-        queryset=ComanageGroup.objects.all().order_by('cn'),
+    admin_groups = forms.ModelMultipleChoiceField(
+        queryset=ComanageGroup.objects.filter(cn__contains=':admins', active=True).order_by('cn'),
         widget=forms.SelectMultiple(),
-        label='Permissible groups',
+        label='Administrative groups'
+    )
+    comanage_groups = forms.ModelMultipleChoiceField(
+        queryset=ComanageGroup.objects.filter(cn__contains=':active', active=True).order_by('cn'),
+        widget=forms.SelectMultiple(),
+        label='Membership groups',
     )
 
     class Meta:
@@ -14,6 +19,7 @@ class ProjectForm(forms.ModelForm):
         fields = (
             'name',
             'description',
+            'admin_groups',
             'comanage_groups',
         )
 

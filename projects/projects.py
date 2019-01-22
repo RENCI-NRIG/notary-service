@@ -12,7 +12,7 @@ server = Server(ldap_host, use_ssl=True, get_info=ALL)
 
 
 def get_ldap_comanage_groups():
-    ldap_search_filter = '(&(objectClass=groupOfNames)(cn=CO:COU:*:active))'
+    ldap_search_filter = '(&(objectClass=groupOfNames)(cn=CO:COU:*))'
     conn = Connection(server, ldap_user, ldap_password, auto_bind=True)
     groups_found = conn.search(
         ldap_search_base,
@@ -33,6 +33,7 @@ def update_comanage_group():
     for group in group_list:
         dn = str(group.entry_dn)
         cn = str(group.cn[0])
-        active = True
         if not ComanageGroup.objects.filter(dn=dn).exists():
-            ComanageGroup.objects.create(dn=dn, cn=cn, active=active)
+            ComanageGroup.objects.create(dn=dn, cn=cn, active=True)
+        else:
+            ComanageGroup.objects.filter(dn=dn, cn=cn).update(active=True)

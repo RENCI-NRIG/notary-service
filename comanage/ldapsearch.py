@@ -10,8 +10,13 @@ ldap_search_base = os.getenv('LDAP_SEARCH_BASE', '')
 server = Server(ldap_host, use_ssl=True, get_info=ALL)
 
 
-def get_ldap_attributes(email):
-    ldap_search_filter = '(mail=' + email + ')'
+def get_ldap_attributes(user):
+    if user.eppn:
+        print('### INFO - using eduPersonPrincipalName:' + user.eppn)
+        ldap_search_filter = '(eduPersonPrincipalName=' + user.eppn + ')'
+    else:
+        print('### INFO - using user.email:' + user.email)
+        ldap_search_filter = '(mail=' + user.email + ')'
     conn = Connection(server, ldap_user, ldap_password, auto_bind=True)
     profile_found = conn.search(ldap_search_base,
                                 ldap_search_filter,
