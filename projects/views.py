@@ -1,7 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from .forms import ProjectForm
-from .models import Project, MembershipComanage, ComanageGroup
+from .models import Project, ComanageMemberActive, ComanageAdmin, \
+    MembershipComanageMemberActive, MembershipComanageAdmin
 from .projects import update_comanage_group
 
 
@@ -15,12 +16,12 @@ def projects(request):
 
 def project_detail(request, uuid):
     project = get_object_or_404(Project, uuid=uuid)
-    admin_groups = ComanageGroup.objects.filter(cn__contains=':admins', project=project).order_by('cn')
-    comanage_groups = ComanageGroup.objects.filter(cn__contains=':active', project=project).order_by('cn')
+    comanage_admins = ComanageAdmin.objects.filter(cn__contains=':admins', project=project).order_by('cn')
+    comanage_groups = ComanageMemberActive.objects.filter(cn__contains=':active', project=project).order_by('cn')
     return render(request, 'project_detail.html', {
         'projects_page': 'active',
         'project': project,
-        'admin_groups': admin_groups,
+        'comanage_admins': comanage_admins,
         'comanage_groups': comanage_groups,
     })
 
@@ -39,20 +40,20 @@ def project_new(request):
             project.modified_date = timezone.now()
             project.save()
             # admin groups
-            for group_pk in form.data.getlist('admin_groups'):
+            for group_pk in form.data.getlist('comanage_admins'):
                 print('ADMIN: ' + group_pk)
-                if not MembershipComanage.objects.filter(project=project.id, comanage_group=group_pk).exists():
-                    MembershipComanage.objects.create(
+                if not MembershipComanageAdmin.objects.filter(project=project.id, comanage_group=group_pk).exists():
+                    MembershipComanageAdmin.objects.create(
                         project=project,
-                        comanage_group=ComanageGroup.objects.get(id=group_pk)
+                        comanage_group=ComanageAdmin.objects.get(id=group_pk)
                     )
             # membership groups
             for group_pk in form.data.getlist('comanage_groups'):
                 print('MEMBER: ' + group_pk)
-                if not MembershipComanage.objects.filter(project=project.id, comanage_group=group_pk).exists():
-                    MembershipComanage.objects.create(
+                if not MembershipComanageMemberActive.objects.filter(project=project.id, comanage_group=group_pk).exists():
+                    MembershipComanageMemberActive.objects.create(
                         project=project,
-                        comanage_group=ComanageGroup.objects.get(id=group_pk)
+                        comanage_group=ComanageMemberActive.objects.get(id=group_pk)
                     )
             return redirect('project_detail', uuid=project.uuid)
     else:
@@ -69,26 +70,32 @@ def project_edit(request, uuid):
             project = form.save(commit=False)
             project.modified_date = timezone.now()
             project.save()
-            current_groups = MembershipComanage.objects.filter(project=project.id)
+
             # administrative groups
+            current_groups = MembershipComanageAdmin.objects.filter(project=project.id)
             for group in current_groups:
-                if str(group.comanage_group.id) not in form.data.getlist('admin_groups'):
+                if str(group.comanage_group.id) not in (
+                        form.data.getlist('comanage_admins') + form.data.getlist('comanage_groups')):
                     group.delete()
-            for group_pk in form.data.getlist('admin_groups'):
-                if not MembershipComanage.objects.filter(project=project.id, comanage_group=group_pk).exists():
-                    MembershipComanage.objects.create(
+            for group_pk in form.data.getlist('comanage_admins'):
+                print('ADMIN: ' + group_pk)
+                if not MembershipComanageAdmin.objects.filter(project=project.id, comanage_group=group_pk).exists():
+                    MembershipComanageAdmin.objects.create(
                         project=project,
-                        comanage_group=ComanageGroup.objects.get(id=group_pk)
+                        comanage_group=ComanageAdmin.objects.get(id=group_pk)
                     )
             # membership groups
+            current_groups = MembershipComanageMemberActive.objects.filter(project=project.id)
             for group in current_groups:
-                if str(group.comanage_group.id) not in form.data.getlist('comanage_groups'):
+                if str(group.comanage_group.id) not in (
+                        form.data.getlist('comanage_admins') + form.data.getlist('comanage_groups')):
                     group.delete()
             for group_pk in form.data.getlist('comanage_groups'):
-                if not MembershipComanage.objects.filter(project=project.id, comanage_group=group_pk).exists():
-                    MembershipComanage.objects.create(
+                print('MEMBER: ' + group_pk)
+                if not MembershipComanageMemberActive.objects.filter(project=project.id, comanage_group=group_pk).exists():
+                    MembershipComanageMemberActive.objects.create(
                         project=project,
-                        comanage_group=ComanageGroup.objects.get(id=group_pk)
+                        comanage_group=ComanageMemberActive.objects.get(id=group_pk)
                     )
             return redirect('project_detail', uuid=project.uuid)
     else:
@@ -98,14 +105,15 @@ def project_edit(request, uuid):
 
 def project_delete(request, uuid):
     project = get_object_or_404(Project, uuid=uuid)
-    admin_groups = ComanageGroup.objects.filter(cn__contains=':admins', project=project).order_by('cn')
-    comanage_groups = ComanageGroup.objects.filter(cn__contains=':active', project=project).order_by('cn')
+    comanage_admins = ComanageAdmin.objects.filter(cn__contains=':admins', project=project).order_by('cn')
+    comanage_groups = ComanageMemberActive.objects.filter(cn__contains=':active', project=project).order_by('cn')
     if request.method == "POST":
-        MembershipComanage.objects.filter(project=project.id).delete()
+        MembershipComanageAdmin.objects.filter(project=project.id).delete()
         project.delete()
+        return project_list(request)
     return render(request, 'project_delete.html', {
         'projects_page': 'active',
         'project': project,
-        'admin_groups': admin_groups,
+        'comanage_admins': comanage_admins,
         'comanage_groups': comanage_groups,
     })

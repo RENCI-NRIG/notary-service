@@ -18,7 +18,7 @@
         <h3>Permissions</h3>
         <b>Administrative Groups</b>
         <ul>
-            {% for group in admin_groups %}
+            {% for group in comanage_admins %}
             <li>{{ group.cn|slice:"7:" }}</li>
             {% endfor %}
         </ul>

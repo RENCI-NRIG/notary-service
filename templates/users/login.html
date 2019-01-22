@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="container">
-    <h2>Login with CILogon</h2>
+    <h2>We use
     <div style="border: 5px outset #696; cursor:pointer; padding:3px;
 display:inline-block;" onclick="location.href='https://cilogon.org'">
         <a href="{% url 'oidc_authentication_init' %}"
@@ -13,7 +13,46 @@ display:inline-block;" onclick="location.href='https://cilogon.org'">
 font-weight:bold; font-size:28px; color:#363;
 text-decoration:none;"><img alt=""
                             src="https://cilogon.org/images/cilogon-logo-32x32.png"
-                            style="vertical-align:middle"/>&nbsp;CILogon&nbsp;</a>
+                            style="vertical-align:middle"/> CILogon 2.0 and COmanage </a>
     </div>
+     for authN and authZ</h2>
+    <p>
+    <h3>What is CILogon 2.0?</h3>
+    When scientists work together, they use web sites and other software to share their ideas and data.
+    To ensure the integrity of their work, these systems require the scientists to log in and verify that they
+    are part of the team working on a particular science problem. Too often, the identity and access verification
+    process is a stumbling block for the scientists. Scientific research projects are forced to invest time and
+    effort into developing and supporting Identity and Access Management (IdAM) services, distracting them from
+    the core goals of their research collaboration. The "CILogon 2.0" project provides an IdAM platform that
+    enables scientists to work together to meet their IdAM needs more effectively so they can allocate more time
+    and effort to their core mission of scientific research. To ensure that the project makes a real contribution
+    to scientific collaborations, the researchers have partnered with the Laser Interferometer Gravitational-Wave
+    Observatory (LIGO) Scientific Collaboration, the North American Nanohertz Observatory for Gravitational Waves
+    (NANOGrav) Physics Frontiers Center, and the Data Observation Network for Earth (DataONE). The project also
+    provides training and outreach to additional scientific collaborations, and the project supports integration
+    with the Extreme Science and Engineering Discovery Environment (XSEDE), which provides a national-scale
+    cyberinfrastructure for scientific research in the US.
+    <br>
+    Learn more about <a href="https://www.cilogon.org/2">CILogon 2.0</a></p>
+
+    <p>
+    <h3>What is COmanage</h3>
+    COmanage provides collaboration management services for CILogon 2.0. COmanage enables research collaborations
+    (virtual organizations or VOs) to manage the entire lifecycle of collaboration. Beginning with onboarding,
+    COmanage provides flexible and customizable enrollment flows to bring people and their federated identities
+    onto the platform and create a collaborative organization (CO). Each CO may have multiple active enrollment
+    flows tailored specifically for particular types of collaborators such as faculty, students, or staff, and each
+    flow may onboard users by invitation, self signup, and even conscription. During enrollment COmanage consumes
+    the details about a user’s federated identity provided by their home organization and records it as an
+    organizational identity. After enrollment the organizational identity is linked to the CO person identity
+    representing the user as part of the CO or VO. Because researchers today may hail from multiple organizations
+    and often participate in multiple VOs simultaneously COmanage supports linking multiple organizational identities
+    to multiple CO person identities.
+    <br>
+    Learn more about <a href="https://www.cilogon.org/comanage">COmanage</a></p>
+
+</p>
+
+
 </div>
 {% endblock %}

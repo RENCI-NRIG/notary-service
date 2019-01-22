@@ -19,13 +19,13 @@
             <a class="nav-link" href="{% url 'contact' %}">
                 <i class="fa fa-fw fa-envelope"></i> Contact</a>
         </li>
+    </ul>
+    {% if user.is_authenticated %}
+    <ul class="navbar-nav ns-navbar">
         <li class="nav-item {{ search_page }}">
             <a class="nav-link" href="{% url 'search' %}">
                 <i class="fa fa-fw fa-search"></i> Search</a>
         </li>
-    </ul>
-    {% if user.is_authenticated %}
-    <ul class="navbar-nav ns-navbar">
         <li class="nav-item {{ projects_page }}">
             <a class="nav-link" href="{% url 'projects' %}">
                 <i class="fa fa-fw fa-folder-open"></i> Projects</a>

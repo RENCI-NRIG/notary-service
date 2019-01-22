@@ -1,7 +1,7 @@
 import os
 
 from ldap3 import Connection, Server, ALL
-from .models import ComanageGroup
+from .models import ComanageMemberActive, ComanageAdmin
 
 ldap_host = os.getenv('LDAP_HOST', '')
 ldap_user = os.getenv('LDAP_USER', '')
@@ -29,11 +29,18 @@ def get_ldap_comanage_groups():
 
 def update_comanage_group():
     group_list = get_ldap_comanage_groups()
-    ComanageGroup.objects.update(active=False)
+    ComanageAdmin.objects.update(active=False)
+    ComanageMemberActive.objects.update(active=False)
     for group in group_list:
         dn = str(group.entry_dn)
         cn = str(group.cn[0])
-        if not ComanageGroup.objects.filter(dn=dn).exists():
-            ComanageGroup.objects.create(dn=dn, cn=cn, active=True)
+        if ":admins" in cn:
+            if not ComanageAdmin.objects.filter(dn=dn).exists():
+                ComanageAdmin.objects.create(dn=dn, cn=cn, active=True)
+            else:
+                ComanageAdmin.objects.filter(dn=dn, cn=cn).update(active=True)
         else:
-            ComanageGroup.objects.filter(dn=dn, cn=cn).update(active=True)
+            if not ComanageMemberActive.objects.filter(dn=dn).exists():
+                ComanageMemberActive.objects.create(dn=dn, cn=cn, active=True)
+            else:
+                ComanageMemberActive.objects.filter(dn=dn, cn=cn).update(active=True)

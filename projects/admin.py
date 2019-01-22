@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import Project, MembershipComanage, ComanageGroup, MembershipWorkflow, WorkflowNeo4j
+from .models import Project, ComanageAdmin, ComanageMemberActive, \
+    MembershipComanageAdmin, MembershipComanageMemberActive, \
+    WorkflowNeo4j, MembershipWorkflow
 
 
 class ListProjects(admin.ModelAdmin):
@@ -14,16 +16,16 @@ class ListProjects(admin.ModelAdmin):
 admin.site.register(Project, ListProjects)
 
 
-class ListCOmanageGroups(admin.ModelAdmin):
+class ListCOmanageAdmin(admin.ModelAdmin):
     project = Project.name
-    comanage_group = ComanageGroup.cn
+    comanage_group = ComanageAdmin.cn
     list_display = [
         'project',
         'comanage_group'
     ]
 
 
-admin.site.register(MembershipComanage, ListCOmanageGroups)
+admin.site.register(MembershipComanageAdmin, ListCOmanageAdmin)
 
 
 class ListWorkflows(admin.ModelAdmin):
