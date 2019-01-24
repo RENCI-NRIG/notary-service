@@ -68,6 +68,8 @@ def project_new(request):
         form = ProjectForm(request.POST)
         if form.is_valid():
             project = form.save(commit=False)
+            project.created_by = request.user
+            project.modified_by = request.user
             project.modified_date = timezone.now()
             project.save()
             # admin groups

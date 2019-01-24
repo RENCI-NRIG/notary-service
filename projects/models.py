@@ -1,6 +1,8 @@
 import uuid
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 # Create your models here.
@@ -51,7 +53,9 @@ class Project(models.Model):
     comanage_groups = models.ManyToManyField(ComanageMemberActive, through="MembershipComanageMemberActive")
     comanage_personnel = models.ManyToManyField(ComanagePersonnel, through="MembershipComanagePersonnel")
     workflows = models.ManyToManyField(WorkflowNeo4j, through="MembershipWorkflow")
+    created_by = models.ForeignKey(User, related_name='created_by', on_delete=models.CASCADE)
     created_date = models.DateTimeField(default=timezone.now)
+    modified_by = models.ForeignKey(User, related_name='modified_by', on_delete=models.CASCADE)
     modified_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:

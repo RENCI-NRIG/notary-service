@@ -12,7 +12,9 @@
                     <a href="{% url 'project_delete' uuid=project.uuid %}" title="Delete" class="fa fa-fw fa-trash"></a>
                 </h2>
                 <b>Created Date:</b> {{ project.created_date }}<br>
+                <b>Created By:</b> {{ project.created_by }}<br>
                 <b>Last Modified Date:</b> {{ project.modified_date }}<br>
+                <b>Modified By:</b> {{ project.modified_by }}<br>
                 <b>Description:</b>
                 <p>{{ project.description|linebreaksbr }}</p>
                 <h3>Permissions</h3>
@@ -69,17 +71,11 @@
                     {% endfor %}
                 </table>
                 <br>
-                <h3>Worklflows</h3>
-                <b>Templates</b>
+                <h3>Datasets</h3>
+                <b>Workflows</b>
                 <ul>
-                    {% for workflow in project_workflow_templates %}
+                    {% for workflow in project_workflows %}
                         <li>{{ workflow.name }}</li>
-                    {% endfor %}
-                </ul>
-                <b>Instances</b>
-                <ul>
-                    {% for instance in project_workflow_instances %}
-                        <li>{{ instance.name }}</li>
                     {% endfor %}
                 </ul>
             </div>
