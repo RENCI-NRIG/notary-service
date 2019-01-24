@@ -4,32 +4,34 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-{% if user.is_authenticated %}
-<div class="container">
-    <h1>Projects - {{ user.name }} ({{ user.username }})</h1>
-    <h2>My Projects
-        <a href="{% url 'project_new' %}" title="Create New Project" class="fa fa-fw fa-plus-square"></a>
-    </h2>
-    <table border="1px solid black" cellpadding="5px">
-        <tr>
-            <td align="center"><b>Name</b></td>
-            <td align="center"><b>UUID</b></td>
-            <td align="center"><b>Created Date</b></td>
-            <td align="center"><b>Published Date</b></td>
-        </tr>
-        {% for project in projects %}
-        <tr>
-            <td>{{ project.name }}</td>
-            <td><a href="{% url 'project_detail' uuid=project.uuid %}" title="Project Details">{{ project.uuid }}</a></td>
-            <td>{{ project.created_date }}</td>
-            <td>{{ project.modified_date }}</td>
-            <td><a href="{% url 'project_edit' uuid=project.uuid %}" title="Edit" class="fa fa-fw fa-edit"></a></td>
-        {% endfor %}
-    </table>
-</div>
-{% else %}
-<div class="container">
-    <p>You are not currently logged in</p>
-</div>
-{% endif %}
+    {% if user.is_authenticated %}
+        <div class="container">
+            <h1>Projects - {{ user.name }} ({{ user.username }})</h1>
+            <h2>My Projects
+                <a href="{% url 'project_new' %}" title="Create New Project" class="fa fa-fw fa-plus-square"></a>
+            </h2>
+            <table border="1px solid black" cellpadding="5px">
+                <tr>
+                    <td align="center"><b>Name</b></td>
+                    <td align="center"><b>UUID</b></td>
+                    <td align="center"><b>Created Date</b></td>
+                    <td align="center"><b>Published Date</b></td>
+                </tr>
+                {% for project in projects %}
+                    <tr>
+                    <td>{{ project.name }}</td>
+                    <td><a href="{% url 'project_detail' uuid=project.uuid %}"
+                           title="Project Details">{{ project.uuid }}</a></td>
+                    <td>{{ project.created_date }}</td>
+                    <td>{{ project.modified_date }}</td>
+                    <td><a href="{% url 'project_edit' uuid=project.uuid %}" title="Edit" class="fa fa-fw fa-edit"></a>
+                    </td>
+                {% endfor %}
+            </table>
+        </div>
+    {% else %}
+        <div class="container">
+            <p>You are not currently logged in</p>
+        </div>
+    {% endif %}
 {% endblock %}

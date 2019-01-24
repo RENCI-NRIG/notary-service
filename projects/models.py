@@ -22,6 +22,18 @@ class ComanageAdmin(models.Model):
         return self.cn[7:]
 
 
+class ComanagePersonnel(models.Model):
+    dn = models.CharField(max_length=255)
+    cn = models.CharField(max_length=255)
+    eppn = models.CharField(max_length=255)
+    employee_number = models.CharField(max_length=255)
+    email = models.CharField(max_length=255)
+    active = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.cn
+
+
 class WorkflowNeo4j(models.Model):
     name = models.CharField(max_length=255)
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
@@ -37,6 +49,7 @@ class Project(models.Model):
     description = models.TextField()
     comanage_admins = models.ManyToManyField(ComanageAdmin, through="MembershipComanageAdmin")
     comanage_groups = models.ManyToManyField(ComanageMemberActive, through="MembershipComanageMemberActive")
+    comanage_personnel = models.ManyToManyField(ComanagePersonnel, through="MembershipComanagePersonnel")
     workflows = models.ManyToManyField(WorkflowNeo4j, through="MembershipWorkflow")
     created_date = models.DateTimeField(default=timezone.now)
     modified_date = models.DateTimeField(blank=True, null=True)
@@ -74,3 +87,10 @@ class MembershipWorkflow(models.Model):
 
     class Meta:
         verbose_name = 'NS Project Workflow'
+
+
+class MembershipComanagePersonnel(models.Model):
+    person = models.ForeignKey(ComanagePersonnel, on_delete=models.CASCADE)
+    comanage_admins = models.ForeignKey(ComanageAdmin, on_delete=models.CASCADE, null=True)
+    comanage_groups = models.ForeignKey(ComanageMemberActive, on_delete=models.CASCADE, null=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)

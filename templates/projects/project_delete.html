@@ -4,46 +4,46 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-{% if user.is_authenticated %}
-<div class="container">
-    <div class="post">
-        <h1><font color="red">Are you sure you want to delete?</font></h1>
-        <h2>{{ project.name }}
-            <a href="{% url 'project_detail' uuid=project.uuid %}" title="Cancel" class="fa fa-fw fa-ban"></a>
-        </h2>
-        <b>Created Date:</b> {{ project.created_date }}<br>
-        <b>Last Modified Date:</b> {{ project.modified_date }}<br>
-        <b>Description:</b>
-        <p>{{ project.description|linebreaksbr }}</p>
-        <h3>Permissions</h3>
-        <b>Administrative Groups</b>
-        <ul>
-            {% for group in comanage_admins %}
-            <li>{{ group.cn|slice:"7:" }}</li>
-            {% endfor %}
-        </ul>
-        <b>Membership Groups</b>
-        <ul>
-            {% for group in comanage_groups %}
-            <li>{{ group.cn|slice:"7:" }}</li>
-            {% endfor %}
-        </ul>
-        <h3>Worklflows</h3>
-        <b>Templates</b>
-        <ul>
-            {% for workflow in project_workflows %}
-            <li>{{ workflow.name }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-    <form method="POST" class="post-form">
-        {% csrf_token %}
-        <input type="submit" value="Delete">
-    </form>
-    {% else %}
-    <div class="container">
-        <p>You are not currently logged in</p>
-    </div>
-</div>
-{% endif %}
+    {% if user.is_authenticated %}
+        <div class="container">
+            <div class="post">
+                <h1><font color="red">Are you sure you want to delete?</font></h1>
+                <h2>{{ project.name }}
+                    <a href="{% url 'project_detail' uuid=project.uuid %}" title="Cancel" class="fa fa-fw fa-ban"></a>
+                </h2>
+                <b>Created Date:</b> {{ project.created_date }}<br>
+                <b>Last Modified Date:</b> {{ project.modified_date }}<br>
+                <b>Description:</b>
+                <p>{{ project.description|linebreaksbr }}</p>
+                <h3>Permissions</h3>
+                <b>Administrative Groups</b>
+                <ul>
+                    {% for group in comanage_admins %}
+                        <li>{{ group.cn|slice:"7:" }}</li>
+                    {% endfor %}
+                </ul>
+                <b>Membership Groups</b>
+                <ul>
+                    {% for group in comanage_groups %}
+                        <li>{{ group.cn|slice:"7:" }}</li>
+                    {% endfor %}
+                </ul>
+                <h3>Worklflows</h3>
+                <b>Templates</b>
+                <ul>
+                    {% for workflow in project_workflows %}
+                        <li>{{ workflow.name }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <form method="POST" class="post-form">
+                {% csrf_token %}
+                <input type="submit" value="Delete">
+            </form>
+            {% else %}
+            <div class="container">
+                <p>You are not currently logged in</p>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}

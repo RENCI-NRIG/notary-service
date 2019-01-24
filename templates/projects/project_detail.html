@@ -4,42 +4,89 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-{% if user.is_authenticated %}
-<div class="container">
-    <div class="post">
-        <h2>{{ project.name }}
-            <a href="{% url 'project_edit' uuid=project.uuid %}" title="Edit" class="fa fa-fw fa-edit"></a>
-            <a href="{% url 'project_delete' uuid=project.uuid %}" title="Delete" class="fa fa-fw fa-trash"></a>
-        </h2>
-        <b>Created Date:</b> {{ project.created_date }}<br>
-        <b>Last Modified Date:</b> {{ project.modified_date }}<br>
-        <b>Description:</b>
-        <p>{{ project.description|linebreaksbr }}</p>
-        <h3>Permissions</h3>
-        <b>Administrative Groups</b>
-        <ul>
-            {% for group in comanage_admins %}
-            <li>{{ group.cn|slice:"7:" }}</li>
-            {% endfor %}
-        </ul>
-        <b>Membership Groups</b>
-        <ul>
-            {% for group in comanage_groups %}
-            <li>{{ group.cn|slice:"7:" }}</li>
-            {% endfor %}
-        </ul>
-        <h3>Worklflows</h3>
-        <b>Templates</b>
-        <ul>
-            {% for workflow in project_workflows %}
-            <li>{{ workflow.name }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-    {% else %}
-    <div class="container">
-        <p>You are not currently logged in</p>
-    </div>
-</div>
-{% endif %}
+    {% if user.is_authenticated %}
+        <div class="container">
+            <div class="post">
+                <h2>{{ project.name }}
+                    <a href="{% url 'project_edit' uuid=project.uuid %}" title="Edit" class="fa fa-fw fa-edit"></a>
+                    <a href="{% url 'project_delete' uuid=project.uuid %}" title="Delete" class="fa fa-fw fa-trash"></a>
+                </h2>
+                <b>Created Date:</b> {{ project.created_date }}<br>
+                <b>Last Modified Date:</b> {{ project.modified_date }}<br>
+                <b>Description:</b>
+                <p>{{ project.description|linebreaksbr }}</p>
+                <h3>Permissions</h3>
+                <b>Administrative Groups</b>
+                <ul>
+                    {% for group in comanage_admins %}
+                        <li>{{ group.cn|slice:"7:" }}</li>
+                    {% endfor %}
+                </ul>
+                <b>Membership Groups</b>
+                <ul>
+                    {% for group in comanage_groups %}
+                        <li>{{ group.cn|slice:"7:" }}</li>
+                    {% endfor %}
+                </ul>
+                <h3>Personnel</h3>
+                <b>Administrators</b>
+                <table border="1px solid black" cellpadding="5px">
+                    <tr>
+                        <td align="center"><b>Group</b></td>
+                        <td align="center"><b>Name</b></td>
+                        <td align="center"><b>COmanage ID</b></td>
+                        <td align="center"><b>eppn</b></td>
+                        <td align="center"><b>email</b></td>
+                    </tr>
+                    {% for group, name, employee_number, eppn, email in admin_group %}
+                        <tr>
+                            <td>{{ group|slice:"7:" }}</td>
+                            <td>{{ name }}</td>
+                            <td>{{ employee_number }}</td>
+                            <td>{{ eppn }}</td>
+                            <td>{{ email }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                <br>
+                <b>Active Members</b>
+                <table border="1px solid black" cellpadding="5px">
+                    <tr>
+                        <td align="center"><b>Group</b></td>
+                        <td align="center"><b>Name</b></td>
+                        <td align="center"><b>COmanage ID</b></td>
+                        <td align="center"><b>eppn</b></td>
+                        <td align="center"><b>email</b></td>
+                    </tr>
+                    {% for group, name, employee_number, eppn, email in member_group %}
+                        <tr>
+                            <td>{{ group|slice:"7:" }}</td>
+                            <td>{{ name }}</td>
+                            <td>{{ employee_number }}</td>
+                            <td>{{ eppn }}</td>
+                            <td>{{ email }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                <br>
+                <h3>Worklflows</h3>
+                <b>Templates</b>
+                <ul>
+                    {% for workflow in project_workflow_templates %}
+                        <li>{{ workflow.name }}</li>
+                    {% endfor %}
+                </ul>
+                <b>Instances</b>
+                <ul>
+                    {% for instance in project_workflow_instances %}
+                        <li>{{ instance.name }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% else %}
+            <div class="container">
+                <p>You are not currently logged in</p>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}
