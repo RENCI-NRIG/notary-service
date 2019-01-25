@@ -21,32 +21,38 @@
         </li>
     </ul>
     {% if user.is_authenticated %}
-    <ul class="navbar-nav ns-navbar">
-        <li class="nav-item {{ search_page }}">
-            <a class="nav-link" href="{% url 'search' %}">
-                <i class="fa fa-fw fa-search"></i> Search</a>
-        </li>
-        <li class="nav-item {{ projects_page }}">
-            <a class="nav-link" href="{% url 'projects' %}">
-                <i class="fa fa-fw fa-folder-open"></i> Projects</a>
-        </li>
-        <li class="nav-item {{ profile_page }}">
-            <a class="nav-link" href="{% url 'profile' %}">
-                <i class="fa fa-fw fa-user"></i> {{ user.username }}</a>
-        </li>
-    </ul>
-    <ul class="navbar-nav ml-auto ns-navbar">
-        <li class="nav-item {{ logout_page }}">
-            <a class="nav-link" href="{% url 'logout' %}">
-                <i class="fa fa-fw fa-sign-out"></i> Logout</a>
-        </li>
-    </ul>
+        <ul class="navbar-nav ns-navbar">
+            <li class="nav-item {{ search_page }}">
+                <a class="nav-link" href="{% url 'search' %}">
+                    <i class="fa fa-fw fa-search"></i> Search</a>
+            </li>
+            <li class="nav-item {{ projects_page }}">
+                <a class="nav-link" href="{% url 'projects' %}">
+                    <i class="fa fa-fw fa-folder-open"></i> Projects</a>
+            </li>
+            <li class="nav-item {{ profile_page }}">
+                <a class="nav-link" href="{% url 'profile' %}">
+                    <i class="fa fa-fw fa-user"></i> {{ user.username }}</a>
+            </li>
+            {% if user.is_superuser %}
+                <li class="nav-item {{ debug_page }}">
+                    <a class="nav-link" href="{% url 'debug' %}">
+                        <i class="fa fa-fw fa-bug"></i> Debug</a>
+                </li>
+            {% endif %}
+        </ul>
+        <ul class="navbar-nav ml-auto ns-navbar">
+            <li class="nav-item {{ logout_page }}">
+                <a class="nav-link" href="{% url 'logout' %}">
+                    <i class="fa fa-fw fa-sign-out"></i> Logout</a>
+            </li>
+        </ul>
     {% else %}
-    <ul class="navbar-nav ml-auto ns-navbar">
-        <li class="nav-item {{ login_page }}">
-            <a class="nav-link" href="{% url 'oidc_authentication_init' %}">
-                <i class="fa fa-fw fa-sign-in"></i> Login</a>
-        </li>
-    </ul>
+        <ul class="navbar-nav ml-auto ns-navbar">
+            <li class="nav-item {{ login_page }}">
+                <a class="nav-link" href="{% url 'oidc_authentication_init' %}">
+                    <i class="fa fa-fw fa-sign-in"></i> Login</a>
+            </li>
+        </ul>
     {% endif %}
 </nav>

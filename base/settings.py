@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'crispy_forms',                  # django-crispy-forms
     'django_nose',                   # django-nose test runner
     'projects.apps.ProjectsConfig',  # projects for notary service
+    'debug.apps.DebugConfig',        # debug dashboard for notary service
 ]
 
 MIDDLEWARE = [
@@ -74,6 +75,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'templates/users'),
             os.path.join(BASE_DIR, 'templates/comanage'),
             os.path.join(BASE_DIR, 'templates/projects'),
+            os.path.join(BASE_DIR, 'templates/debug'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
