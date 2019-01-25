@@ -23,6 +23,7 @@ urlpatterns = [
     path('', include('users.urls')),
     path('', include('comanage.urls')),
     path('', include('projects.urls')),
+    path('', include('debug.urls')),
 ]
 
 # Configure custom error pages
