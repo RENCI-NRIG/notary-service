@@ -125,6 +125,7 @@ def project_edit(request, uuid):
         form = ProjectForm(request.POST, instance=project)
         if form.is_valid():
             project = form.save(commit=False)
+            project.modified_by = request.user
             project.modified_date = timezone.now()
             project.save()
 

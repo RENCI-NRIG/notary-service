@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django_nose',                   # django-nose test runner
     'projects.apps.ProjectsConfig',  # projects for notary service
     'debug.apps.DebugConfig',        # debug dashboard for notary service
+    'datasets.apps.DatasetsConfig',  # datasets in notary service
 ]
 
 MIDDLEWARE = [
