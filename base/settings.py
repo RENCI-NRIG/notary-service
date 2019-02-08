@@ -77,6 +77,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'templates/comanage'),
             os.path.join(BASE_DIR, 'templates/projects'),
             os.path.join(BASE_DIR, 'templates/debug'),
+            os.path.join(BASE_DIR, 'templates/datasets'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -162,7 +163,7 @@ OIDC_RP_SCOPES = 'openid email profile org.cilogon.userinfo'
 # username algorithm
 OIDC_USERNAME_ALGO = 'comanage.auth.generate_username'
 # redirect URLs
-LOGIN_REDIRECT_URL = '/profile/'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 # SameSite prevents the browser from sending this cookie along with cross-site requests
 # Safari seems to need this set to None

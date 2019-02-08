@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        <div class="container">
+            <h1>Templates - {{ user.name }} ({{ user.username }})</h1>
+            <h2>My Templates
+                <a href="{% url 'template_new' %}" title="Create new Template" class="fa fa-fw fa-plus-square"></a>
+            </h2>
+        </div>
+    {% else %}
+        <div class="container">
+            <p>You are not currently logged in</p>
+        </div>
+    {% endif %}
+{% endblock %}

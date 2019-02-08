@@ -16,6 +16,7 @@ neo4j
 nginx/default.conf
 nosetests.xml
 pg_data
+sample_data
 static/*
 venv
 xunittest.xml

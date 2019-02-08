@@ -10,7 +10,9 @@ class NSTemplate(models.Model):
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
     graphml_definition = models.FilePathField()
     description = models.TextField()
+    created_by = models.ForeignKey(User, related_name='nstemplate_created_by', on_delete=models.CASCADE)
     created_date = models.DateTimeField(default=timezone.now)
+    modified_by = models.ForeignKey(User, related_name='nstemplate_modified_by', on_delete=models.CASCADE)
     modified_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:

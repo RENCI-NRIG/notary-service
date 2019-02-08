@@ -7,18 +7,18 @@
         NotaryService
     </a>
     <ul class="navbar-nav ns-navbar">
-        <li class="nav-item {{ index_page }}">
-            <a class="nav-link" href="{% url 'index' %}">
-                <i class="fa fa-fw fa-home"></i> Home</a>
-        </li>
+{#        <li class="nav-item {{ index_page }}">#}
+{#            <a class="nav-link" href="{% url 'index' %}">#}
+{#                <i class="fa fa-fw fa-home"></i> Home</a>#}
+{#        </li>#}
         <li class="nav-item {{ about_page }}">
             <a class="nav-link" href="{% url 'about' %}">
                 <i class="fa fa-fw fa-question-circle"></i> About</a>
         </li>
-        <li class="nav-item {{ contact_page }}">
-            <a class="nav-link" href="{% url 'contact' %}">
-                <i class="fa fa-fw fa-envelope"></i> Contact</a>
-        </li>
+{#        <li class="nav-item {{ contact_page }}">#}
+{#            <a class="nav-link" href="{% url 'contact' %}">#}
+{#                <i class="fa fa-fw fa-envelope"></i> Contact</a>#}
+{#        </li>#}
     </ul>
     {% if user.is_authenticated %}
         <ul class="navbar-nav ns-navbar">
@@ -29,6 +29,14 @@
             <li class="nav-item {{ projects_page }}">
                 <a class="nav-link" href="{% url 'projects' %}">
                     <i class="fa fa-fw fa-folder-open"></i> Projects</a>
+            </li>
+            <li class="nav-item {{ datasets_page }}">
+                <a class="nav-link" href="{% url 'datasets' %}">
+                    <i class="fa fa-fw fa-database"></i> Datasets</a>
+            </li>
+            <li class="nav-item {{ tempates_page }}">
+                <a class="nav-link" href="{% url 'templates' %}">
+                    <i class="fa fa-fw fa-code"></i> Templates</a>
             </li>
             <li class="nav-item {{ profile_page }}">
                 <a class="nav-link" href="{% url 'profile' %}">
