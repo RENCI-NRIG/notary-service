@@ -5,7 +5,7 @@
 {% block content %}
     {% if user.is_authenticated %}
         <div class="container">
-            <h1>Datasets - {{ user.name }} ({{ user.username }})</h1>
+            <h1>Datasets</h1>
             <h2>My Datasets
                 <a href="{% url 'dataset_new' %}" title="Create new Dataset" class="fa fa-fw fa-plus-square"></a>
         </div>

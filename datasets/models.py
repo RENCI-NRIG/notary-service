@@ -5,11 +5,17 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
+def user_nstemplates_directory_path(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
+    return 'nstemplates/user_{0}/{1}'.format(instance.created_by.id, filename)
+
+
 class NSTemplate(models.Model):
     name = models.CharField(max_length=255)
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
-    graphml_definition = models.FilePathField()
+    graphml_definition = models.FileField(upload_to=user_nstemplates_directory_path)
     description = models.TextField()
+    is_valid = models.BooleanField(default=False)
     created_by = models.ForeignKey(User, related_name='nstemplate_created_by', on_delete=models.CASCADE)
     created_date = models.DateTimeField(default=timezone.now)
     modified_by = models.ForeignKey(User, related_name='nstemplate_modified_by', on_delete=models.CASCADE)

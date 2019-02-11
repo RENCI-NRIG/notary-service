@@ -11,10 +11,24 @@
                     <a href="{% url 'project_edit' uuid=project.uuid %}" title="Edit" class="fa fa-fw fa-edit"></a>
                     <a href="{% url 'project_delete' uuid=project.uuid %}" title="Delete" class="fa fa-fw fa-trash"></a>
                 </h2>
-                <b>Created Date:</b> {{ project.created_date }}<br>
-                <b>Created By:</b> {{ project.created_by }}<br>
-                <b>Last Modified Date:</b> {{ project.modified_date }}<br>
-                <b>Modified By:</b> {{ project.modified_by }}<br>
+            <table>
+                    <tr>
+                        <td width="60%">
+                            <b>Created By:</b> {{ project.created_by }}
+                        </td>
+                        <td>
+                            <b>Modified By:</b> {{ project.modified_by }}
+                        </td>
+                        </td>
+                    <tr>
+                        <td>
+                            <b>Created Date:</b> {{ project.created_date|date:"m/d/Y g:i a" }}
+                        </td>
+                        <td>
+                            <b>Last Modified Date:</b> {{ project.modified_date|date:"m/d/Y g:i a" }}
+                        </td>
+                    </tr>
+                </table>
                 <b>Description:</b>
                 <p>{{ project.description|linebreaksbr }}</p>
                 <h3>Permissions</h3>

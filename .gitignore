@@ -11,13 +11,16 @@ base.sock
 base/.env
 base/secrets.py
 cover/*
+media
+!media/.include_this_dir
 migrations
 neo4j
 nginx/default.conf
 nosetests.xml
 pg_data
 sample_data
-static/*
+static
+!static/.include_this_dir
 venv
 xunittest.xml
 xunittest.xml

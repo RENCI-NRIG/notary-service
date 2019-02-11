@@ -1,4 +1,5 @@
 coverage==4.5.2
+django-cleanup
 django-crispy-forms==1.7.2
 django-nose==1.4.6
 Django==2.1.5

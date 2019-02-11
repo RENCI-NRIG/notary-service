@@ -1,14 +1,44 @@
 {% extends 'base.html' %}
+{% load static dataset_tags %}
 
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
     {% if user.is_authenticated %}
         <div class="container">
-            <h1>Templates - {{ user.name }} ({{ user.username }})</h1>
+            <h1>Templates</h1>
+        <p>Notary Service Templates are directed acyclic graphs (DAGs) that provide the basis for permission
+        based workflows. The graphs are defined using graphml and are stored in a Neo4j database.</p>
             <h2>My Templates
                 <a href="{% url 'template_new' %}" title="Create new Template" class="fa fa-fw fa-plus-square"></a>
             </h2>
+            <table border="1px solid black" cellpadding="5px">
+                <tr>
+                    <td align="center"><b>Name</b></td>
+                    <td align="center"><b>Validated</b></td>
+                    <td align="center"><b>UUID</b></td>
+{#                    <td align="center"><b>File</b></td>#}
+                    <td align="center"><b>Created Date</b></td>
+                    <td align="center"><b>Published Date</b></td>
+                </tr>
+                {% for template in templates %}
+                    <tr>
+                    <td>{{ template.name }}</td>
+                    <td align="center">{% if template.is_valid %}
+                            <i class="fa fa-fw fa-check" style="color: green;"></i>
+                        {% else %}
+                            <i class="fa fa-fw fa-remove" style="color: red;"></i>
+                        {% endif %}
+                    </td>
+                    <td><a href="{% url 'template_detail' uuid=template.uuid %}"
+                           title="Template Details">{{ template.uuid }}</a></td>
+{#                    <td>{{ template.graphml_definition | getfilename }}</td>#}
+                    <td>{{ template.created_date|date:"m/d/Y g:i a" }}</td>
+                    <td>{{ template.modified_date|date:"m/d/Y g:i a" }}</td>
+                    <td><a href="{% url 'template_edit' uuid=template.uuid %}" title="Edit" class="fa fa-fw fa-edit"></a>
+                    </td>
+                {% endfor %}
+            </table>
         </div>
     {% else %}
         <div class="container">
