@@ -7,6 +7,11 @@
     {% if user.is_authenticated %}
         <div class="container">
             <h1>Projects</h1>
+        <p>
+            Projects are created by their Principal Investigators (PIs) and define membership via roles registered
+            within the ImPACT COmanage registry as well as Datasets as defined by data providers using
+            Notary Service tools.
+        </p>
             <h2>My Projects
                 <a href="{% url 'project_new' %}" title="Create New Project" class="fa fa-fw fa-plus-square"></a>
             </h2>
