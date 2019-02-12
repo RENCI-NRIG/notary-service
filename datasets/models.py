@@ -35,9 +35,10 @@ class NSTemplate(models.Model):
 class Dataset(models.Model):
     name = models.CharField(max_length=255)
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
-    dataset_identifier = models.URLField(primary_key=False, editable=False)
-    safe_identifier = models.CharField(max_length=255)
+    dataset_identifier_as_url = models.URLField()
+    safe_identifier_as_scid = models.CharField(max_length=255)
     description = models.TextField()
+    is_valid = models.BooleanField(default=False)
     templates = models.ManyToManyField(NSTemplate, through="MembershipNSTemplate")
     created_by = models.ForeignKey(User, related_name='dataset_created_by', on_delete=models.CASCADE)
     created_date = models.DateTimeField(default=timezone.now)

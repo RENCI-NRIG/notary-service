@@ -5,41 +5,41 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="text-center">
-        <h1>Infrastructure for Privacy-Assured CompuTations</h1>
-        <img class="rounded" width="300" src="{% static 'img/logo/impact-logo-1600x752.png' %}">
-    </div>
-<br><br>
-    {% if user.is_authenticated %}
     <div class="container">
-        <p>Hello <b>{{ user.name }}</b>, You are logged in as username: <b>{{ user.username }}</b></p>
-        <h2>My Messages</h2>
-        <table border="1px solid black" cellpadding="5px">
-                <tr>
-                    <td align="center"><b>Message ID</b></td>
-                    <td align="center"><b>Content</b></td>
-                    <td align="center"><b>Created Date</b></td>
-                    <td align="center"><b>Completed Date</b></td>
-                </tr>
-            <tr>
-                    <td>1</td>
-                    <td>Example content</td>
-                    <td>Jan. 24, 2019, 5:20 p.m.</td>
-                    <td>Feb. 7, 2019, 6:09 p.m.</td>
-                    <td>
-                        <a href="{% url 'datasets' %}" title="Show me more" class="fa fa-fw fa-eye"></a>
-                    </td>
-                <td>
-                        <a href="{% url 'datasets' %}" title="Dismiss message" class="fa fa-fw fa-trash"></a>
-                    </td>
-            </tr>
-            </table>
+        <div class="text-center">
+            <h1>Infrastructure for Privacy-Assured CompuTations</h1>
+            <img class="rounded" width="300" src="{% static 'img/logo/impact-logo-1600x752.png' %}">
         </div>
-    {% else %}
-    <div class="container">
-        <p>You are not currently logged in</p>
+        <br><br>
+        {% if user.is_authenticated %}
+            <div class="container">
+                <p>Hello <b>{{ user.name }}</b>, You are logged in as username: <b>{{ user.username }}</b></p>
+                <h2>My Messages</h2>
+                <table border="1px solid black" cellpadding="5px">
+                    <tr>
+                        <td align="center"><b>Message ID</b></td>
+                        <td align="center"><b>Content</b></td>
+                        <td align="center"><b>Created Date</b></td>
+                        <td align="center"><b>Completed Date</b></td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>Example content</td>
+                        <td>Jan. 24, 2019, 5:20 p.m.</td>
+                        <td>Feb. 7, 2019, 6:09 p.m.</td>
+                        <td>
+                            <a href="{% url 'datasets' %}" title="Show me more" class="fa fa-fw fa-eye"></a>
+                        </td>
+                        <td>
+                            <a href="{% url 'datasets' %}" title="Dismiss message" class="fa fa-fw fa-trash"></a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        {% else %}
+            <div class="container">
+                <p>You are not currently logged in</p>
+            </div>
+        {% endif %}
     </div>
-    {% endif %}
-</div>
 {% endblock %}

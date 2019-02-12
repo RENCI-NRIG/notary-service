@@ -1,34 +1,141 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from .forms import TemplateForm
-from .models import NSTemplate
+from .forms import TemplateForm, DatasetForm
+from .models import NSTemplate, Dataset, MembershipNSTemplate
 from ns_workflow import Neo4jWorkflow, WorkflowError
 import os
 
 
 def datasets(request):
     context = {"datasets_page": "active"}
-    return render(request, 'datasets.html', context)
+    if request.user.is_authenticated:
+        return dataset_list(request)
+    else:
+        return render(request, 'datasets.html', context)
 
 
-def dataset_detail(request):
-    context = {"datasets_page": "active"}
-    return render(request, 'datasets.html', context)
+def dataset_list(request):
+    ds_objs = Dataset.objects.filter(created_date__lte=timezone.now()).order_by('name')
+    return render(request, 'datasets.html', {'datasets_page': 'active', 'datasets': ds_objs})
+
+
+def dataset_validate(tp_list):
+    for name, is_valid, uuid, file in tp_list:
+        if not is_valid:
+            return False, 'Template ' + str(uuid) + ' is not validated'
+    return True, None
+
+
+def dataset_detail(request, uuid):
+    dataset = get_object_or_404(Dataset, uuid=uuid)
+    tp_list = list(MembershipNSTemplate.objects.values_list(
+        'template__name',
+        'template__is_valid',
+        'template__uuid',
+        'template__graphml_definition',
+    ).filter(
+        dataset=dataset,
+    ))
+    if request.method == "POST":
+        dataset.is_valid, dataset_error = dataset_validate(tp_list)
+        dataset.save()
+    else:
+        dataset_error = None
+    return render(request, 'dataset_detail.html', {
+        'datasets_page': 'active',
+        'dataset': dataset,
+        'dataset_error': dataset_error,
+        'templates': tp_list,
+    })
 
 
 def dataset_new(request):
-    context = {"datasets_page": "active"}
-    return render(request, 'datasets.html', context)
+    if request.method == "POST":
+        form = DatasetForm(request.POST)
+        if form.is_valid():
+            dataset = form.save(commit=False)
+            dataset.created_by = request.user
+            dataset.modified_by = request.user
+            dataset.modified_date = timezone.now()
+            dataset.save()
+            for template_pk in form.data.getlist('templates'):
+                if not MembershipNSTemplate.objects.filter(
+                        dataset=dataset.id,
+                        template=template_pk
+                ).exists():
+                    MembershipNSTemplate.objects.create(
+                        dataset=dataset,
+                        template=NSTemplate.objects.get(id=template_pk)
+                    )
+            return redirect('dataset_detail', uuid=dataset.uuid)
+    else:
+        form = DatasetForm()
+    return render(request, 'dataset_edit.html', {'datasets_page': 'active', 'form': form})
 
 
-def dataset_edit(request):
-    context = {"datasets_page": "active"}
-    return render(request, 'datasets.html', context)
+def dataset_edit(request, uuid):
+    dataset = get_object_or_404(Dataset, uuid=uuid)
+    if request.method == "POST":
+        form = DatasetForm(request.POST, instance=dataset)
+        if form.is_valid():
+            dataset = form.save(commit=False)
+            dataset.created_by = request.user
+            dataset.modified_by = request.user
+            dataset.modified_date = timezone.now()
+            dataset.is_valid = False
+            dataset.save()
+            membership = MembershipNSTemplate.objects.filter(dataset=dataset.id)
+            for member in membership:
+                if str(member.template.id) not in form.data.getlist('templates'):
+                    MembershipNSTemplate.objects.filter(
+                        dataset=dataset.id,
+                        template=member.template.id
+                    ).delete()
+            for template_pk in form.data.getlist('templates'):
+                if not MembershipNSTemplate.objects.filter(
+                        dataset=dataset.id,
+                        template=template_pk
+                ).exists():
+                    MembershipNSTemplate.objects.create(
+                        dataset=dataset,
+                        template=NSTemplate.objects.get(id=template_pk)
+                    )
+            return redirect('dataset_detail', uuid=dataset.uuid)
+    else:
+        form = DatasetForm(instance=dataset)
+    return render(request, 'dataset_edit.html', {'datasets_page': 'active', 'form': form})
 
 
-def dataset_delete(request):
-    context = {"datasets_page": "active"}
-    return render(request, 'datasets.html', context)
+def dataset_delete(request, uuid):
+    dataset = get_object_or_404(Dataset, uuid=uuid)
+    tp_list = list(MembershipNSTemplate.objects.values_list(
+        'template__name',
+        'template__is_valid',
+        'template__uuid',
+        'template__graphml_definition',
+    ).filter(
+        dataset=dataset,
+    ))
+    used_by = dataset_in_use(uuid)
+    if request.method == "POST":
+        dataset.delete()
+        return dataset_list(request)
+    return render(request, 'dataset_delete.html', {
+        'datasets_page': 'active',
+        'dataset': dataset,
+        'used_by': used_by,
+        'templates': tp_list,
+    })
+
+
+def dataset_in_use(template_uuid):
+    proj_list = MembershipNSTemplate.objects.values_list(
+        'dataset__uuid',
+    ).filter(
+        template__uuid=template_uuid,
+    )
+    proj_objs = Dataset.objects.filter(uuid__in=proj_list)
+    return proj_objs
 
 
 def template_validate(graphml_file, template_uuid):
@@ -67,8 +174,8 @@ def templates(request):
 
 
 def template_list(request):
-    templates = NSTemplate.objects.filter(created_date__lte=timezone.now()).order_by('name')
-    return render(request, 'templates.html', {'templates_page': 'active', 'templates': templates})
+    tp_objs = NSTemplate.objects.filter(created_date__lte=timezone.now()).order_by('name')
+    return render(request, 'templates.html', {'templates_page': 'active', 'templates': tp_objs})
 
 
 def template_detail(request, uuid):
@@ -114,6 +221,7 @@ def template_edit(request, uuid):
             template.modified_date = timezone.now()
             template.is_valid = False
             template.save()
+            update_dataset_status_by_template(template.uuid)
             return redirect('template_detail', uuid=template.uuid)
     else:
         form = TemplateForm(instance=template)
@@ -122,6 +230,7 @@ def template_edit(request, uuid):
 
 def template_delete(request, uuid):
     template = get_object_or_404(NSTemplate, uuid=uuid)
+    used_by = template_in_use(uuid)
     if request.method == "POST":
         template.graphml_definition.delete()
         template.delete()
@@ -129,4 +238,25 @@ def template_delete(request, uuid):
     return render(request, 'template_delete.html', {
         'templates_page': 'active',
         'template': template,
+        'used_by': used_by
     })
+
+
+def update_dataset_status_by_template(uuid):
+    ds_list = MembershipNSTemplate.objects.values(
+        'dataset__uuid'
+    ).filter(template__uuid=uuid)
+    for ds_uuid in ds_list:
+        ds = Dataset.objects.get(uuid=ds_uuid['dataset__uuid'])
+        ds.is_valid = False
+        ds.save()
+
+
+def template_in_use(template_uuid):
+    ds_list = MembershipNSTemplate.objects.values_list(
+        'dataset__uuid',
+    ).filter(
+        template__uuid=template_uuid,
+    )
+    ds_objs = Dataset.objects.filter(uuid__in=ds_list)
+    return ds_objs

@@ -34,3 +34,8 @@ def profile(request):
         return ldap_attributes(request)
     else:
         return render(request, 'profile.html', context)
+
+
+def faq(request):
+    context = {"faq_page": "active"}
+    return render(request, 'faq.html', context)

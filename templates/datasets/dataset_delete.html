@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static dataset_tags %}
+
+{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        <div class="container">
+            <div class="post">
+                <h1 style="color: #B22222;">Are you sure you want to delete?</h1>
+                <h2>{{ dataset.name }}
+                    <a href="{% url 'dataset_detail' uuid=dataset.uuid %}" title="Cancel" class="fa fa-fw fa-ban"></a>
+                </h2>
+                <table>
+                    <tr>
+                        <td width="60%">
+                            <b>Created By:</b> {{ dataset.created_by }}
+                        </td>
+                        <td>
+                            <b>Modified By:</b> {{ dataset.modified_by }}
+                        </td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Created Date:</b> {{ dataset.created_date|date:"m/d/Y g:i a" }}
+                        </td>
+                        <td>
+                            <b>Modified Date:</b> {{ dataset.modified_date|date:"m/d/Y g:i a" }}
+                        </td>
+                    </tr>
+                </table>
+                <b>Validated:</b> {{ dataset.is_valid }}
+                {% if dataset.is_valid %}
+                    (<i class="fa fa-fw fa-check" style="color: green;"></i>)
+                {% else %}
+                    (<i class="fa fa-fw fa-remove" style="color: red;"></i>)
+                {% endif %}<br>
+                <b>Dataset URL:</b> {{ dataset.dataset_identifier_as_url }}<br>
+                <b>SAFE SCID:</b> {{ dataset.safe_identifier_as_scid }}<br>
+                <b>Description:</b><br>
+                <p>{{ dataset.description|linebreaksbr }}</p>
+                <b>Templates:</b><br>
+                <table border="1px solid black" cellpadding="5px">
+                    <tr>
+                        <td align="center"><b>Name</b></td>
+                        <td align="center"><b>Validated</b></td>
+                        <td align="center"><b>UUID</b></td>
+                    </tr>
+                    {% for name, is_valid, uuid, graphml_definition in templates %}
+                        <tr>
+                        <td>{{ name }}</td>
+                        <td align="center">{% if is_valid %}
+                            <i class="fa fa-fw fa-check" style="color: green;"></i>
+                        {% else %}
+                            <i class="fa fa-fw fa-remove" style="color: red;"></i>
+                        {% endif %}
+                        </td>
+                        <td><a href="{% url 'template_detail' uuid=uuid %}"
+                               title="Template Details">{{ uuid }}</a></td>
+                    {% endfor %}
+                </table>
+            </div>
+            <br>
+            <form method="POST" class="post-form">
+                {% csrf_token %}
+                {% if used_by %}
+                    <input type="submit" value="Delete" style="color: grey" disabled>
+                {% else %}
+
+                    <input type="submit" value="Delete" style="color: #B22222">
+                {% endif %}
+            </form>
+            {% if used_by %}
+                <br>
+                <h3 style="color: #B22222;">Cannot Delete</h3>
+                <b>Dataset is being used in use by:</b><br>
+                {% for ds in used_by %}
+                    - Dataset: {{ ds.name }}
+                    (<a href="{% url 'dataset_detail' uuid=ds.uuid %}" title="Edit">{{ ds.uuid }}</a>)<br>
+                {% endfor %}
+            {% endif %}
+            {% else %}
+            <div class="container">
+                <p>You are not currently logged in</p>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

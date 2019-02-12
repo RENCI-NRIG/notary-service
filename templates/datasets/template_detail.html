@@ -18,7 +18,7 @@
                         <input type="submit" value="Validate Now" style="color: darkgreen">
                     </form>
                 {% endif %}
-            {% if template_error %}
+                {% if template_error %}
                     <div style="background-color: cornsilk;color:darkblue;font-family:Menlo;
                 font-size: 14px;overflow-y: scroll; border-style: solid; border-color: red;">
                         {{ template_error }}
@@ -39,15 +39,22 @@
                             <b>Created Date:</b> {{ template.created_date|date:"m/d/Y g:i a" }}
                         </td>
                         <td>
-                            <b>Last Modified Date:</b> {{ template.modified_date|date:"m/d/Y g:i a" }}
+                            <b>Modified Date:</b> {{ template.modified_date|date:"m/d/Y g:i a" }}
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <b>File:</b> <a href="{{ template.graphml_definition.url }}" >{{ template.graphml_definition | getfilename }}</a></td>
+                            <b>File:</b> <a
+                                href="{{ template.graphml_definition.url }}">{{ template.graphml_definition | getfilename }}</a>
+                        </td>
                         </td>
                         <td>
                             <b>Validated:</b> {{ template.is_valid }}
+                            {% if template.is_valid %}
+                                (<i class="fa fa-fw fa-check" style="color: green;"></i>)
+                            {% else %}
+                                (<i class="fa fa-fw fa-remove" style="color: red;"></i>)
+                            {% endif %}
                         </td>
                     </tr>
                 </table>
