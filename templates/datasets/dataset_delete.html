@@ -78,10 +78,10 @@
             {% if used_by %}
                 <br>
                 <h3 style="color: #B22222;">Cannot Delete</h3>
-                <b>Dataset is being used in use by:</b><br>
-                {% for ds in used_by %}
-                    - Dataset: {{ ds.name }}
-                    (<a href="{% url 'dataset_detail' uuid=ds.uuid %}" title="Edit">{{ ds.uuid }}</a>)<br>
+                <b>Dataset used by Project(s):</b><br>
+                {% for proj in used_by %}
+                    - {{ proj.name }}
+                    (<a href="{% url 'project_detail' uuid=proj.uuid %}" title="Edit">{{ proj.uuid }}</a>)<br>
                 {% endfor %}
             {% endif %}
             {% else %}

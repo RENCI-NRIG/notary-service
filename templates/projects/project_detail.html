@@ -11,6 +11,18 @@
                     <a href="{% url 'project_edit' uuid=project.uuid %}" title="Edit" class="fa fa-fw fa-edit"></a>
                     <a href="{% url 'project_delete' uuid=project.uuid %}" title="Delete" class="fa fa-fw fa-trash"></a>
                 </h2>
+                {% if not project.is_valid %}
+                    <form method="POST" class="post-form">
+                        {% csrf_token %}
+                        <input type="submit" value="Validate Now" style="color: darkgreen">
+                    </form>
+                {% endif %}
+                {% if project_error %}
+                    <div style="background-color: cornsilk;color:darkblue;font-family:Menlo;
+                font-size: 14px;overflow-y: scroll; border-style: solid; border-color: red;">
+                        {{ project_error }}
+                    </div>
+                {% endif %}
                 <table>
                     <tr>
                         <td width="60%">
@@ -29,6 +41,12 @@
                         </td>
                     </tr>
                 </table>
+                <b>Validated:</b> {{ project.is_valid }}
+                {% if project.is_valid %}
+                    (<i class="fa fa-fw fa-check" style="color: green;"></i>)
+                {% else %}
+                    (<i class="fa fa-fw fa-remove" style="color: red;"></i>)
+                {% endif %}<br>
                 <b>Description:</b>
                 <p>{{ project.description|linebreaksbr }}</p>
                 <h3>Permissions</h3>
@@ -86,7 +104,35 @@
                 </table>
                 <br>
                 <h3>Datasets</h3>
-                <b>Workflows</b>
+                <table border="1px solid black" cellpadding="5px">
+                    <tr>
+                        <td align="center"><b>Name</b></td>
+                        <td align="center"><b>Validated</b></td>
+                        <td align="center"><b>UUID</b></td>
+                    </tr>
+                    {% for dataset in datasets %}
+                        <tr>
+                        <td>{{ dataset.name }}</td>
+                        <td align="center">{% if dataset.is_valid %}
+                            <i class="fa fa-fw fa-check" style="color: green;"></i>
+                        {% else %}
+                            <i class="fa fa-fw fa-remove" style="color: red;"></i>
+                        {% endif %}
+                        </td>
+                        <td style="font-family: Menlo"><a href="{% url 'dataset_detail' uuid=dataset.uuid %}"
+                                                          title="Dataset Details">{{ dataset.uuid }}</a></td>
+                    {% endfor %}
+                </table>
+                <br>
+                <h3>Workflows</h3>
+                <form method="POST" class="post-form">
+                    {% csrf_token %}
+                    {% if missing_workflow %}
+                        <input type="submit" value="Generate Workflow(s)" style="color: darkgreen">
+                    {% else %}
+                        <input type="submit" value="Generate Workflow(s)" style="color: grey" disabled>
+                    {% endif %}
+                </form>
                 <ul>
                     {% for workflow in project_workflows %}
                         <li>{{ workflow.name }}</li>

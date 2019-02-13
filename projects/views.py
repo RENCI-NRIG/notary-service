@@ -1,8 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
+from datasets.models import Dataset
 from .forms import ProjectForm
 from .models import Project, ComanageMemberActive, ComanageAdmin, ComanagePersonnel, \
-    MembershipComanageMemberActive, MembershipComanageAdmin, MembershipComanagePersonnel
+    MembershipComanageMemberActive, MembershipComanageAdmin, MembershipComanagePersonnel, \
+    MembershipDatasets
 from .projects import update_comanage_group, personnel_by_comanage_group, update_comanage_personnel
 
 
@@ -12,6 +14,13 @@ def projects(request):
         return project_list(request)
     else:
         return render(request, 'projects.html', context)
+
+
+def project_validate(ds_objs):
+    for ds in ds_objs:
+        if not ds.is_valid:
+            return False, 'Dataset ' + str(ds.uuid) + ' is not validated'
+    return True, None
 
 
 def project_detail(request, uuid):
@@ -45,6 +54,13 @@ def project_detail(request, uuid):
         project=project,
         comanage_groups__in=comanage_groups
     ))
+    ds_list = MembershipDatasets.objects.values_list('dataset__uuid').filter(project__uuid=uuid)
+    ds_objs = Dataset.objects.filter(uuid__in=ds_list).order_by('name')
+    if request.method == "POST":
+        project.is_valid, project_error = project_validate(ds_objs)
+        project.save()
+    else:
+        project_error = None
     return render(request, 'project_detail.html', {
         'projects_page': 'active',
         'project': project,
@@ -52,6 +68,8 @@ def project_detail(request, uuid):
         'comanage_groups': comanage_groups,
         'admin_group': admin_group,
         'member_group': member_group,
+        'datasets': ds_objs,
+        'project_error': project_error,
     })
 
 
@@ -111,6 +129,14 @@ def project_new(request):
                                 comanage_admins=None,
                                 comanage_groups=ComanageMemberActive.objects.get(id=group_pk)
                             )
+            # datasets
+            for ds_pk in form.data.getlist('datasets'):
+                print('DATASET: ' + ds_pk)
+                if not MembershipDatasets.objects.filter(project=project.id, dataset=ds_pk).exists():
+                    MembershipDatasets.objects.create(
+                        project=project,
+                        dataset=Dataset.objects.get(id=ds_pk)
+                    )
 
             return redirect('project_detail', uuid=project.uuid)
     else:
@@ -159,8 +185,10 @@ def project_edit(request, uuid):
             current_groups = MembershipComanageMemberActive.objects.filter(project=project.id)
             for group in current_groups:
                 if str(group.comanage_group.id) not in form.data.getlist('comanage_groups'):
-                    MembershipComanagePersonnel.objects.filter(project=project.id,
-                                                               comanage_groups=group.comanage_group.id).delete()
+                    MembershipComanagePersonnel.objects.filter(
+                        project=project.id,
+                        comanage_groups=group.comanage_group.id
+                    ).delete()
                     group.delete()
             for group_pk in form.data.getlist('comanage_groups'):
                 print('MEMBER: ' + group_pk)
@@ -181,6 +209,21 @@ def project_edit(request, uuid):
                                 comanage_admins=None,
                                 comanage_groups=ComanageMemberActive.objects.get(id=group_pk)
                             )
+            # datasets
+            current_datasets = MembershipDatasets.objects.filter(project=project.id)
+            for ds in current_datasets:
+                if str(ds.dataset.id) not in form.data.getlist('datasets'):
+                    MembershipDatasets.objects.filter(
+                        project=project.id,
+                        dataset=ds.dataset.id
+                    ).delete()
+            for ds_pk in form.data.getlist('datasets'):
+                print('DATASET: ' + ds_pk)
+                if not MembershipDatasets.objects.filter(project=project.id, dataset=ds_pk).exists():
+                    MembershipDatasets.objects.create(
+                        project=project,
+                        dataset=Dataset.objects.get(id=ds_pk)
+                    )
 
             return redirect('project_detail', uuid=project.uuid)
     else:
@@ -192,6 +235,8 @@ def project_delete(request, uuid):
     project = get_object_or_404(Project, uuid=uuid)
     comanage_admins = ComanageAdmin.objects.filter(cn__contains=':admins', project=project).order_by('cn')
     comanage_groups = ComanageMemberActive.objects.filter(cn__contains=':active', project=project).order_by('cn')
+    ds_list = MembershipDatasets.objects.values_list('dataset__uuid').filter(project__uuid=uuid)
+    ds_objs = Dataset.objects.filter(uuid__in=ds_list).order_by('name')
     if request.method == "POST":
         MembershipComanageAdmin.objects.filter(project=project.id).delete()
         project.delete()
@@ -201,4 +246,5 @@ def project_delete(request, uuid):
         'project': project,
         'comanage_admins': comanage_admins,
         'comanage_groups': comanage_groups,
+        'datasets': ds_objs,
     })

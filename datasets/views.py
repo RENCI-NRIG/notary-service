@@ -3,6 +3,7 @@ from django.utils import timezone
 from .forms import TemplateForm, DatasetForm
 from .models import NSTemplate, Dataset, MembershipNSTemplate
 from ns_workflow import Neo4jWorkflow, WorkflowError
+from projects.models import Project, MembershipDatasets
 import os
 
 
@@ -99,6 +100,7 @@ def dataset_edit(request, uuid):
                         dataset=dataset,
                         template=NSTemplate.objects.get(id=template_pk)
                     )
+            update_project_status_by_dataset(dataset.uuid)
             return redirect('dataset_detail', uuid=dataset.uuid)
     else:
         form = DatasetForm(instance=dataset)
@@ -125,13 +127,23 @@ def dataset_delete(request, uuid):
     })
 
 
-def dataset_in_use(template_uuid):
-    proj_list = MembershipNSTemplate.objects.values_list(
-        'dataset__uuid',
+def update_project_status_by_dataset(uuid):
+    proj_list = MembershipDatasets.objects.values(
+        'project__uuid'
+    ).filter(dataset__uuid=uuid)
+    for proj_uuid in proj_list:
+        proj = Project.objects.get(uuid=proj_uuid['project__uuid'])
+        proj.is_valid = False
+        proj.save()
+
+
+def dataset_in_use(ds_uuid):
+    proj_list = MembershipDatasets.objects.values_list(
+        'project__uuid',
     ).filter(
-        template__uuid=template_uuid,
+        dataset__uuid=ds_uuid,
     )
-    proj_objs = Dataset.objects.filter(uuid__in=proj_list).order_by('name')
+    proj_objs = Project.objects.filter(uuid__in=proj_list).order_by('name')
     return proj_objs
 
 
@@ -247,6 +259,7 @@ def update_dataset_status_by_template(uuid):
         ds = Dataset.objects.get(uuid=ds_uuid['dataset__uuid'])
         ds.is_valid = False
         ds.save()
+        update_project_status_by_dataset(ds.uuid)
 
 
 def template_in_use(template_uuid):

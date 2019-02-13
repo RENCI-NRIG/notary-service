@@ -1,5 +1,6 @@
 from django import forms
 from .models import Project, ComanageAdmin, ComanageMemberActive
+from datasets.models import Dataset
 
 
 class ProjectForm(forms.ModelForm):
@@ -13,6 +14,11 @@ class ProjectForm(forms.ModelForm):
         widget=forms.SelectMultiple(),
         label='Membership groups',
     )
+    datasets = forms.ModelMultipleChoiceField(
+        queryset=Dataset.objects.order_by('name'),
+        widget=forms.SelectMultiple(),
+        label="Datasets",
+    )
 
     class Meta:
         model = Project
@@ -21,6 +27,7 @@ class ProjectForm(forms.ModelForm):
             'description',
             'comanage_admins',
             'comanage_groups',
+            'datasets'
         )
 
 

@@ -61,7 +61,7 @@
             {% if used_by %}
                 <br>
                 <h3 style="color: #B22222;">Cannot Delete</h3>
-                <b>Template is being used by:</b><br>
+                <b>Template used by Dataset(s):</b><br>
                 {% for ds in used_by %}
                     - {{ ds.name }}
                     (<a href="{% url 'dataset_detail' uuid=ds.uuid %}"
