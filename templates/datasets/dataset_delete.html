@@ -46,18 +46,22 @@
                         <td align="center"><b>Name</b></td>
                         <td align="center"><b>Validated</b></td>
                         <td align="center"><b>UUID</b></td>
+                        <td align="center"><b>GraphML Definition File</b></td>
                     </tr>
-                    {% for name, is_valid, uuid, graphml_definition in templates %}
+                    {% for template in templates %}
+                        {{ template }}
                         <tr>
-                        <td>{{ name }}</td>
-                        <td align="center">{% if is_valid %}
-                            <i class="fa fa-fw fa-check" style="color: green;"></i>
-                        {% else %}
-                            <i class="fa fa-fw fa-remove" style="color: red;"></i>
-                        {% endif %}
-                        </td>
-                        <td><a href="{% url 'template_detail' uuid=uuid %}"
-                               title="Template Details">{{ uuid }}</a></td>
+                            <td>{{ template.name }}</td>
+                            <td align="center">
+                                {% if template.is_valid %}
+                                    <i class="fa fa-fw fa-check" style="color: green;"></i>
+                                {% else %}
+                                    <i class="fa fa-fw fa-remove" style="color: red;"></i>
+                                {% endif %}
+                            </td>
+                            <td style="font-family: Menlo"><a href="{% url 'template_detail' uuid=template.uuid %}">{{ template.uuid }}</a></td>
+                            <td>{{ template.graphml_definition|getfilename }}</td>
+                        </tr>
                     {% endfor %}
                 </table>
             </div>

@@ -30,7 +30,7 @@
                         <i class="fa fa-fw fa-remove" style="color: red;"></i>
                     {% endif %}
                     </td>
-                    <td><a href="{% url 'template_detail' uuid=template.uuid %}"
+                    <td style="font-family: Menlo"><a href="{% url 'template_detail' uuid=template.uuid %}"
                            title="Template Details">{{ template.uuid }}</a></td>
                     {#                    <td>{{ template.graphml_definition | getfilename }}</td>#}
                     <td>{{ template.created_date|date:"m/d/Y g:i a" }}</td>

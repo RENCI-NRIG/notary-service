@@ -25,7 +25,7 @@
                 {% for project in projects %}
                     <tr>
                     <td>{{ project.name }}</td>
-                    <td><a href="{% url 'project_detail' uuid=project.uuid %}"
+                    <td style="font-family: Menlo"><a href="{% url 'project_detail' uuid=project.uuid %}"
                            title="Project Details">{{ project.uuid }}</a></td>
                     <td>{{ project.created_date|date:"m/d/Y g:i a" }}</td>
                     <td>{{ project.modified_date|date:"m/d/Y g:i a" }}</td>

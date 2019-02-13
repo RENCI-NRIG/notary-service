@@ -19,25 +19,24 @@ def dataset_list(request):
     return render(request, 'datasets.html', {'datasets_page': 'active', 'datasets': ds_objs})
 
 
-def dataset_validate(tp_list):
-    for name, is_valid, uuid, file in tp_list:
-        if not is_valid:
-            return False, 'Template ' + str(uuid) + ' is not validated'
+def dataset_validate(tpl_objs):
+    for template in tpl_objs:
+        if not template.is_valid:
+            return False, 'Template ' + str(template.uuid) + ' is not validated'
     return True, None
 
 
 def dataset_detail(request, uuid):
     dataset = get_object_or_404(Dataset, uuid=uuid)
-    tp_list = list(MembershipNSTemplate.objects.values_list(
-        'template__name',
-        'template__is_valid',
+    tpl_list = MembershipNSTemplate.objects.values_list(
         'template__uuid',
-        'template__graphml_definition',
     ).filter(
         dataset=dataset,
-    ))
+    )
+    tpl_objs = NSTemplate.objects.filter(uuid__in=tpl_list).order_by('name')
+    print(tpl_objs)
     if request.method == "POST":
-        dataset.is_valid, dataset_error = dataset_validate(tp_list)
+        dataset.is_valid, dataset_error = dataset_validate(tpl_objs)
         dataset.save()
     else:
         dataset_error = None
@@ -45,7 +44,7 @@ def dataset_detail(request, uuid):
         'datasets_page': 'active',
         'dataset': dataset,
         'dataset_error': dataset_error,
-        'templates': tp_list,
+        'templates': tpl_objs,
     })
 
 
@@ -108,14 +107,12 @@ def dataset_edit(request, uuid):
 
 def dataset_delete(request, uuid):
     dataset = get_object_or_404(Dataset, uuid=uuid)
-    tp_list = list(MembershipNSTemplate.objects.values_list(
-        'template__name',
-        'template__is_valid',
+    tpl_list = MembershipNSTemplate.objects.values_list(
         'template__uuid',
-        'template__graphml_definition',
     ).filter(
         dataset=dataset,
-    ))
+    )
+    tpl_objs = NSTemplate.objects.filter(uuid__in=tpl_list).order_by('name')
     used_by = dataset_in_use(uuid)
     if request.method == "POST":
         dataset.delete()
@@ -124,7 +121,7 @@ def dataset_delete(request, uuid):
         'datasets_page': 'active',
         'dataset': dataset,
         'used_by': used_by,
-        'templates': tp_list,
+        'templates': tpl_objs,
     })
 
 
@@ -134,7 +131,7 @@ def dataset_in_use(template_uuid):
     ).filter(
         template__uuid=template_uuid,
     )
-    proj_objs = Dataset.objects.filter(uuid__in=proj_list)
+    proj_objs = Dataset.objects.filter(uuid__in=proj_list).order_by('name')
     return proj_objs
 
 
@@ -174,8 +171,8 @@ def templates(request):
 
 
 def template_list(request):
-    tp_objs = NSTemplate.objects.filter(created_date__lte=timezone.now()).order_by('name')
-    return render(request, 'templates.html', {'templates_page': 'active', 'templates': tp_objs})
+    tpl_objs = NSTemplate.objects.filter(created_date__lte=timezone.now()).order_by('name')
+    return render(request, 'templates.html', {'templates_page': 'active', 'templates': tpl_objs})
 
 
 def template_detail(request, uuid):
@@ -258,5 +255,5 @@ def template_in_use(template_uuid):
     ).filter(
         template__uuid=template_uuid,
     )
-    ds_objs = Dataset.objects.filter(uuid__in=ds_list)
+    ds_objs = Dataset.objects.filter(uuid__in=ds_list).order_by('name')
     return ds_objs

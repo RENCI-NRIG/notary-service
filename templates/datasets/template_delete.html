@@ -64,7 +64,8 @@
                 <b>Template is being used by:</b><br>
                 {% for ds in used_by %}
                     - {{ ds.name }}
-                    (<a href="{% url 'dataset_detail' uuid=ds.uuid %}" title="Edit">{{ ds.uuid }}</a>)<br>
+                    (<a href="{% url 'dataset_detail' uuid=ds.uuid %}"
+                        title="Edit"  style="font-family: Menlo">{{ ds.uuid }}</a>)<br>
                 {% endfor %}
             {% endif %}
             {% else %}
