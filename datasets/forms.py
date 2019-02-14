@@ -1,9 +1,9 @@
 from django import forms
-from .models import NSTemplate, Dataset, MembershipNSTemplate
+
+from .models import NSTemplate, Dataset
 
 
 class TemplateForm(forms.ModelForm):
-
     class Meta:
         model = NSTemplate
         fields = (

@@ -1,9 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
+
 from datasets.models import Dataset
 from .forms import ProjectForm
-from .models import Project, ComanageMemberActive, ComanageAdmin, ComanagePersonnel, \
-    MembershipComanageMemberActive, MembershipComanageAdmin, MembershipComanagePersonnel, \
+from .models import Project, ComanageMemberActive, ComanageAdmin, MembershipComanageMemberActive, \
+    MembershipComanageAdmin, MembershipComanagePersonnel, \
     MembershipDatasets
 from .projects import update_comanage_group, personnel_by_comanage_group, update_comanage_personnel
 
@@ -112,7 +113,8 @@ def project_new(request):
             # membership groups
             for group_pk in form.data.getlist('comanage_groups'):
                 print('MEMBER: ' + group_pk)
-                if not MembershipComanageMemberActive.objects.filter(project=project.id, comanage_group=group_pk).exists():
+                if not MembershipComanageMemberActive.objects.filter(project=project.id,
+                                                                     comanage_group=group_pk).exists():
                     MembershipComanageMemberActive.objects.create(
                         project=project,
                         comanage_group=ComanageMemberActive.objects.get(id=group_pk)
@@ -192,7 +194,8 @@ def project_edit(request, uuid):
                     group.delete()
             for group_pk in form.data.getlist('comanage_groups'):
                 print('MEMBER: ' + group_pk)
-                if not MembershipComanageMemberActive.objects.filter(project=project.id, comanage_group=group_pk).exists():
+                if not MembershipComanageMemberActive.objects.filter(project=project.id,
+                                                                     comanage_group=group_pk).exists():
                     MembershipComanageMemberActive.objects.create(
                         project=project,
                         comanage_group=ComanageMemberActive.objects.get(id=group_pk)

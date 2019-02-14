@@ -1,17 +1,20 @@
-import uuid
-import networkx as nx
-import tempfile
-import os
-from neo4j import GraphDatabase
-import neo4j
-from typing import Any, List, Set, Dict, Tuple, Optional
-from .abstract_workflow import AbstractWorkflow, WorkflowError, WorkflowImportError, WorkflowQueryError
 # from workflow.graph.abstract_workflow import AbstractWorkflow, WorkflowError, WorkflowImportError, WorkflowQueryError
 import json
-import time
 import logging
+import os
+import tempfile
+import time
+import uuid
+from typing import Any, List, Dict, Tuple
+
+import neo4j
+import networkx as nx
+from neo4j import GraphDatabase
+
+from .abstract_workflow import AbstractWorkflow, WorkflowImportError, WorkflowQueryError
 
 APOCRetryCount = 10
+
 
 class Neo4jWorkflow(AbstractWorkflow):
 
@@ -65,8 +68,9 @@ class Neo4jWorkflow(AbstractWorkflow):
 
         try:
             with self.driver.session() as session:
-                session.run('call apoc.import.graphml( $fileName, {batchSize: 10000, readLabels: true, storeNodeIds: true, defaultRelationshipType: "isPrerequisiteFor" } ) ',
-                fileName=graphmlFile)
+                session.run(
+                    'call apoc.import.graphml( $fileName, {batchSize: 10000, readLabels: true, storeNodeIds: true, defaultRelationshipType: "isPrerequisiteFor" } ) ',
+                    fileName=graphmlFile)
         except Exception as e:
             msg = "Neo4j APOC error %s", str(e)
             raise WorkflowImportError(None, msg)
@@ -102,7 +106,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         os.unlink(hostFileName)
 
         if retry == 0:
-            raise(WorkflowImportError(graphId, 'Unable to load graph'))
+            raise (WorkflowImportError(graphId, 'Unable to load graph'))
 
         return id
 
@@ -114,9 +118,9 @@ class Neo4jWorkflow(AbstractWorkflow):
 
         for r in rulesDict:
             with self.driver.session() as session:
-                #print('Applying rule ', r['msg'])
+                # print('Applying rule ', r['msg'])
                 v = session.run(r['rule'], graphId=graphId).single().value()
-                #print("Rule {}, value {}".format(r['msg'], v))
+                # print("Rule {}, value {}".format(r['msg'], v))
                 if v is False:
                     raise WorkflowImportError(graphId, r['msg'])
 
@@ -190,12 +194,12 @@ class Neo4jWorkflow(AbstractWorkflow):
         else:
             query = "match ({GraphID: $graphId, ID: $nodeId}) --> (n) return n"
         with self.driver.session() as session:
-            val = session.run(query, graphId = graphId, nodeId = nodeId, role=role)
+            val = session.run(query, graphId=graphId, nodeId=nodeId, role=role)
             if val is None:
                 raise WorkflowQueryError(graphId, nodeId, "Unable to find adjacent nodes")
             return val.value()
 
-    def find_reachable_nodes(self, graphId: str, nodeId: str, role: str) ->List[neo4j.types.graph.Node]:
+    def find_reachable_nodes(self, graphId: str, nodeId: str, role: str) -> List[neo4j.types.graph.Node]:
         """Get a list of nodes reachable from the specified node and have a specific role.
         See https://neo4j.com/docs/api/python-driver/current/types/graph.html for more info"""
         assert graphId is not None
@@ -204,7 +208,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         query = "match (s {GraphID: $graphId, ID: $nodeId}), (pi {Role: $role}), p=(s) -[*]-> (pi) where ALL(x in tail(reverse(tail(nodes(p)))) where not x.Role=$role) return distinct(pi)"
 
         with self.driver.session() as session:
-            val = session.run(query, graphId = graphId, nodeId = nodeId, role = role)
+            val = session.run(query, graphId=graphId, nodeId=nodeId, role=role)
             if val is None:
                 raise WorkflowQueryError(graphId, nodeId, "Unable to find reachable nodes")
             return val.value()

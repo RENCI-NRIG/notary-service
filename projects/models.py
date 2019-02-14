@@ -1,8 +1,11 @@
 import uuid
+
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth import get_user_model
+
 from datasets.models import Dataset
+
 User = get_user_model()
 
 
@@ -12,6 +15,9 @@ class ComanageMemberActive(models.Model):
     cn = models.CharField(max_length=255)
     active = models.BooleanField(default=False)
 
+    class Meta:
+        verbose_name = 'COmanage Active Member'
+
     def __str__(self):
         return self.cn[7:]
 
@@ -20,6 +26,9 @@ class ComanageAdmin(models.Model):
     dn = models.CharField(max_length=255)
     cn = models.CharField(max_length=255)
     active = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'COmanage Admin'
 
     def __str__(self):
         return self.cn[7:]
@@ -33,6 +42,9 @@ class ComanagePersonnel(models.Model):
     email = models.CharField(max_length=255)
     active = models.BooleanField(default=False)
 
+    class Meta:
+        verbose_name = 'COmanage Person'
+
     def __str__(self):
         return self.cn
 
@@ -41,6 +53,9 @@ class WorkflowNeo4j(models.Model):
     name = models.CharField(max_length=255)
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
     description = models.TextField()
+
+    class Meta:
+        verbose_name = 'Neo4j Workflow'
 
     def __str__(self):
         return self.name
@@ -62,7 +77,7 @@ class Project(models.Model):
     modified_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:
-        verbose_name = 'NS Project Description'
+        verbose_name = 'NS Project'
 
     def publish(self):
         self.modified_date = timezone.now()
@@ -77,7 +92,7 @@ class MembershipDatasets(models.Model):
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
 
     class Meta:
-        verbose_name = 'Datasets'
+        verbose_name = 'Membership Dataset'
 
 
 class MembershipComanageMemberActive(models.Model):
@@ -85,7 +100,7 @@ class MembershipComanageMemberActive(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     class Meta:
-        verbose_name = 'COmanage members:active'
+        verbose_name = 'Membership COmanage Active Member'
 
 
 class MembershipComanageAdmin(models.Model):
@@ -93,7 +108,7 @@ class MembershipComanageAdmin(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     class Meta:
-        verbose_name = 'COmanage admins'
+        verbose_name = 'Membership COmanage Admin'
 
 
 class MembershipWorkflow(models.Model):
@@ -101,7 +116,7 @@ class MembershipWorkflow(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     class Meta:
-        verbose_name = 'NS Project Workflow'
+        verbose_name = 'Membership Workflow'
 
 
 class MembershipComanagePersonnel(models.Model):
@@ -109,3 +124,6 @@ class MembershipComanagePersonnel(models.Model):
     comanage_admins = models.ForeignKey(ComanageAdmin, on_delete=models.CASCADE, null=True)
     comanage_groups = models.ForeignKey(ComanageMemberActive, on_delete=models.CASCADE, null=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'Membership COmanage Person'

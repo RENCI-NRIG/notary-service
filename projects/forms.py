@@ -1,6 +1,7 @@
 from django import forms
-from .models import Project, ComanageAdmin, ComanageMemberActive
+
 from datasets.models import Dataset
+from .models import Project, ComanageAdmin, ComanageMemberActive
 
 
 class ProjectForm(forms.ModelForm):
@@ -29,5 +30,3 @@ class ProjectForm(forms.ModelForm):
             'comanage_groups',
             'datasets'
         )
-
-

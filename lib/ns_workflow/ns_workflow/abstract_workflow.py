@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict
 
+
 class AbstractWorkflow(ABC):
 
     @abstractmethod
@@ -40,7 +41,7 @@ class AbstractWorkflow(ABC):
         return None
 
     @abstractmethod
-    def find_reachable_nodes(self, graphId: str, nodeId: str, role: str = None) ->List[str]:
+    def find_reachable_nodes(self, graphId: str, nodeId: str, role: str = None) -> List[str]:
         """ find names of reachable nodes, optionally for a given role"""
         return None
 
@@ -54,6 +55,7 @@ class WorkflowError(Exception):
         super(WorkflowError, self).__init__(msg)
         self.graphId = graphId
 
+
 class WorkflowImportError(WorkflowError):
     """Error importing a workflow graph"""
     pass
@@ -61,6 +63,7 @@ class WorkflowImportError(WorkflowError):
 
 class WorkflowQueryError(WorkflowError):
     """Error querying a workflow graph"""
+
     def __init__(self, graphId: str, nodeId: str, msg: str):
         msg = "%s in querying node %s", (msg, nodeId)
         super(WorkflowQueryError, self).__init__(graphId, msg)

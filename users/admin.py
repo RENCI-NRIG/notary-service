@@ -9,7 +9,7 @@ class NotaryServiceUserAdmin(UserAdmin):
     add_form = UserCreationForm
     form = UserChangeForm
     model = NotaryServiceUser
-    list_display = ['email', 'username', 'first_name', 'last_name', 'idp']
+    list_display = ['username', 'email', 'first_name', 'last_name', 'idp']
 
 
 admin.site.register(NotaryServiceUser, NotaryServiceUserAdmin)

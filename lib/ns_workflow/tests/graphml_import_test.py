@@ -1,13 +1,14 @@
-import unittest
-from ns_workflow import Neo4jWorkflow, WorkflowError
-import os
 import logging
+import os
+import unittest
+
+from ns_workflow import Neo4jWorkflow, WorkflowError
 
 
 class TestLogInitializer:
     """ initialize neo4j and unit test logging """
     # Tell pytest to ignore
-    __test__=False
+    __test__ = False
 
     def __init__(self):
         # configure neo4j workflow log

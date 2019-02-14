@@ -1,8 +1,10 @@
 import os
-from django.shortcuts import render
-from .forms import TerminalForm, ComanageForm
 import subprocess as sp
+
+from django.shortcuts import render
 from ldap3 import Connection, Server, ALL
+
+from .forms import TerminalForm, ComanageForm
 
 ldap_host = os.getenv('LDAP_HOST', '')
 ldap_user = os.getenv('LDAP_USER', '')

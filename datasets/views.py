@@ -1,10 +1,12 @@
+import os
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
+from ns_workflow import Neo4jWorkflow, WorkflowError
+
+from projects.models import Project, MembershipDatasets
 from .forms import TemplateForm, DatasetForm
 from .models import NSTemplate, Dataset, MembershipNSTemplate
-from ns_workflow import Neo4jWorkflow, WorkflowError
-from projects.models import Project, MembershipDatasets
-import os
 
 
 def datasets(request):
