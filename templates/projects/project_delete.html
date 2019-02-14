@@ -11,7 +11,7 @@
                 <h2>{{ project.name }}
                     <a href="{% url 'project_detail' uuid=project.uuid %}" title="Cancel" class="fa fa-fw fa-ban"></a>
                 </h2>
-            <table>
+                <table>
                     <tr>
                         <td width="60%">
                             <b>Created By:</b> {{ project.created_by }}
@@ -51,11 +51,17 @@
                     {% endfor %}
                 </ul>
                 <h3>Datasets</h3>
-            <table border="1px solid black" cellpadding="5px">
+                <table border="1px solid black" cellpadding="5px">
                     <tr>
                         <td align="center"><b>Name</b></td>
                         <td align="center"><b>Validated</b></td>
-                        <td align="center"><b>UUID</b></td>
+                        <td align="center"><b>
+                            {% if user.show_uuid %}
+                                UUID
+                            {% else %}
+                                Description
+                            {% endif %}
+                        </b></td>
                     </tr>
                     {% for dataset in datasets %}
                         <tr>
@@ -66,8 +72,14 @@
                             <i class="fa fa-fw fa-remove" style="color: red;"></i>
                         {% endif %}
                         </td>
-                        <td style="font-family: Menlo"><a href="{% url 'dataset_detail' uuid=dataset.uuid %}"
-                                                          title="Dataset Details">{{ dataset.uuid }}</a></td>
+                        <td style="font-family: Courier"><a href="{% url 'dataset_detail' uuid=dataset.uuid %}"
+                                                            title="Dataset Details">
+                            {% if user.show_uuid %}
+                                {{ dataset.uuid }}
+                            {% else %}
+                                {{ dataset.description|slice:":34" }}..
+                            {% endif %}
+                        </a></td>
                     {% endfor %}
                 </table>
                 <h3>Workflows</h3>

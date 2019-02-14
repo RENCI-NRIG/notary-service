@@ -45,7 +45,13 @@
                     <tr>
                         <td align="center"><b>Name</b></td>
                         <td align="center"><b>Validated</b></td>
-                        <td align="center"><b>UUID</b></td>
+                        <td align="center"><b>
+                            {% if user.show_uuid %}
+                                UUID
+                            {% else %}
+                                Description
+                            {% endif %}
+                        </b></td>
                         <td align="center"><b>GraphML Definition File</b></td>
                     </tr>
                     {% for template in templates %}
@@ -59,7 +65,13 @@
                                     <i class="fa fa-fw fa-remove" style="color: red;"></i>
                                 {% endif %}
                             </td>
-                            <td style="font-family: Menlo"><a href="{% url 'template_detail' uuid=template.uuid %}">{{ template.uuid }}</a></td>
+                            <td style="font-family: Courier"><a href="{% url 'template_detail' uuid=template.uuid %}">
+                                {% if user.show_uuid %}
+                                    {{ template.uuid }}
+                                {% else %}
+                                    {{ template.description|slice:":34" }}..
+                                {% endif %}
+                            </a></td>
                             <td>{{ template.graphml_definition|getfilename }}</td>
                         </tr>
                     {% endfor %}
@@ -81,7 +93,12 @@
                 <b>Dataset used by Project(s):</b><br>
                 {% for proj in used_by %}
                     - {{ proj.name }}
-                    (<a href="{% url 'project_detail' uuid=proj.uuid %}" title="Edit">{{ proj.uuid }}</a>)<br>
+                    (<a href="{% url 'project_detail' uuid=proj.uuid %}" title="Edit">
+                    {% if user.show_uuid %}
+                        {{ proj.uuid }}
+                    {% else %}
+                        {{ proj.description|slice:":34" }}..
+                    {% endif %}</a>)<br>
                 {% endfor %}
             {% endif %}
             {% else %}

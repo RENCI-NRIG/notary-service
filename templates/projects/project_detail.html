@@ -18,7 +18,7 @@
                     </form>
                 {% endif %}
                 {% if project_error %}
-                    <div style="background-color: cornsilk;color:darkblue;font-family:Menlo;
+                    <div style="background-color: cornsilk;color:darkblue;font-family:Courier;
                 font-size: 14px;overflow-y: scroll; border-style: solid; border-color: red;">
                         {{ project_error }}
                     </div>
@@ -108,7 +108,13 @@
                     <tr>
                         <td align="center"><b>Name</b></td>
                         <td align="center"><b>Validated</b></td>
-                        <td align="center"><b>UUID</b></td>
+                        <td align="center"><b>
+                            {% if user.show_uuid %}
+                                UUID
+                            {% else %}
+                                Description
+                            {% endif %}
+                        </b></td>
                     </tr>
                     {% for dataset in datasets %}
                         <tr>
@@ -119,8 +125,14 @@
                             <i class="fa fa-fw fa-remove" style="color: red;"></i>
                         {% endif %}
                         </td>
-                        <td style="font-family: Menlo"><a href="{% url 'dataset_detail' uuid=dataset.uuid %}"
-                                                          title="Dataset Details">{{ dataset.uuid }}</a></td>
+                        <td style="font-family: Courier"><a href="{% url 'dataset_detail' uuid=dataset.uuid %}"
+                                                            title="Dataset Details">
+                            {% if user.show_uuid %}
+                                {{ dataset.uuid }}
+                            {% else %}
+                                {{ dataset.description|slice:":34" }}..
+                            {% endif %}
+                        </a></td>
                     {% endfor %}
                 </table>
                 <br>

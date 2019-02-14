@@ -65,7 +65,13 @@
                 {% for ds in used_by %}
                     - {{ ds.name }}
                     (<a href="{% url 'dataset_detail' uuid=ds.uuid %}"
-                        title="Edit"  style="font-family: Menlo">{{ ds.uuid }}</a>)<br>
+                        title="Edit" style="font-family: Courier">
+                    {% if user.show_uuid %}
+                        {{ ds.uuid }}
+                    {% else %}
+                        {{ ds.description|slice:":34" }}..
+                    {% endif %}
+                </a>)<br>
                 {% endfor %}
             {% endif %}
             {% else %}

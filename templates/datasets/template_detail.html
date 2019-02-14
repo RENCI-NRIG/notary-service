@@ -19,7 +19,7 @@
                     </form>
                 {% endif %}
                 {% if template_error %}
-                    <div style="background-color: cornsilk;color:darkblue;font-family:Menlo;
+                    <div style="background-color: cornsilk;color:darkblue;font-family:Courier;
                 font-size: 14px;overflow-y: scroll; border-style: solid; border-color: red;">
                         {{ template_error }}
                     </div>
@@ -62,7 +62,7 @@
                 <p>{{ template.description|linebreaksbr }}</p>
 
                 <b>File Contents:</b><br>
-                <div style="background-color: #DCDCDC;color:darkblue;font-family:Menlo;
+                <div style="background-color: #DCDCDC;color:darkblue;font-family:Courier;
                 font-size: 14px;overflow-x: scroll; height: 600px;overflow-y: scroll">
                     {% if template.graphml_definition.file %}
                         <p>{{ template_file|linebreaksbr|spacify }}</p>

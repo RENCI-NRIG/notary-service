@@ -1,6 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
-from comanage.views import ldap_attributes
+from comanage.models import IsMemberOf, LdapOther, NotaryServiceUser
+from .forms import UserPreferences
 
 
 def index(request):
@@ -28,14 +29,27 @@ def login(request):
     return render(request, 'login.html', context)
 
 
-def profile(request):
-    context = {"profile_page": "active"}
-    if request.user.is_authenticated:
-        return ldap_attributes(request)
-    else:
-        return render(request, 'profile.html', context)
-
-
 def faq(request):
     context = {"faq_page": "active"}
     return render(request, 'faq.html', context)
+
+
+def profile(request):
+    if request.user.is_authenticated:
+        user = get_object_or_404(NotaryServiceUser, id=request.user.id)
+        if request.method == "POST":
+            form = UserPreferences(request.POST, instance=user)
+            if form.is_valid():
+                user.show_uuid = form.data.get('show_uuid')
+                user.save()
+            ismemberof = IsMemberOf.objects.filter(
+                membershipismemberof__user_id=request.user.id).order_by('value')
+            ldapother = LdapOther.objects.filter(
+                membershipldapother__user_id=request.user.id).order_by('attribute', 'value')
+            return render(request, 'profile.html',
+                          {'profile_page': 'active', 'isMemberOf': ismemberof, 'LDAPOther': ldapother, 'form': form})
+        else:
+            form = UserPreferences(instance=user)
+            return render(request, 'profile.html', {'profile_page': 'active', 'form': form})
+    else:
+        return render(request, 'profile.html', {'profile_page': 'active'})

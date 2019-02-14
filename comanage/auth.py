@@ -103,6 +103,7 @@ class MyOIDCAB(OIDCAuthenticationBackend):
         user.acr = claims.get('acr', '')
         user.affiliation = claims.get('affiliation', '')
         user.name = claims.get('name', '')
+        user.show_uuid = False
         user.save()
 
         ldap_attributes = get_ldap_attributes(user)
