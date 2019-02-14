@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static dataset_tags %}
+
+{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        <div class="container">
+            <div class="post">
+                <h1 style="color: #B22222;">Are you sure you want to delete?</h1>
+                <h2>{{ template.name }}
+                    <a href="{% url 'template_detail' uuid=template.uuid %}" title="Cancel" class="fa fa-fw fa-ban"></a>
+                </h2>
+                <table>
+
+                    <tr>
+                        <td width="60%">
+                            <b>Created By:</b> {{ template.created_by }}
+                        </td>
+                        <td>
+                            <b>Modified By:</b> {{ template.modified_by }}
+                        </td>
+                        </td>
+                    <tr>
+                        <td>
+                            <b>Created Date:</b> {{ template.created_date|date:"m/d/Y g:i a" }}
+                        </td>
+                        <td>
+                            <b>Modified Date:</b> {{ template.modified_date|date:"m/d/Y g:i a" }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>File:</b> <a
+                                href="{{ template.graphml_definition.url }}">{{ template.graphml_definition | getfilename }}</a>
+                        </td>
+                        </td>
+                        <td>
+                            <b>Validated:</b> {{ template.is_valid }}
+                            {% if template.is_valid %}
+                                (<i class="fa fa-fw fa-check" style="color: green;"></i>)
+                            {% else %}
+                                (<i class="fa fa-fw fa-remove" style="color: red;"></i>)
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+                <b>Description:</b>
+                <p>{{ template.description|linebreaksbr }}</p>
+            </div>
+            <br>
+            <form method="POST" class="post-form">
+                {% csrf_token %}
+                {% if used_by %}
+                    <input type="submit" value="Delete" style="color: grey" disabled>
+                {% else %}
+
+                    <input type="submit" value="Delete" style="color: #B22222">
+                {% endif %}
+            </form>
+            {% if used_by %}
+                <br>
+                <h3 style="color: #B22222;">Cannot Delete</h3>
+                <b>Template used by Dataset(s):</b><br>
+                {% for ds in used_by %}
+                    - {{ ds.name }}
+                    (<a href="{% url 'dataset_detail' uuid=ds.uuid %}"
+                        title="Edit" style="font-family: Courier">
+                    {% if user.show_uuid %}
+                        {{ ds.uuid }}
+                    {% else %}
+                        {{ ds.description|slice:":34" }}..
+                    {% endif %}
+                </a>)<br>
+                {% endfor %}
+            {% endif %}
+            {% else %}
+            <div class="container">
+                <p>You are not currently logged in</p>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

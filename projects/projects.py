@@ -1,6 +1,7 @@
 import os
 
 from ldap3 import Connection, Server, ALL
+
 from .models import ComanageMemberActive, ComanageAdmin, ComanagePersonnel
 
 ldap_host = os.getenv('LDAP_HOST', '')

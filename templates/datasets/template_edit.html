@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        <div class="container">
+            <h2>Add/Edit Template
+                <a href="{% url 'templates' %}" title="Cancel" class="fa fa-fw fa-ban"></a>
+            </h2>
+            <form method="POST" class="post-form" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="Save" style="color: darkgreen">
+            </form>
+        </div>
+    {% else %}
+        <div class="container">
+            <p>You are not currently logged in</p>
+        </div>
+    {% endif %}
+{% endblock %}

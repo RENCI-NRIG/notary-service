@@ -4,107 +4,107 @@
 {% block title %}ImPACT - Notary Service{% endblock %}
 
 {% block content %}
-<div class="container">
-    {% if user.is_authenticated %}
-    <h1>Profile - {{ user.name }} ({{ user.username }})</h1>
-    <h2>My Identity (CILogon)</h2>
-    <table border="1px solid black" cellpadding="5px">
-        <tr>
-            <td>name</td>
-            <td><b>{{ user.name }}</b></td>
-        </tr>
-        <tr>
-            <td>email</td>
-            <td><b>{{ user.email }}</b></td>
-        </tr>
-        <tr>
-            <td>given_name</td>
-            <td><b>{{ user.first_name }}</b></td>
-        </tr>
-        <tr>
-            <td>family_name</td>
-            <td><b>{{ user.last_name }}</b></td>
-        </tr>
-        <tr>
-            <td>idp</td>
-            <td><b>{{ user.idp }}</b></td>
-        </tr>
-        <tr>
-            <td>idp_name</td>
-            <td><b>{{ user.idp_name }}</b></td>
-        </tr>
-        <tr>
-            <td>sub</td>
-            <td><b>{{ user.sub }}</b></td>
-        </tr>
-        <tr>
-            <td>aud</td>
-            <td><b>{{ user.aud }}</b></td>
-        </tr>
-        <tr>
-            <td>cert_subject_dn</td>
-            <td><b>{{ user.cert_subject_dn }}</b></td>
-        </tr>
-        <tr>
-            <td>iss</td>
-            <td><b>{{ user.iss }}</b></td>
-        </tr>
-        <tr>
-            <td>oidc</td>
-            <td><b>{{ user.oidc }}</b></td>
-        </tr>
-        <tr>
-            <td>eppn</td>
-            <td><b>{{ user.eppn }}</b></td>
-        </tr>
-        <tr>
-            <td>eptid</td>
-            <td><b>{{ user.eptid }}</b></td>
-        </tr>
-        <tr>
-            <td>acr</td>
-            <td><b>{{ user.acr }}</b></td>
-        </tr>
-        <tr>
-            <td>affiliation</td>
-            <td><b>{{ user.affiliation }}</b></td>
-        </tr>
-    </table>
-    <br>
-    <form action="/profile/" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="user_id" value="{{ user.id }}">
-        <input type="submit" value="Show me more">
-        <br>
-        {% if isMemberOf %}
-        <br>
-        <h2>My Memberships</h2>
-        <table border="1px solid black" cellpadding="5px">
-            {% for group in isMemberOf %}
-            <tr>
-                <td>{{ group.attribute }}</td>
-                <td><b>{{ group.value }}</b></td>
-            </tr>
-            {% endfor %}
-        </table>
-        {% endif %}
-        {% if LDAPOther %}
-        <br>
-        <h2>My Other Attributes</h2>
-        <table border="1px solid black" cellpadding="5px">
-            {% for group in LDAPOther %}
-            <tr>
-                <td>{{ group.attribute }}</td>
-                <td><b>{{ group.value }}</b></td>
-            </tr>
-            {% endfor %}
-        </table>
-        {% endif %}
-    </form>
-    {% else %}
     <div class="container">
-        <p>You are not currently logged in</p>
+        {% if user.is_authenticated %}
+            <h1>Profile</h1>
+            <h3>My Preferences</h3>
+            <form method="POST" class="post-form">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="Update Preferences" style="color: darkgreen">
+            </form>
+            <br>
+            <h3>My Identity (CILogon)</h3>
+            <table border="1px solid black" cellpadding="5px">
+                <tr>
+                    <td>name</td>
+                    <td><b>{{ user.name }}</b></td>
+                </tr>
+                <tr>
+                    <td>email</td>
+                    <td><b>{{ user.email }}</b></td>
+                </tr>
+                <tr>
+                    <td>given_name</td>
+                    <td><b>{{ user.first_name }}</b></td>
+                </tr>
+                <tr>
+                    <td>family_name</td>
+                    <td><b>{{ user.last_name }}</b></td>
+                </tr>
+                <tr>
+                    <td>idp</td>
+                    <td><b>{{ user.idp }}</b></td>
+                </tr>
+                <tr>
+                    <td>idp_name</td>
+                    <td><b>{{ user.idp_name }}</b></td>
+                </tr>
+                <tr>
+                    <td>sub</td>
+                    <td><b>{{ user.sub }}</b></td>
+                </tr>
+                <tr>
+                    <td>aud</td>
+                    <td><b>{{ user.aud }}</b></td>
+                </tr>
+                <tr>
+                    <td>cert_subject_dn</td>
+                    <td><b>{{ user.cert_subject_dn }}</b></td>
+                </tr>
+                <tr>
+                    <td>iss</td>
+                    <td><b>{{ user.iss }}</b></td>
+                </tr>
+                <tr>
+                    <td>oidc</td>
+                    <td><b>{{ user.oidc }}</b></td>
+                </tr>
+                <tr>
+                    <td>eppn</td>
+                    <td><b>{{ user.eppn }}</b></td>
+                </tr>
+                <tr>
+                    <td>eptid</td>
+                    <td><b>{{ user.eptid }}</b></td>
+                </tr>
+                <tr>
+                    <td>acr</td>
+                    <td><b>{{ user.acr }}</b></td>
+                </tr>
+                <tr>
+                    <td>affiliation</td>
+                    <td><b>{{ user.affiliation }}</b></td>
+                </tr>
+            </table>
+            {% if isMemberOf %}
+                <br>
+                <h3>My Memberships</h3>
+                <table border="1px solid black" cellpadding="5px">
+                    {% for group in isMemberOf %}
+                        <tr>
+                            <td>{{ group.attribute }}</td>
+                            <td><b>{{ group.value }}</b></td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+            {% if LDAPOther %}
+                <br>
+                <h3>My Other Attributes</h3>
+                <table border="1px solid black" cellpadding="5px">
+                    {% for group in LDAPOther %}
+                        <tr>
+                            <td>{{ group.attribute }}</td>
+                            <td><b>{{ group.value }}</b></td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+        {% else %}
+            <div class="container">
+                <p>You are not currently logged in</p>
+            </div>
+        {% endif %}
     </div>
-    {% endif %}
-</div>
 {% endblock %}

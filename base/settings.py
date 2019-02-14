@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', False)
 
-ALLOWED_HOSTS = ["*"]                # MUST be updated for production
+ALLOWED_HOSTS = ["*"]  # MUST be updated for production
 
 # django-crispy-forms
 # https://django-crispy-forms.readthedocs.io/en/latest/
@@ -36,17 +36,19 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
-    'mozilla_django_oidc',           # mozilla-django-oidc
+    'mozilla_django_oidc',  # mozilla-django-oidc
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users.apps.UsersConfig',        # custom user model
+    'users.apps.UsersConfig',  # custom user model
     'comanage.apps.ComanageConfig',  # comanage authN/authZ
-    'crispy_forms',                  # django-crispy-forms
-    'django_nose',                   # django-nose test runner
+    'crispy_forms',  # django-crispy-forms
+    'django_nose',  # django-nose test runner
     'projects.apps.ProjectsConfig',  # projects for notary service
-    'debug.apps.DebugConfig',        # debug dashboard for notary service
+    'debug.apps.DebugConfig',  # debug dashboard for notary service
+    'datasets.apps.DatasetsConfig',  # datasets in notary service
+    'django_cleanup',
 ]
 
 MIDDLEWARE = [
@@ -76,6 +78,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'templates/comanage'),
             os.path.join(BASE_DIR, 'templates/projects'),
             os.path.join(BASE_DIR, 'templates/debug'),
+            os.path.join(BASE_DIR, 'templates/datasets'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -161,7 +164,7 @@ OIDC_RP_SCOPES = 'openid email profile org.cilogon.userinfo'
 # username algorithm
 OIDC_USERNAME_ALGO = 'comanage.auth.generate_username'
 # redirect URLs
-LOGIN_REDIRECT_URL = '/profile/'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 # SameSite prevents the browser from sending this cookie along with cross-site requests
 # Safari seems to need this set to None
@@ -170,7 +173,6 @@ SESSION_COOKIE_SAMESITE = None
 # pytest-django as the test runner
 # https://pytest-django.readthedocs.io/en/latest/faq.html
 TEST_RUNNER = 'base.runner.PytestTestRunner'
-
 
 # Default Django logging is WARNINGS+ to console
 # so visible via docker-compose logs django
