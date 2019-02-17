@@ -47,7 +47,7 @@
                     <td>{{ template.created_date|date:"m/d/Y g:i a" }}</td>
                     <td>{{ template.modified_date|date:"m/d/Y g:i a" }}</td>
                     <td><a href="{% url 'template_edit' uuid=template.uuid %}" title="Edit"
-                           class="fa fa-fw fa-edit"></a>
+                           class="fa fa-fw fa-pencil"></a>
                     </td>
                 {% endfor %}
             </table>

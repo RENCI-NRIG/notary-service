@@ -8,7 +8,7 @@
         <div class="container">
             <div class="post">
                 <h2>{{ project.name }}
-                    <a href="{% url 'project_edit' uuid=project.uuid %}" title="Edit" class="fa fa-fw fa-edit"></a>
+                    <a href="{% url 'project_edit' uuid=project.uuid %}" title="Edit" class="fa fa-fw fa-pencil"></a>
                     <a href="{% url 'project_delete' uuid=project.uuid %}" title="Delete" class="fa fa-fw fa-trash"></a>
                 </h2>
                 {% if not project.is_valid %}

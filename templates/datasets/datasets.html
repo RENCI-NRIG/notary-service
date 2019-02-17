@@ -46,7 +46,7 @@
                     </a></td>
                     <td>{{ dataset.created_date|date:"m/d/Y g:i a" }}</td>
                     <td>{{ dataset.modified_date|date:"m/d/Y g:i a" }}</td>
-                    <td><a href="{% url 'dataset_edit' uuid=dataset.uuid %}" title="Edit" class="fa fa-fw fa-edit"></a>
+                    <td><a href="{% url 'dataset_edit' uuid=dataset.uuid %}" title="Edit" class="fa fa-fw fa-pencil"></a>
                     </td>
                 {% endfor %}
             </table>

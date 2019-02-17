@@ -22,10 +22,13 @@ def dataset_list(request):
     return render(request, 'datasets.html', {'datasets_page': 'active', 'datasets': ds_objs})
 
 
-def dataset_validate(tpl_objs):
+def dataset_validate(tpl_objs, show_uuid):
     for template in tpl_objs:
         if not template.is_valid:
-            return False, 'Template ' + str(template.uuid) + ' is not validated'
+            if show_uuid:
+                return False, 'Template ' + str(template.uuid) + ' is not validated'
+            else:
+                return False, 'Template (' + str(template.description)[:34] + '..) is not validated'
     return True, None
 
 
@@ -39,7 +42,7 @@ def dataset_detail(request, uuid):
     tpl_objs = NSTemplate.objects.filter(uuid__in=tpl_list).order_by('name')
     print(tpl_objs)
     if request.method == "POST":
-        dataset.is_valid, dataset_error = dataset_validate(tpl_objs)
+        dataset.is_valid, dataset_error = dataset_validate(tpl_objs, request.user.show_uuid)
         dataset.save()
     else:
         dataset_error = None

@@ -17,10 +17,13 @@ def projects(request):
         return render(request, 'projects.html', context)
 
 
-def project_validate(ds_objs):
+def project_validate(ds_objs, show_uuid):
     for ds in ds_objs:
         if not ds.is_valid:
-            return False, 'Dataset ' + str(ds.uuid) + ' is not validated'
+            if show_uuid:
+                return False, 'Dataset ' + str(ds.uuid) + ' is not validated'
+            else:
+                return False, 'Dataset (' + str(ds.description)[:34] + '..) is not validated'
     return True, None
 
 
@@ -58,7 +61,7 @@ def project_detail(request, uuid):
     ds_list = MembershipDatasets.objects.values_list('dataset__uuid').filter(project__uuid=uuid)
     ds_objs = Dataset.objects.filter(uuid__in=ds_list).order_by('name')
     if request.method == "POST":
-        project.is_valid, project_error = project_validate(ds_objs)
+        project.is_valid, project_error = project_validate(ds_objs, request.user.show_uuid)
         project.save()
     else:
         project_error = None
