@@ -57,6 +57,8 @@ services:
       - ${NEO4J_DATA_PATH_HOST:-$(pwd)/neo4j/data}:${NEO4J_DATA_PATH_DOCKER:-/data}
       - ${NEO4J_IMPORTS_PATH_HOST:-$(pwd)/neo4j/imports}:${NEO4J_IMPORTS_PATH_DOCKER:-/imports}
       - ${NEO4J_LOGS_PATH_HOST:-$(pwd)/neo4j/logs}:${NEO4J_LOGS_PATH_DOCKER:-/logs}
+      - ${NGINX_SSL_CERT:-./ssl/ssl_dev.crt}:/ssl/neo4j.cert  # SSL development certificate
+      - ${NGINX_SSL_KEY:-./ssl/ssl_dev.key}:/ssl/neo4j.key    # SSL development key
     environment:
       - NEO4J_AUTH=${NEO4J_USER:-neo4j}/${NEO4J_PASS:-password}
 
