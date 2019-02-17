@@ -79,6 +79,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'templates/projects'),
             os.path.join(BASE_DIR, 'templates/debug'),
             os.path.join(BASE_DIR, 'templates/datasets'),
+            os.path.join(BASE_DIR, 'templates/workflows'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -87,6 +88,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'workflows.context_processors.export_neo4j_vars',
             ],
         },
     },
