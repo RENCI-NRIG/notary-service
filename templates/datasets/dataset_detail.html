@@ -46,14 +46,21 @@
                     </tr>
                     <tr>
                         <td>
-                            <b>Presidio URL:</b> {{ dataset.dataset_identifier_as_url }}<br>
+                            <b>Presidio URL:</b>
+                            <a href="{{ dataset.dataset_identifier_as_url }}" target="_blank">
+                            {{ dataset.dataset_identifier_as_url }}
+                            </a><br>
                         </td>
                         <td>
                             <b>SAFE SCID:</b> {{ dataset.safe_identifier_as_scid }}<br>
                         </td>
                     </tr>
                 </table>
-                <b>DOI or Metadata URL:</b> {{ dataset.dataset_identifier_as_doi_or_meta }}<br>
+                <b>DOI or Metadata URL:</b>
+                <a href="{{ dataset.dataset_identifier_as_doi_or_meta }}" target="_blank">
+                {{ dataset.dataset_identifier_as_doi_or_meta }}
+                </a>
+                <br>
                 <b>Validated:</b> {{ dataset.is_valid }}
                 {% if dataset.is_valid %}
                     (<i class="fa fa-fw fa-check" style="color: green;"></i>)
