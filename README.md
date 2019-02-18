@@ -20,9 +20,10 @@
 
 ## Table of Contents
 
-- [TL;DR](#tldr) - Just run it, I don't care about specifics
-- [Environment](#env) - How to setup your development environment
-- [Configure](#configure) - Configuration / Settings / Prerequisites
+- [TL;DR](#tldr) - Just run it all in Docker and I don't care about specifics
+- [Scripts](#scripts) - Convenience scripts for setting up or tearing down a development environment
+- [Environment and Configuration](#env) - How to setup your development environment
+- [Virtualenv](#venv) - Establish a Python virtual environment
 - [Build](#build) - Building the stack
 - [Run](#run) - Running the stack
 - [Docker](#docker) - I want to do all of this in docker
@@ -31,13 +32,13 @@
 
 ## <a name="tldr"></a>TL;DR
 
-Assuming you have OIDC Client credentials and LDAP access in a COmanage Registry.
+**NOTE**: Assumes you already have OIDC Client credentials, and LDAP access setup for a COmanage Registry.
 
 ```
-cp dummy.env .env                                  # set variables accordingly
-cp base/dummy.env base/.env                        # set variables accordingly
-cp base/dummy_secrets.py base/secrets.py           # set variables accordingly
-cp nginx/ns_core_nginx_ssl.conf nginx/default.conf # configure accordingly
+cp env.template .env                                  # set variables accordingly
+cp base/env.template base/.env                        # set variables accordingly
+cp base/secrets.py.template base/secrets.py           # set variables accordingly
+cp nginx/default.conf.template nginx/default.conf     # configure accordingly
 source base/.env
 UWSGI_UID=$(id -u) UWSGI_GID=$(id -g) docker-compose up -d
 ```
@@ -48,73 +49,227 @@ Example: [https://127.0.0.1:8443/](https://127.0.0.1:8443/)
 
 <img width="80%" alt="Landing page" src="https://user-images.githubusercontent.com/5332509/50703546-7cc92400-1022-11e9-9004-924d8ed9713e.png">
 
-## <a name="scripts"></a>Scritps
+Wait! What if I don't know how to **set variables accordingly** or to **configure accordingly**?.. Then keep reading below.
 
-A small set of convenience scripts are provided in the `scripts` directory.
+## <a name="scripts"></a>Scripts
 
-`setup-environment.sh` - generates the directories and environment stubs for the user to populate with their own configuration parameters
+Convenience scripts are provided in the `scripts` directory. The scripts are somewhat macOS specific due the primary development environment, but can be modified to run elsewhere.
 
-`clean-and-reset.sh` - as the name suggests, 
+1. [macos-development-environment.sh](scripts/macos-development-environment.sh) - generates the directories and environment stubs for the user to populate with their own configuration parameters, and starts the **database**, **neo4j**, and **nginx** containers.
 
+2. [stop-and-remove-all.sh](scripts/stop-and-remove-all.sh) - as the name suggests, stops all running containers, removes them, and purges the system of user created container volume mounts.
 
-## <a name="env"></a>Environment
+Move on to the [Environment and Configuration](#env) section.
 
-By default this project is configured to run everything in Docker which may be non-optimal for develoment. In order to enble local development using Python 3 the user must make a few small changes prior to running the code.
-
-If you're only wanting to run this in Docker, move on to the [Docker](#docker) section.
-
-### Using virtualenv locally
-
-Create the virtual environment and install packages
-
-```
-virtualenv -p $(which python3) venv
-source venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
-```
-
-Move on to the [Configure](#configure) section.
-
-## <a name="configure"></a>Configure
+## <a name="env"></a>Environment and Configuration
 
 Your project must be configured prior to running it for the first time. Example configuration files have been provided as templates to start from.
 
 Do not check any of your configuration files into a repository as they will contain your projects **secrets** (use `.gitignore` to exclude any files containing secrets).
 
-### `base/secrets.py`
+1. **.env** from [env.template](env.template) - Environment variables for docker-compose.yml to use
+2. **base/.env** from [base/env.template](base/env.template) - Environment variables for Django to use via the dotenv package
+3. **base/secrets.py** from [base/secrets.py.template](base/secrets.py.template) - Django requires a secret key and this file provides an example.
+4. **nginx/default.conf** from [nginx/default.conf.template](nginx/default.conf.template) - Example Nginx SSL configuration file to use for deployment.
 
-A file named `base/dummy_secrets.py` has been provided as an exmaple.
+### `.env`
+
+A file named `env.template` has been provided as an example, and is used by the `docker-compose.yml` file.
 
 ```
-cp base/dummy_secrets.py base/secrets.py
+cp env.template .env
 ```
 
-Generate a `SECRET_KEY` and save in in this file
+Once copied, modify the default values for each to correspond to your desired deployment. The UID and GID based entries should correspond to the values of the user responsible for running the code as these will relate to shared volumes from the host to the running containers.
+
+```env
+# docker-compose environment file
+#
+# When you set the same environment variable in multiple files,
+# here’s the priority used by Compose to choose which value to use:
+#
+#  1. Compose file
+#  2. Shell environment variables
+#  3. Environment file
+#  4. Dockerfile
+#  5. Variable is not defined
+
+# database PostgreSQL - default values should not be used in production
+POSTGRES_PASSWORD=postgres
+POSTGRES_USER=postgres
+PGDATA=/var/lib/postgresql/data
+POSTGRES_DB=postgres
+POSTGRES_PORT=5432
+
+# django
+UWSGI_UID=1000
+UWSGI_GID=1000
+
+# nginx
+NGINX_DEFAULT_CONF=./nginx/default.conf
+NGINX_SSL_CERT=./ssl/ssl_dev.crt
+NGINX_SSL_KEY=./ssl/ssl_dev.key
+
+# neo4J
+NEO4J_UID=1000
+NEO4J_GID=1000
+NEO4J_DATA_PATH_HOST=./neo4j/data
+NEO4J_DATA_PATH_DOCKER=/data
+NEO4J_IMPORTS_PATH_HOST=./neo4j/imports
+NEO4J_IMPORTS_PATH_DOCKER=/imports
+NEO4J_LOGS_PATH_HOST=./neo4j/logs
+NEO4J_LOGS_PATH_DOCKER=/logs
+NEO4J_BOLT_URL=bolt://127.0.0.1:7687
+NEO4J_USER=neo4j
+NEO4J_PASS=password
+NEO4J_HOST=127.0.0.1
+```
 
 ### `base/.env`
 
-A file named `base/dummy.env` has been provided as an exmaple, and is used by Django's python-dotenv package.
-
-```console
-cp base/dummy.env base/.env
-```
-
-Modify the environment varialbes in the `base/.env` file to coincide with the settings you'll be using in your deployment.
+A file named `base/dummy.env` has been provided as an example, and is used by Django's python-dotenv package.
 
 If you're planning on doing local development with virutalenv, configure the database to be reachable from the local machine.
 
 - Update `POSTGRES_HOST` in `.env` to reflect the IP of your local machine (For example, from `export POSTGRES_HOST=database` to  `export POSTGRES_HOST=127.0.0.1`)
 
-### `.env`
-
-A file named `dummy.env` has been provided as an exmaple, and is used by the `docker-compose.yml` file.
-
-```console
-cp dummy.env .env
+```
+cp base/env.template base/.env
 ```
 
-Modify the environment varialbes in the `.env` file to coincide with the settings you'll be using in your deployment.
+Once copied, update the variables to correspond with your deployment needs. The OIDC_RP_CLIENT values should come from your OIDC COmanage registry and the LDAP values would be provided by CILogon personnel. Default host information relates to localhost (127.0.0.1) and should be adjusted according to the hostname or IP your running on.
+
+```env
+# Settings for environment. Notes:
+#
+#  - Since these are bash-like settings, there should be no space between the
+#    variable name and the value (ie, "A=B", not "A = B")
+#  - Boolean values should be all lowercase (ie, "A=false", not "A=False")
+
+# debug - set to false in production
+export DEBUG=true
+
+# uwsgi user
+export UWSGI_UID=$(id -u)
+export UWSGI_GID=$(id -g)
+
+# database PostgreSQL - default values should not be used in production
+export POSTGRES_PASSWORD=postgres
+export POSTGRES_USER=postgres
+export PGDATA=/var/lib/postgresql/data
+export POSTGRES_DB=postgres
+export POSTGRES_HOST=database
+export POSTGRES_PORT=5432
+
+# CILogon / COmanage - values provided when OIDC client is created
+export OIDC_RP_CLIENT_ID=''
+export OIDC_RP_CLIENT_SECRET=''
+
+# LDAP - values provided by CILogon staff
+export LDAP_HOST=''
+export LDAP_USER=''
+export LDAP_PASSWORD=''
+export LDAP_SEARCH_BASE=''
+
+# Neo4j
+export NEO4J_UID=$(id -u)
+export NEO4J_GID=$(id -g)
+export NEO4J_DATA_PATH_HOST=./neo4j/data
+export NEO4J_DATA_PATH_DOCKER=/data
+export NEO4J_IMPORTS_PATH_HOST=./neo4j/imports
+export NEO4J_IMPORTS_PATH_DOCKER=/imports
+export NEO4J_LOGS_PATH_HOST=./neo4j/logs
+export NEO4J_LOGS_PATH_DOCKER=/logs
+export NEO4J_BOLT_URL=bolt://127.0.0.1:7687
+export NEO4J_USER=neo4j
+export NEO4J_PASS=password
+export NEO4J_HOST=127.0.0.1
+```
+
+### `base/secrets.py`
+
+A file named `base/secrets.py.template` has been provided as an exmaple.
+
+Generate a `SECRET_KEY` and save in in this file
+
+```
+cp base/secrets.py.template base/secrets.py
+```
+
+Once copied, uncomment the SECRET_KEY line and add a key (example below)
+
+```python
+# Secret Key
+# You must uncomment, and set SECRET_KEY to a secure random value
+# e.g. https://djskgen.herokuapp.com/
+
+SECRET_KEY = '1123*n%5ep$n2cmd9ul*qgr+uzc!d*47h$u_tdhk+x0_v+%z5a'
+```
+
+### `nginx/default.conf`
+
+A file named `nginx/default.conf.template` has been provided as an exmaple.
+
+```
+cp nginx/default.conf.template nginx/default.conf
+```
+
+Once copied, entries for `FQDN_OR_IP` should be replaced with actual hostnames or IPs along with port information if not using default values. Also note that macOS will not use file based sockets, so TCP sockets should be used instead.
+
+```nginx
+# the upstream component nginx needs to connect to
+upstream django {
+    server unix:///code/base.sock; # UNIX file socket
+    # Defaulting to macOS equivalent of docker0 network for TCP socket
+    #server host.docker.internal:8000; # TCP socket
+}
+
+server {
+    listen 80;
+    server_name FQDN_OR_IP;
+    return 301 https://FQDN_OR_IP$request_uri;
+}
+
+server {
+    listen   443 ssl default_server;
+    # the domain name it will serve for
+    server_name FQDN_OR_IP; # substitute your machine's IP address or FQDN
+
+    # If they come here using HTTP, bounce them to the correct scheme
+    error_page 497 https://$server_name$request_uri;
+    # Or if you're on the default port 443, then this should work too
+    # error_page 497 https://;
+
+    ssl_certificate /etc/ssl/SSL.crt;
+    ssl_certificate_key /etc/ssl/SSL.key;
+
+    charset     utf-8;
+
+    # max upload size
+    client_max_body_size 75M;   # adjust to taste
+
+    # Django media
+    location /media  {
+        alias /code/media;  # your Django project's media files - amend as required
+    }
+
+    location /static {
+        alias /code/static; # your Django project's static files - amend as required
+    }
+
+    # Finally, send all non-media requests to the Django server.
+    location / {
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header Host $http_host;
+        proxy_redirect off;
+
+        uwsgi_pass  django;
+        include     /code/uwsgi_params; # the uwsgi_params file
+    }
+}
+```
+- **NOTE**: `host.docker.internal` is macOS specific, substitute as required by your operating system
 
 ### `docker-compose.yml`
 
@@ -145,35 +300,30 @@ socket              = :8000
 ;chmod-socket        = 666
 ...
 ```
+Move on to the [Virtualenv](#venv) section.
 
-### `nginx/default.conf`
+## <a name="venv"></a>Virtualenv
 
-Example nginx configurations are provided for http or https, copy the one that is relevant to your deployment scheme.
+By default this project is configured to run everything in Docker which may be non-optimal for development. In order to enable local development using Python 3 the user must make a few small changes prior to running the code.
 
-```console
-### for http ###
-$ cp nginx/ns_core_nginx.conf nginx/default.conf
-### for https ###
-$ cp nginx/ns_core_nginx_ssl.conf nginx/default.conf
+If you're only wanting to run this in Docker, move on to the [Docker](#docker) section.
+
+### Using virtualenv locally
+
+Create the virtual environment and install packages
+
 ```
-
-Update the nginx configuration file (http or https)
-
-```conf
-upstream django {
-    #server unix:///code/${PROJECT_NAME}.sock; # UNIX file socket
-    # Defaulting to macOS equivalent of docker0 network for TCP socket
-    server host.docker.internal:8000; # TCP socket
-}
+virtualenv -p $(which python3) venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
 ```
-
-- **NOTE**: `host.docker.internal` is macOS specific, substitute as required by your operating system
 
 Move on to the [Build](#build) section.
 
 ## <a name="build"></a>Build
 
-Once all configuration has been done, the user can build the necessary containers by issueing:
+Once all configuration has been done, the user can build the necessary containers by issuing:
 
 ```
 docker-compose build

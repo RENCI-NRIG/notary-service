@@ -1,5 +1,3 @@
-# ns_core_nginx_ssl.conf
-
 # the upstream component nginx needs to connect to
 upstream django {
     server unix:///code/base.sock; # UNIX file socket

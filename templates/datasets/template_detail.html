@@ -34,7 +34,6 @@
                         <td>
                             <b>Modified By:</b> {{ template.modified_by }}
                         </td>
-                        </td>
                     <tr>
                         <td>
                             <b>Created Date:</b> {{ template.created_date|date:"m/d/Y g:i a" }}
@@ -47,7 +46,6 @@
                         <td>
                             <b>File:</b> <a
                                 href="{{ template.graphml_definition.url }}">{{ template.graphml_definition | getfilename }}</a>
-                        </td>
                         </td>
                         <td>
                             <b>Validated:</b> {{ template.is_valid }}

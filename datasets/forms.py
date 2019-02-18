@@ -19,6 +19,7 @@ class DatasetForm(forms.ModelForm):
         widget=forms.SelectMultiple(),
         label='Templates',
     )
+    dataset_identifier_as_doi_or_meta = forms.URLField(required=False)
 
     class Meta:
         model = Dataset
@@ -26,6 +27,7 @@ class DatasetForm(forms.ModelForm):
             'name',
             'description',
             'dataset_identifier_as_url',
+            'dataset_identifier_as_doi_or_meta',
             'safe_identifier_as_scid',
-            'templates'
+            'templates',
         )

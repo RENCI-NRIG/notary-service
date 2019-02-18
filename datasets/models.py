@@ -38,6 +38,7 @@ class Dataset(models.Model):
     name = models.CharField(max_length=255)
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
     dataset_identifier_as_url = models.URLField()
+    dataset_identifier_as_doi_or_meta = models.URLField()
     safe_identifier_as_scid = models.CharField(max_length=255)
     description = models.TextField()
     is_valid = models.BooleanField(default=False)
