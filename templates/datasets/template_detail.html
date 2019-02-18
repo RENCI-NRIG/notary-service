@@ -20,7 +20,8 @@
                 {% endif %}
                 {% if template_error %}
                     <div style="background-color: cornsilk;color:darkblue;font-family:Courier;
-                font-size: 14px;overflow-y: scroll; border-style: solid; border-color: red;">
+                font-size: 14px;overflow-y: scroll; border-style: solid; border-color: #B22222;
+                padding: 10px;">
                         {{ template_error }}
                     </div>
                 {% endif %}
@@ -53,7 +54,7 @@
                             {% if template.is_valid %}
                                 (<i class="fa fa-fw fa-check" style="color: green;"></i>)
                             {% else %}
-                                (<i class="fa fa-fw fa-remove" style="color: red;"></i>)
+                                (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
                             {% endif %}
                         </td>
                     </tr>

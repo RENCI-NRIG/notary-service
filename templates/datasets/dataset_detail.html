@@ -20,7 +20,8 @@
                 {% endif %}
                 {% if dataset_error %}
                     <div style="background-color: cornsilk;color:darkblue;font-family:Courier;
-                font-size: 14px;overflow-y: scroll; border-style: solid; border-color: red;">
+                font-size: 14px;overflow-y: scroll; border-style: solid; border-color: #B22222;
+                padding: 10px;">
                         {{ dataset_error }}
                     </div>
                 {% endif %}
@@ -47,7 +48,7 @@
                 {% if dataset.is_valid %}
                     (<i class="fa fa-fw fa-check" style="color: green;"></i>)
                 {% else %}
-                    (<i class="fa fa-fw fa-remove" style="color: red;"></i>)
+                    (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
                 {% endif %}<br>
                 <b>Dataset URL:</b> {{ dataset.dataset_identifier_as_url }}<br>
                 <b>SAFE SCID:</b> {{ dataset.safe_identifier_as_scid }}<br>
@@ -75,7 +76,7 @@
                                 {% if template.is_valid %}
                                     <i class="fa fa-fw fa-check" style="color: green;"></i>
                                 {% else %}
-                                    <i class="fa fa-fw fa-remove" style="color: red;"></i>
+                                    <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
                                 {% endif %}
                             </td>
                             <td style="font-family: Courier"><a href="{% url 'template_detail' uuid=template.uuid %}">

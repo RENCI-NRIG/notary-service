@@ -34,7 +34,7 @@
                 {% if dataset.is_valid %}
                     (<i class="fa fa-fw fa-check" style="color: green;"></i>)
                 {% else %}
-                    (<i class="fa fa-fw fa-remove" style="color: red;"></i>)
+                    (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
                 {% endif %}<br>
                 <b>Dataset URL:</b> {{ dataset.dataset_identifier_as_url }}<br>
                 <b>SAFE SCID:</b> {{ dataset.safe_identifier_as_scid }}<br>
@@ -62,7 +62,7 @@
                                 {% if template.is_valid %}
                                     <i class="fa fa-fw fa-check" style="color: green;"></i>
                                 {% else %}
-                                    <i class="fa fa-fw fa-remove" style="color: red;"></i>
+                                    <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
                                 {% endif %}
                             </td>
                             <td style="font-family: Courier"><a href="{% url 'template_detail' uuid=template.uuid %}">
@@ -84,7 +84,7 @@
                     <input type="submit" value="Delete" style="color: grey" disabled>
                 {% else %}
 
-                    <input type="submit" value="Delete" style="color: #B22222">
+                    <input type="submit" value="Delete" style="color: #B22222;">
                 {% endif %}
             </form>
             {% if used_by %}

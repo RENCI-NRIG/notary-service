@@ -40,7 +40,7 @@
                             {% if template.is_valid %}
                                 (<i class="fa fa-fw fa-check" style="color: green;"></i>)
                             {% else %}
-                                (<i class="fa fa-fw fa-remove" style="color: red;"></i>)
+                                (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
                             {% endif %}
                         </td>
                     </tr>
@@ -55,7 +55,7 @@
                     <input type="submit" value="Delete" style="color: grey" disabled>
                 {% else %}
 
-                    <input type="submit" value="Delete" style="color: #B22222">
+                    <input type="submit" value="Delete" style="color: #B22222;">
                 {% endif %}
             </form>
             {% if used_by %}
