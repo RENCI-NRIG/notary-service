@@ -1,12 +1,16 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 
-from datasets.models import Dataset
+from datasets.models import Dataset, MembershipNSTemplate, NSTemplate
+from workflows.models import WorkflowNeo4j
+from users.models import NotaryServiceUser
 from .forms import ProjectForm
 from .models import Project, ComanageMemberActive, ComanageAdmin, MembershipComanageMemberActive, \
     MembershipComanageAdmin, MembershipComanagePersonnel, \
-    MembershipDatasets
+    MembershipDatasets, MembershipWorkflow
 from .projects import update_comanage_group, personnel_by_comanage_group, update_comanage_personnel
+from workflows import views as wf_views
+
 
 
 def projects(request):
@@ -44,7 +48,6 @@ def project_detail(request, uuid):
         project=project,
         comanage_admins__in=comanage_admins
     ))
-    print(admin_group)
     member_group = list(MembershipComanagePersonnel.objects.values_list(
         'comanage_groups__cn',
         'person__cn',
@@ -60,11 +63,24 @@ def project_detail(request, uuid):
     ))
     ds_list = MembershipDatasets.objects.values_list('dataset__uuid').filter(project__uuid=uuid)
     ds_objs = Dataset.objects.filter(uuid__in=ds_list).order_by('name')
+    project_error = None
     if request.method == "POST":
-        project.is_valid, project_error = project_validate(ds_objs, request.user.show_uuid)
+        if request.POST.get("validate"):
+            project.is_valid, project_error = project_validate(ds_objs, request.user.show_uuid)
+        elif request.POST.get("generate_workflow"):
+            for ds in ds_objs:
+                tpl_list = MembershipNSTemplate.objects.values_list('template__uuid').filter(dataset__uuid=ds.uuid)
+                tpl_objs = NSTemplate.objects.filter(uuid__in=tpl_list).order_by('name')
+                for tpl in tpl_objs:
+                    if not MembershipWorkflow.objects.filter(
+                            project=project, dataset=ds, template=tpl
+                    ).exists():
+                        create_new_workflow(
+                            project_obj=project, dataset_obj=ds, template_obj=tpl, user_obj=request.user
+                        )
         project.save()
-    else:
-        project_error = None
+    wf_list = MembershipWorkflow.objects.values_list('workflow__uuid').filter(project__uuid=project.uuid)
+    wf_objs = WorkflowNeo4j.objects.filter(uuid__in=wf_list).order_by('name')
     return render(request, 'project_detail.html', {
         'projects_page': 'active',
         'project': project,
@@ -74,7 +90,40 @@ def project_detail(request, uuid):
         'member_group': member_group,
         'datasets': ds_objs,
         'project_error': project_error,
+        'workflows': wf_objs,
     })
+
+
+def create_new_workflow(project_obj: Project,
+                        dataset_obj: Dataset,
+                        template_obj: NSTemplate,
+                        user_obj: NotaryServiceUser):
+    workflow = WorkflowNeo4j.objects.create(
+        name='neo4j_',
+        description=template_obj.description,
+        dataset=dataset_obj,
+        template=template_obj,
+        created_by=user_obj,
+        created_date=timezone.now(),
+        modified_by=user_obj,
+        modified_date=timezone.now(),
+    )
+    workflow.name = 'neo4j_' + str(workflow.uuid)
+    workflow.save()
+    wf_created = wf_views.create_neo4j_workflow(
+        graphml_file=template_obj.graphml_definition.name,
+        workflow_uuid=str(workflow.uuid)
+    )
+    if wf_created:
+        workflow.loaded_in_neo4j = True
+        workflow.save()
+        MembershipWorkflow.objects.create(
+            project=project_obj,
+            dataset=dataset_obj,
+            template=template_obj,
+            workflow=workflow,
+            is_generated=True,
+        )
 
 
 def project_list(request):
@@ -95,7 +144,6 @@ def project_new(request):
             project.save()
             # admin groups
             for group_pk in form.data.getlist('comanage_admins'):
-                print('ADMIN: ' + group_pk)
                 if not MembershipComanageAdmin.objects.filter(project=project.id, comanage_group=group_pk).exists():
                     MembershipComanageAdmin.objects.create(
                         project=project,
@@ -115,7 +163,6 @@ def project_new(request):
                             )
             # membership groups
             for group_pk in form.data.getlist('comanage_groups'):
-                print('MEMBER: ' + group_pk)
                 if not MembershipComanageMemberActive.objects.filter(project=project.id,
                                                                      comanage_group=group_pk).exists():
                     MembershipComanageMemberActive.objects.create(
@@ -136,7 +183,6 @@ def project_new(request):
                             )
             # datasets
             for ds_pk in form.data.getlist('datasets'):
-                print('DATASET: ' + ds_pk)
                 if not MembershipDatasets.objects.filter(project=project.id, dataset=ds_pk).exists():
                     MembershipDatasets.objects.create(
                         project=project,
@@ -168,7 +214,6 @@ def project_edit(request, uuid):
                                                                comanage_admins=group.comanage_group.id).delete()
                     group.delete()
             for group_pk in form.data.getlist('comanage_admins'):
-                print('ADMIN: ' + group_pk)
                 if not MembershipComanageAdmin.objects.filter(project=project.id, comanage_group=group_pk).exists():
                     MembershipComanageAdmin.objects.create(
                         project=project,
@@ -196,7 +241,6 @@ def project_edit(request, uuid):
                     ).delete()
                     group.delete()
             for group_pk in form.data.getlist('comanage_groups'):
-                print('MEMBER: ' + group_pk)
                 if not MembershipComanageMemberActive.objects.filter(project=project.id,
                                                                      comanage_group=group_pk).exists():
                     MembershipComanageMemberActive.objects.create(
@@ -224,7 +268,6 @@ def project_edit(request, uuid):
                         dataset=ds.dataset.id
                     ).delete()
             for ds_pk in form.data.getlist('datasets'):
-                print('DATASET: ' + ds_pk)
                 if not MembershipDatasets.objects.filter(project=project.id, dataset=ds_pk).exists():
                     MembershipDatasets.objects.create(
                         project=project,

@@ -40,7 +40,6 @@ def dataset_detail(request, uuid):
         dataset=dataset,
     )
     tpl_objs = NSTemplate.objects.filter(uuid__in=tpl_list).order_by('name')
-    print(tpl_objs)
     if request.method == "POST":
         dataset.is_valid, dataset_error = dataset_validate(tpl_objs, request.user.show_uuid)
         dataset.save()
@@ -168,12 +167,10 @@ def template_validate(graphml_file, template_uuid):
                              importHostDir=import_host_dir
                              )
     gid = workflow.import_workflow(graphml=graphml, graphId=template_uuid)
-    print(gid)
     try:
         workflow.validate_workflow(graphId=gid)
     except WorkflowError as template_error:
         workflow.delete_workflow(graphId=gid)
-        print(template_error)
         return False, template_error
     workflow.delete_workflow(graphId=gid)
     return True, None
