@@ -4,7 +4,8 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 
-from datasets.models import Dataset
+from datasets.models import Dataset, NSTemplate
+from workflows.models import WorkflowNeo4j
 
 User = get_user_model()
 
@@ -47,18 +48,6 @@ class ComanagePersonnel(models.Model):
 
     def __str__(self):
         return self.cn
-
-
-class WorkflowNeo4j(models.Model):
-    name = models.CharField(max_length=255)
-    uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
-    description = models.TextField()
-
-    class Meta:
-        verbose_name = 'Neo4j Workflow'
-
-    def __str__(self):
-        return self.name
 
 
 class Project(models.Model):
@@ -112,8 +101,11 @@ class MembershipComanageAdmin(models.Model):
 
 
 class MembershipWorkflow(models.Model):
-    workflow = models.ForeignKey(WorkflowNeo4j, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
+    template = models.ForeignKey(NSTemplate, on_delete=models.CASCADE)
+    workflow = models.ForeignKey(WorkflowNeo4j, on_delete=models.CASCADE)
+    is_generated = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'Membership Workflow'

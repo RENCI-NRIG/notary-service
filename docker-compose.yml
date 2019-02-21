@@ -6,6 +6,9 @@ services:
     container_name: database
     ports:
       - ${POSTGRES_PORT:-5432}:5432
+    networks:
+      ns_net:
+        ipv4_address: 172.16.238.10
     volumes:
       - ./pg_data/data:${PGDATA:-/var/lib/postgresql/data}
       - ./pg_data/logs:${POSTGRES_INITDB_WALDIR:-/var/log/postgresql}
@@ -23,6 +26,11 @@ services:
     container_name: django
     ports:
       - 8000:8000
+    networks:
+      ns_net:
+        ipv4_address: 172.16.238.11
+    extra_hosts:
+      - "${NEO4J_HOST:-127.0.0.1}:172.16.238.13"
     volumes:
       - .:/code
       - ./static:/code/static
@@ -37,6 +45,9 @@ services:
     ports:
       - 8080:80
       - 8443:443
+    networks:
+      ns_net:
+        ipv4_address: 172.16.238.12
     volumes:
       - .:/code
       - ./static:/code/static
@@ -53,10 +64,21 @@ services:
       - 7474:7474  # for HTTP
       - 7473:7473  # for HTTPS
       - 7687:7687  # for Bolt
+    networks:
+      ns_net:
+        ipv4_address: 172.16.238.13
     volumes:
       - ${NEO4J_DATA_PATH_HOST:-$(pwd)/neo4j/data}:${NEO4J_DATA_PATH_DOCKER:-/data}
       - ${NEO4J_IMPORTS_PATH_HOST:-$(pwd)/neo4j/imports}:${NEO4J_IMPORTS_PATH_DOCKER:-/imports}
       - ${NEO4J_LOGS_PATH_HOST:-$(pwd)/neo4j/logs}:${NEO4J_LOGS_PATH_DOCKER:-/logs}
+      - ${NGINX_SSL_CERT:-./ssl/ssl_dev.crt}:/ssl/neo4j.cert  # SSL development certificate
+      - ${NGINX_SSL_KEY:-./ssl/ssl_dev.key}:/ssl/neo4j.key    # SSL development key
     environment:
       - NEO4J_AUTH=${NEO4J_USER:-neo4j}/${NEO4J_PASS:-password}
-
+networks:
+  ns_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.238.0/24

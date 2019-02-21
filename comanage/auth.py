@@ -1,5 +1,4 @@
 import unicodedata
-from pprint import pprint
 
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 
@@ -12,7 +11,6 @@ def generate_username(email):
 
 
 def check_ismemberof(attributelist):
-    print('### CHECKING ISMEMBEROF')
     if attributelist['isMemberOf']:
         for attribute in attributelist['isMemberOf']:
             if not IsMemberOf.objects.filter(value=attribute).exists():
@@ -20,7 +18,6 @@ def check_ismemberof(attributelist):
 
 
 def update_membership_ismemberof(user, attributelist):
-    print('### UPDATE ISMEMBEROF')
     for attribute in attributelist['isMemberOf']:
         attr_id = IsMemberOf.objects.get(attribute='isMemberOf', value=attribute).pk
         if not MembershipIsMemberOf.objects.filter(user=user.id, ismemberof=attr_id).exists():
@@ -28,28 +25,22 @@ def update_membership_ismemberof(user, attributelist):
 
 
 def check_ldapother_attributes(attributelist):
-    print('### CHECKING LDAPOTHER')
-    # print(attributelist['eduPersonAffiliation'])
     if attributelist['eduPersonAffiliation']:
         for attribute in attributelist['eduPersonAffiliation']:
             if not LdapOther.objects.filter(value=attribute).exists():
                 LdapOther.objects.create(attribute='eduPersonAffiliation', value=attribute)
-    # print(attributelist['eduPersonPrincipalName'])
     if attributelist['eduPersonPrincipalName']:
         for attribute in attributelist['eduPersonPrincipalName']:
             if not LdapOther.objects.filter(value=attribute).exists():
                 LdapOther.objects.create(attribute='eduPersonPrincipalName', value=attribute)
-    # print(attributelist['employeeNumber'])
     if attributelist['employeeNumber']:
         for attribute in attributelist['employeeNumber']:
             if not LdapOther.objects.filter(value=attribute).exists():
                 LdapOther.objects.create(attribute='employeeNumber', value=attribute)
-    # print(attributelist['objectClass'])
     if attributelist['objectClass']:
         for attribute in attributelist['objectClass']:
             if not LdapOther.objects.filter(value=attribute).exists():
                 LdapOther.objects.create(attribute='objectClass', value=attribute)
-    # print(attributelist['uid'])
     if attributelist['uid']:
         for attribute in attributelist['uid']:
             if not LdapOther.objects.filter(value=attribute).exists():
@@ -57,7 +48,6 @@ def check_ldapother_attributes(attributelist):
 
 
 def update_ldapother_ismemberof(user, attributelist):
-    print('### UPDATE LDAPOTHER')
     for attribute in attributelist['eduPersonAffiliation']:
         attr_id = LdapOther.objects.get(attribute='eduPersonAffiliation', value=attribute).pk
         if not MembershipLdapOther.objects.filter(user=user.id, ldapother=attr_id).exists():
@@ -83,10 +73,6 @@ def update_ldapother_ismemberof(user, attributelist):
 class MyOIDCAB(OIDCAuthenticationBackend):
     def create_user(self, claims):
         user = super(MyOIDCAB, self).create_user(claims)
-
-        print('### CREATE USER')
-        pprint(claims)
-
         user.first_name = claims.get('given_name', '')
         user.given_name = claims.get('given_name', '')
         user.last_name = claims.get('family_name', '')
@@ -117,10 +103,6 @@ class MyOIDCAB(OIDCAuthenticationBackend):
         return user
 
     def update_user(self, user, claims):
-
-        print('### UPDATE USER')
-        pprint(claims)
-
         user.first_name = claims.get('given_name', '')
         user.given_name = claims.get('given_name', '')
         user.last_name = claims.get('family_name', '')

@@ -8,18 +8,20 @@
         <div class="container">
             <div class="post">
                 <h2>{{ project.name }}
-                    <a href="{% url 'project_edit' uuid=project.uuid %}" title="Edit" class="fa fa-fw fa-edit"></a>
+                    <a href="{% url 'project_edit' uuid=project.uuid %}" title="Regenerate"
+                       class="fa fa-fw fa-pencil"></a>
                     <a href="{% url 'project_delete' uuid=project.uuid %}" title="Delete" class="fa fa-fw fa-trash"></a>
                 </h2>
                 {% if not project.is_valid %}
                     <form method="POST" class="post-form">
                         {% csrf_token %}
-                        <input type="submit" value="Validate Now" style="color: darkgreen">
+                        <input type="submit" name="validate" value="Validate Now" style="color: darkgreen">
                     </form>
                 {% endif %}
                 {% if project_error %}
                     <div style="background-color: cornsilk;color:darkblue;font-family:Courier;
-                font-size: 14px;overflow-y: scroll; border-style: solid; border-color: red;">
+                font-size: 14px;overflow-y: scroll; border-style: solid; border-color: #B22222;
+                padding: 10px;">
                         {{ project_error }}
                     </div>
                 {% endif %}
@@ -45,7 +47,7 @@
                 {% if project.is_valid %}
                     (<i class="fa fa-fw fa-check" style="color: green;"></i>)
                 {% else %}
-                    (<i class="fa fa-fw fa-remove" style="color: red;"></i>)
+                    (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
                 {% endif %}<br>
                 <b>Description:</b>
                 <p>{{ project.description|linebreaksbr }}</p>
@@ -122,7 +124,7 @@
                         <td align="center">{% if dataset.is_valid %}
                             <i class="fa fa-fw fa-check" style="color: green;"></i>
                         {% else %}
-                            <i class="fa fa-fw fa-remove" style="color: red;"></i>
+                            <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
                         {% endif %}
                         </td>
                         <td style="font-family: Courier"><a href="{% url 'dataset_detail' uuid=dataset.uuid %}"
@@ -139,17 +141,49 @@
                 <h3>Workflows</h3>
                 <form method="POST" class="post-form">
                     {% csrf_token %}
-                    {% if missing_workflow %}
-                        <input type="submit" value="Generate Workflow(s)" style="color: darkgreen">
+                    {% if project.is_valid %}
+                        <input type="submit" name="generate_workflow" value="Generate Workflow(s)"
+                               style="color: darkgreen">
                     {% else %}
-                        <input type="submit" value="Generate Workflow(s)" style="color: grey" disabled>
+                        <input type="submit" name="generate_workflow" value="Generate Workflow(s)" style="color: grey"
+                               disabled>
                     {% endif %}
                 </form>
-                <ul>
-                    {% for workflow in project_workflows %}
-                        <li>{{ workflow.name }}</li>
+                <br>
+                <table border="1px solid black" cellpadding="5px">
+                    <tr>
+                        <td align="center"><b>Name</b></td>
+                        <td align="center"><b>Loaded</b></td>
+                        <td align="center"><b>
+                            {% if user.show_uuid %}
+                                UUID
+                            {% else %}
+                                Description
+                            {% endif %}
+                        </b></td>
+                        <td align="center"><b>Provenance</b></td>
+                    </tr>
+                    {% for workflow in workflows %}
+                        <tr>
+                        <td>{{ workflow.name }}</td>
+                        <td align="center">{% if workflow.loaded_in_neo4j %}
+                            <i class="fa fa-fw fa-check" style="color: green;"></i>
+                        {% else %}
+                            <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
+                        {% endif %}
+                        </td>
+                        <td style="font-family: Courier"><a href="{% url 'workflow_detail' uuid=workflow.uuid %}"
+                                                            title="Workflow Details">
+                            {% if user.show_uuid %}
+                                {{ workflow.uuid }}
+                            {% else %}
+                                {{ workflow.description|slice:":34" }}..
+                            {% endif %}
+                        </a></td>
+                        <td><b>D:</b> {{ workflow.dataset.name }}<br><b>T:</b> {{ workflow.template.name }}</td>
+                        </tr>
                     {% endfor %}
-                </ul>
+                </table>
             </div>
             {% else %}
             <div class="container">

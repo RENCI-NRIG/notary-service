@@ -22,10 +22,13 @@ def dataset_list(request):
     return render(request, 'datasets.html', {'datasets_page': 'active', 'datasets': ds_objs})
 
 
-def dataset_validate(tpl_objs):
+def dataset_validate(tpl_objs, show_uuid):
     for template in tpl_objs:
         if not template.is_valid:
-            return False, 'Template ' + str(template.uuid) + ' is not validated'
+            if show_uuid:
+                return False, 'Template ' + str(template.uuid) + ' is not validated'
+            else:
+                return False, 'Template (' + str(template.description)[:34] + '..) is not validated'
     return True, None
 
 
@@ -37,9 +40,8 @@ def dataset_detail(request, uuid):
         dataset=dataset,
     )
     tpl_objs = NSTemplate.objects.filter(uuid__in=tpl_list).order_by('name')
-    print(tpl_objs)
     if request.method == "POST":
-        dataset.is_valid, dataset_error = dataset_validate(tpl_objs)
+        dataset.is_valid, dataset_error = dataset_validate(tpl_objs, request.user.show_uuid)
         dataset.save()
     else:
         dataset_error = None
@@ -165,12 +167,10 @@ def template_validate(graphml_file, template_uuid):
                              importHostDir=import_host_dir
                              )
     gid = workflow.import_workflow(graphml=graphml, graphId=template_uuid)
-    print(gid)
     try:
         workflow.validate_workflow(graphId=gid)
     except WorkflowError as template_error:
         workflow.delete_workflow(graphId=gid)
-        print(template_error)
         return False, template_error
     workflow.delete_workflow(graphId=gid)
     return True, None

@@ -8,7 +8,7 @@
         <div class="container">
             <div class="post">
                 <h2>{{ template.name }}
-                    <a href="{% url 'template_edit' uuid=template.uuid %}" title="Edit" class="fa fa-fw fa-edit"></a>
+                    <a href="{% url 'template_edit' uuid=template.uuid %}" title="Edit" class="fa fa-fw fa-pencil"></a>
                     <a href="{% url 'template_delete' uuid=template.uuid %}" title="Delete"
                        class="fa fa-fw fa-trash"></a>
                 </h2>
@@ -20,7 +20,8 @@
                 {% endif %}
                 {% if template_error %}
                     <div style="background-color: cornsilk;color:darkblue;font-family:Courier;
-                font-size: 14px;overflow-y: scroll; border-style: solid; border-color: red;">
+                font-size: 14px;overflow-y: scroll; border-style: solid; border-color: #B22222;
+                padding: 10px;">
                         {{ template_error }}
                     </div>
                 {% endif %}
@@ -32,7 +33,6 @@
                         </td>
                         <td>
                             <b>Modified By:</b> {{ template.modified_by }}
-                        </td>
                         </td>
                     <tr>
                         <td>
@@ -47,13 +47,12 @@
                             <b>File:</b> <a
                                 href="{{ template.graphml_definition.url }}">{{ template.graphml_definition | getfilename }}</a>
                         </td>
-                        </td>
                         <td>
                             <b>Validated:</b> {{ template.is_valid }}
                             {% if template.is_valid %}
                                 (<i class="fa fa-fw fa-check" style="color: green;"></i>)
                             {% else %}
-                                (<i class="fa fa-fw fa-remove" style="color: red;"></i>)
+                                (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
                             {% endif %}
                         </td>
                     </tr>

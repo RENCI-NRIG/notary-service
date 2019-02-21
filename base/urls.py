@@ -25,6 +25,7 @@ urlpatterns = [
     path('', include('projects.urls')),
     path('', include('debug.urls')),
     path('', include('datasets.urls')),
+    path('', include('workflows.urls')),
 ]
 
 # Configure custom error pages

@@ -7,7 +7,7 @@
     {% if user.is_authenticated %}
         <div class="container">
             <div class="post">
-                <h1 style="color: #B22222">Are you sure you want to delete?</h1>
+                <h1 style="color: #B22222;">Are you sure you want to delete?</h1>
                 <h2>{{ project.name }}
                     <a href="{% url 'project_detail' uuid=project.uuid %}" title="Cancel" class="fa fa-fw fa-ban"></a>
                 </h2>
@@ -33,7 +33,7 @@
                 {% if project.is_valid %}
                     (<i class="fa fa-fw fa-check" style="color: green;"></i>)
                 {% else %}
-                    (<i class="fa fa-fw fa-remove" style="color: red;"></i>)
+                    (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
                 {% endif %}<br>
                 <b>Description:</b>
                 <p>{{ project.description|linebreaksbr }}</p>
@@ -69,7 +69,7 @@
                         <td align="center">{% if dataset.is_valid %}
                             <i class="fa fa-fw fa-check" style="color: green;"></i>
                         {% else %}
-                            <i class="fa fa-fw fa-remove" style="color: red;"></i>
+                            <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
                         {% endif %}
                         </td>
                         <td style="font-family: Courier"><a href="{% url 'dataset_detail' uuid=dataset.uuid %}"
@@ -91,7 +91,7 @@
             </div>
             <form method="POST" class="post-form">
                 {% csrf_token %}
-                <input type="submit" value="Delete" style="color: #B22222">
+                <input type="submit" value="Delete" style="color: #B22222;">
             </form>
             {% else %}
             <div class="container">

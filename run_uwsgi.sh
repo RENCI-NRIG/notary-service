@@ -1,13 +1,20 @@
 #!/usr/bin/env bash
 
-python manage.py makemigrations admin
-python manage.py makemigrations auth
-python manage.py makemigrations contenttypes
-python manage.py makemigrations sessions
-python manage.py makemigrations users
-python manage.py makemigrations comanage
-python manage.py makemigrations projects
-python manage.py makemigrations datasets
+APPS_LIST=(
+  "admin"
+  "auth"
+  "contenttypes"
+  "sessions"
+  "users"
+  "comanage"
+  "projects"
+  "datasets"
+  "workflows"
+)
+
+for app in "${APPS_LIST[@]}";do
+    python manage.py makemigrations $app
+done
 python manage.py makemigrations
 python manage.py showmigrations
 python manage.py migrate

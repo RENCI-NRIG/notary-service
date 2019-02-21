@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'projects.apps.ProjectsConfig',  # projects for notary service
     'debug.apps.DebugConfig',  # debug dashboard for notary service
     'datasets.apps.DatasetsConfig',  # datasets in notary service
+    'workflows.apps.WorkflowsConfig',  # workflows in notary service
     'django_cleanup',
 ]
 
@@ -79,6 +80,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'templates/projects'),
             os.path.join(BASE_DIR, 'templates/debug'),
             os.path.join(BASE_DIR, 'templates/datasets'),
+            os.path.join(BASE_DIR, 'templates/workflows'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -87,6 +89,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'workflows.context_processors.export_neo4j_vars',
             ],
         },
     },
