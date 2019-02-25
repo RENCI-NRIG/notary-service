@@ -10,6 +10,7 @@
 base.sock
 base/.env
 base/secrets.py
+!base/static
 cover/*
 media
 !media/.include_this_dir
@@ -22,6 +23,7 @@ sample_data
 static
 !static/.include_this_dir
 venv
+!workflows/static
 xunittest.xml
 xunittest.xml
 __pycache__
