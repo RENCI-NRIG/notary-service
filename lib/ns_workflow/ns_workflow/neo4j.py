@@ -236,10 +236,11 @@ class Neo4jWorkflow(AbstractWorkflow):
         if self.is_child_node(graphId, nodeId):
             raise WorkflowQueryError(graphId, nodeId, "Unable to create a child of child node")
 
-        # using merge guarantees duplicates won't be created. properties overwritten
-        # from parent are immutable anyway, so if this is called on an existing child node
-        # AND there were changes to the child node they should not be affected
-        query = "MATCH(n {GraphID: $graphId, ID: $nodeId}) MERGE (m {GraphID:$graphId, ID:$childNode}) -[:isChildOf]-> (n) set m=n, m.ID=$childNode RETURN m"
+        # using merge guarantees duplicates won't be created. copying properties ON CREATE
+        # guarantees they will not be overwritten on existing node, however parent properties
+        # are immutable anyway 
+        query = """MATCH(n {GraphID: $graphId, ID: $nodeId}) MERGE (m {GraphID:$graphId, ID:$childNode})
+            -[:isChildOf]-> (n) ON CREATE SET m=n, m.ID=$childNode RETURN m"""
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId, childNode=childNode)
             if val is None or len(val.value()) == 0:
