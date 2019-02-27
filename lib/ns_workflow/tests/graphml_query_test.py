@@ -2,7 +2,7 @@ import logging
 import os
 import unittest
 
-from ns_workflow import Neo4jWorkflow, WorkflowError
+from ns_workflow import Neo4jWorkflow, WorkflowError, WorkflowQueryError
 
 
 class TestLogInitializer:
@@ -75,18 +75,21 @@ class TestGraphQuery(unittest.TestCase):
         if self.gid is not None:
             self.neo4j.delete_workflow(self.gid)
 
+    #@unittest.skip("Skip")
     def test_query_start_node(self):
         self.log.info("Testing searching for start node type.")
         d = self.neo4j.find_start_node(self.gid)
         self.assertIsNotNone(d, "Start node must be present")
 
-    def test_query_find_node(self):
+    #@unittest.skip("Skip")
+    def test_query_get_node_properties(self):
         self.log.info("Testing searching for node by id.")
-        d = self.neo4j.find_node(self.gid, "Start")
+        d = self.neo4j.get_node_properties(self.gid, "Start")
         self.assertIsNotNone(d, "Start node must be present")
-        d = self.neo4j.find_node(self.gid, "NoCopiesPledge")
+        d = self.neo4j.get_node_properties(self.gid, "NoCopiesPledge")
         self.assertIsNotNone(d, "NoCopiesPledge node must be present")
 
+    #@unittest.skip("Skip")
     def test_query_adjacent(self):
         self.log.info("Testing searching for adjacent nodes")
         d = self.neo4j.find_adjacent_nodes(self.gid, "Start")
@@ -94,6 +97,7 @@ class TestGraphQuery(unittest.TestCase):
         d = self.neo4j.find_adjacent_nodes(self.gid, "Start", "PI")
         self.assertEqual(len(d), 2, "Start node has two PI adjacent nodes")
 
+    #@unittest.skip("Skip")
     def test_query_reachable(self):
         self.log.info("Testing reachability for nodes")
 
@@ -103,6 +107,62 @@ class TestGraphQuery(unittest.TestCase):
         d = self.neo4j.find_reachable_nodes(self.gid, "RestrictAccessPledge", "PI")
         self.assertEqual(len(d), 3, "3 IP nodes are reachable from RestrictAccessPledge")
 
+    #@unittest.skip("Skip")
+    def test_update_property(self):
+        self.log.info("Testing update property")
+
+        d = self.neo4j.update_node_property(self.gid, "NoCopiesPledge", "NewProperty", "NewValue")
+        self.log.debug(d)
+        d = self.neo4j.get_node_properties(self.gid, "NoCopiesPledge")
+        self.assertTrue(d["NewProperty"] == "NewValue")
+
+    #@unittest.skip("Skip")
+    def test_create_child(self):
+        self.log.info("Testing adding a child node")
+
+        self.neo4j.create_child_node(self.gid, "NoCopiesPledge", "BobsPledge")
+        d1 = self.neo4j.get_node_properties(self.gid, "BobsPledge")
+        self.log.info(d1)
+        d2 = self.neo4j.get_node_properties(self.gid, "NoCopiesPledge")
+        self.log.info(d2)
+        self.assertTrue(d1["ID"] == "BobsPledge")
+        self.assertTrue(len(d1) == len(d2))
+
+        with self.assertRaises(WorkflowQueryError):
+            self.neo4j.create_child_node(self.gid, "BobsPledge", "InvalidChild")
+
+    #@unittest.skip("Skip")
+    def test_node_exists(self):
+        self.log.info("Testing node existst")
+
+        self.assertTrue(self.neo4j.node_exists(self.gid, "NoCopiesPledge"))
+        self.assertFalse(self.neo4j.node_exists(self.gid, "Blah"))
+
+    def test_get_children(self):
+        self.log.info("Testing getting children")
+
+        self.neo4j.create_child_node(self.gid, "NoCopiesPledge", "BobsPledge")
+        self.neo4j.create_child_node(self.gid, "NoCopiesPledge", "AlicesPledge")
+        self.neo4j.create_child_node(self.gid, "NoCopiesPledge", "AlicesPledge")
+
+        d = self.neo4j.get_children(self.gid, "NoCopiesPledge")
+        self.assertTrue(len(d) == 2)
+
+        self.neo4j.create_child_node(self.gid, "NoCopiesPledge", "AlansPledge")
+        d = self.neo4j.get_children(self.gid, "NoCopiesPledge")
+        self.assertTrue(len(d) == 3)
+
+    def test_is_child(self):
+        self.log.info("Testing testing for child")
+
+        self.neo4j.create_child_node(self.gid, "NoCopiesPledge", "BobsPledge")
+        self.neo4j.create_child_node(self.gid, "NoCopiesPledge", "AlicesPledge")
+        self.neo4j.create_child_node(self.gid, "NoCopiesPledge", "AlicesPledge")
+
+        d = self.neo4j.is_child_node(self.gid, "NoCopiesPledge")
+        self.assertFalse(d)
+        d = self.neo4j.is_child_node(self.gid, "BobsPledge")
+        self.assertTrue(d)
 
 if __name__ == '__main__':
     loginit = TestLogInitializer()

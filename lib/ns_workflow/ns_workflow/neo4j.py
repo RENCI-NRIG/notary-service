@@ -97,16 +97,16 @@ class Neo4jWorkflow(AbstractWorkflow):
                 self._import_workflow(mappedFileName)
                 retry = -1
             except WorkflowImportError:
-                self.log.error("Unable to load, deleting graph %s", id)
-                self.delete_workflow(id)
+                self.log.warn("Transient error, unable to load, deleting and reimporting graph %s", id)
                 retry = retry - 1
+                self.delete_workflow(id)
                 time.sleep(1.0)
 
         # remove the file
         os.unlink(hostFileName)
 
         if retry == 0:
-            raise (WorkflowImportError(graphId, 'Unable to load graph'))
+            raise (WorkflowImportError(graphId, 'Unable to load graph after multiple attempts'))
 
         return id
 
@@ -145,10 +145,10 @@ class Neo4jWorkflow(AbstractWorkflow):
         self.log.debug('Counting nodes in graph %s', graphId)
         with self.driver.session() as session:
             if nodeRole is None:
-                return session.run('match (n {GraphID: $graphId }) return count(n)',
+                return session.run('MATCH (n {GraphID: $graphId }) RETURN count(n)',
                                    graphId=graphId).single().value()
             else:
-                return session.run('match (n {GraphID: $graphId, Role: $nodeRole} ) return count(n)',
+                return session.run('MATCH (n {GraphID: $graphId, Role: $nodeRole} ) RETURN count(n)',
                                    graphId=graphId, nodeRole=nodeRole).single().value()
 
     def _run_node_dict_query(self, graphId: str, nodeId: str, query: str) -> Dict[str, str]:
@@ -165,7 +165,7 @@ class Neo4jWorkflow(AbstractWorkflow):
 
     def find_start_node(self, graphId: str) -> Dict[str, str]:
         """ find start node in a graph and return its properties """
-        query = "match (n {GraphID: $graphId, Type: 'Start'}) return properties(n)"
+        query = "MATCH (n {GraphID: $graphId, Type: 'Start'}) RETURN properties(n)"
         assert graphId is not None
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId).single()
@@ -173,9 +173,9 @@ class Neo4jWorkflow(AbstractWorkflow):
                 raise WorkflowQueryError(graphId, "Start", "Unable to find start node")
             return val.data()['properties(n)']
 
-    def find_node(self, graphId: str, nodeId: str) -> Dict[str, str]:
+    def get_node_properties(self, graphId: str, nodeId: str) -> Dict[str, str]:
         """ get properties of a node with specific name in a graph """
-        query = "match (n {GraphID: $graphId, ID: $nodeId}) return properties(n)"
+        query = "MATCH (n {GraphID: $graphId, ID: $nodeId}) RETURN properties(n)"
         assert graphId is not None
         assert nodeId is not None
         with self.driver.session() as session:
@@ -190,9 +190,9 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert graphId is not None
         assert nodeId is not None
         if role is not None:
-            query = "match ({GraphID: $graphId, ID: $nodeId}) --> (n) where n.Role=$role return n"
+            query = "MATCH ({GraphID: $graphId, ID: $nodeId}) --> (n) WHERE n.Role=$role RETURN n"
         else:
-            query = "match ({GraphID: $graphId, ID: $nodeId}) --> (n) return n"
+            query = "MATCH ({GraphID: $graphId, ID: $nodeId}) --> (n) RETURN n"
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId, role=role)
             if val is None:
@@ -205,10 +205,80 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert graphId is not None
         assert nodeId is not None
         assert role is not None
-        query = "match (s {GraphID: $graphId, ID: $nodeId}), (pi {Role: $role}), p=(s) -[*]-> (pi) where ALL(x in tail(reverse(tail(nodes(p)))) where not x.Role=$role) return distinct(pi)"
+        query = """MATCH (s {GraphID: $graphId, ID: $nodeId}), (pi {Role: $role}), p=(s) -[*]-> (pi)
+        WHERE ALL(x in tail(reverse(tail(nodes(p)))) WHERE NOT x.Role=$role) RETURN distinct(pi)"""
 
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId, role=role)
             if val is None:
                 raise WorkflowQueryError(graphId, nodeId, "Unable to find reachable nodes")
             return val.value()
+
+    def update_node_property(self, graphId: str, nodeId: str, propName: str, propVal: str) -> None:
+        """ Use a cypher query to update or add a property to a node """
+        assert graphId is not None
+        assert nodeId is not None
+        assert propName is not None
+        query = "MATCH (s {GraphID: $graphId, ID: $nodeId}) set s+={ %s: $propVal} RETURN properties(s)" % propName
+        with self.driver.session() as session:
+            val = session.run(query, graphId=graphId, nodeId=nodeId, propVal=propVal)
+            if val is None:
+                raise WorkflowQueryError(graphId, nodeId, "Unable to set property")
+            pass
+
+    def create_child_node(self, graphId: str, nodeId: str, childNode: str) -> None:
+        """ create a child node copying/inheriting properties of the parent """
+        assert graphId is not None
+        assert nodeId is not None
+        assert childNode is not None
+
+        # don't create children of child nodes
+        if self.is_child_node(graphId, nodeId):
+            raise WorkflowQueryError(graphId, nodeId, "Unable to create a child of child node")
+
+        # using merge guarantees duplicates won't be created. copying properties ON CREATE
+        # guarantees they will not be overwritten on existing node, however parent properties
+        # are immutable anyway 
+        query = """MATCH(n {GraphID: $graphId, ID: $nodeId}) MERGE (m {GraphID:$graphId, ID:$childNode})
+            -[:isChildOf]-> (n) ON CREATE SET m=n, m.ID=$childNode RETURN m"""
+        with self.driver.session() as session:
+            val = session.run(query, graphId=graphId, nodeId=nodeId, childNode=childNode)
+            if val is None or len(val.value()) == 0:
+                raise WorkflowQueryError(graphId, nodeId, "Unable to create child node, node not found")
+            pass
+
+    def node_exists(self, graphId: str, nodeId: str) -> bool:
+        """ check if a node exists """
+        assert graphId is not None
+        assert nodeId is not None
+
+        query = "MATCH(n {GraphID: $graphId, ID: $nodeId}) RETURN n"
+        with self.driver.session() as session:
+            val = session.run(query, graphId=graphId, nodeId=nodeId)
+            if val is None or len(val.value()) == 0:
+                return False
+            return True
+
+    def get_children(self, graphId: str, nodeId: str) -> List[str]:
+        """ get a list of children nodes for this node """
+        assert graphId is not None
+        assert nodeId is not None
+
+        query = "MATCH(n {GraphID: $graphId, ID: $nodeId}), (m) -[:isChildOf]-> (n) RETURN collect(m.ID)"
+        with self.driver.session() as session:
+            val = session.run(query, graphId=graphId, nodeId=nodeId)
+            if val is None:
+                raise WorkflowQueryError(graphId, nodeId, "Unable to find children")
+            return val.value()[0]
+
+    def is_child_node(self, graphId: str, nodeId: str) -> bool:
+        """ is this node a child node """
+        assert graphId is not None
+        assert nodeId is not None
+
+        query = "MATCH (n {GraphID: $graphId, ID: $nodeId}), (n) -[:isChildOf]-> () RETURN count(n) > 0 AS result"
+        with self.driver.session() as session:
+            val = session.run(query, graphId=graphId, nodeId=nodeId)
+            if val is None:
+                raise WorkflowQueryError(graphId, nodeId, "Unable to check for child relation")
+            return val.value()[0]
