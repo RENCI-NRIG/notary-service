@@ -157,22 +157,21 @@ def template_validate(graphml_file, template_uuid):
     neo_pass = os.getenv('NEO4J_PASS')
     import_dir = os.getenv('NEO4J_IMPORTS_PATH_DOCKER')
     import_host_dir = os.getenv('NEO4J_IMPORTS_PATH_HOST')
-    graphmlFile = open('./media/' + graphml_file, "r")
-    graphml = graphmlFile.read()
-    graphmlFile.close()
-    workflow = Neo4jWorkflow(url=bolt_url,
-                             user=neo_user,
-                             pswd=neo_pass,
-                             importDir=import_dir,
-                             importHostDir=import_host_dir
-                             )
-    gid = workflow.import_workflow(graphml=graphml, graphId=template_uuid)
     try:
+        graphmlFile = open('./media/' + graphml_file, "r")
+        graphml = graphmlFile.read()
+        graphmlFile.close()
+        workflow = Neo4jWorkflow(url=bolt_url,
+                                 user=neo_user,
+                                 pswd=neo_pass,
+                                 importDir=import_dir,
+                                 importHostDir=import_host_dir
+                                 )
+        gid = workflow.import_workflow(graphml=graphml, graphId=template_uuid)
         workflow.validate_workflow(graphId=gid)
-    except WorkflowError as template_error:
         workflow.delete_workflow(graphId=gid)
+    except WorkflowError as template_error:
         return False, template_error
-    workflow.delete_workflow(graphId=gid)
     return True, None
 
 
