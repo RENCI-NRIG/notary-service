@@ -107,6 +107,7 @@
 
         node.append("circle")
             .attr("r", 20)
+            .transition().duration(4000)
             .style("fill", function (d, i) {
                 console.log(d);
                 if (d.type == "Start") {
@@ -116,9 +117,6 @@
                 } else {
                     return "gray";
                 }
-
-                // return d3.color("steelblue");
-                // return colors(i);
             });
 
         node.append("title")
