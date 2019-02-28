@@ -10,6 +10,7 @@ from .models import Project, ComanageMemberActive, ComanageAdmin, MembershipComa
     MembershipDatasets, MembershipWorkflow
 from .projects import update_comanage_group, personnel_by_comanage_group, update_comanage_personnel
 from workflows import views as wf_views
+from workflows.workflow_neo4j import delete_workflow_from_uuid
 
 
 
@@ -68,6 +69,36 @@ def project_detail(request, uuid):
         if request.POST.get("validate"):
             project.is_valid, project_error = project_validate(ds_objs, request.user.show_uuid)
         elif request.POST.get("generate_workflow"):
+            # delete workflows that are no longer part of the project
+            wf_ds_list = MembershipWorkflow.objects.values_list('dataset__uuid').filter(project__uuid=uuid)
+            wf_ds_objs = Dataset.objects.filter(uuid__in=wf_ds_list)
+            for ds in wf_ds_objs:
+                # check at dataset level
+                if ds not in ds_objs:
+                    rm_wf_list = MembershipWorkflow.objects.values_list('workflow__uuid').filter(
+                        project=project, dataset=ds)
+                    rm_wf_objs = WorkflowNeo4j.objects.filter(uuid__in=rm_wf_list)
+                    for wf in rm_wf_objs:
+                        delete_workflow_from_uuid(workflow_uuid=str(wf.uuid))
+                        wf.delete()
+                    MembershipWorkflow.objects.filter(project=project, dataset=ds).delete()
+                else:
+                    # check at template level
+                    wf_tpl_list = MembershipWorkflow.objects.values_list('template__uuid').filter(project__uuid=uuid)
+                    wf_tpl_objs = NSTemplate.objects.filter(uuid__in=wf_tpl_list)
+                    for tpl in wf_tpl_objs:
+                        if not MembershipNSTemplate.objects.filter(dataset=ds, template=tpl).exists():
+                            rm_wf_list = MembershipWorkflow.objects.values_list('workflow__uuid').filter(
+                                project=project, dataset=ds, template=tpl
+                            )
+                            rm_wf_objs = WorkflowNeo4j.objects.filter(uuid__in=rm_wf_list)
+                            for wf in rm_wf_objs:
+                                delete_workflow_from_uuid(workflow_uuid=str(wf.uuid))
+                                wf.delete()
+                                MembershipWorkflow.objects.filter(
+                                    project=project, dataset=ds, template=tpl
+                                ).delete()
+            # create workflows as needed from updated project
             for ds in ds_objs:
                 tpl_list = MembershipNSTemplate.objects.values_list('template__uuid').filter(dataset__uuid=ds.uuid)
                 tpl_objs = NSTemplate.objects.filter(uuid__in=tpl_list).order_by('name')
@@ -287,7 +318,14 @@ def project_delete(request, uuid):
     ds_list = MembershipDatasets.objects.values_list('dataset__uuid').filter(project__uuid=uuid)
     ds_objs = Dataset.objects.filter(uuid__in=ds_list).order_by('name')
     if request.method == "POST":
+        pr_wf_list = MembershipWorkflow.objects.values_list('workflow__uuid').filter(
+            project=project)
+        pr_wf_objs = WorkflowNeo4j.objects.filter(uuid__in=pr_wf_list)
+        for wf in pr_wf_objs:
+            delete_workflow_from_uuid(workflow_uuid=str(wf.uuid))
+            wf.delete()
         MembershipComanageAdmin.objects.filter(project=project.id).delete()
+        MembershipComanageMemberActive.objects.filter(project=project.id).delete()
         project.delete()
         return project_list(request)
     return render(request, 'project_delete.html', {

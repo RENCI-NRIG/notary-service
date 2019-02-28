@@ -107,7 +107,7 @@
 
         node.append("circle")
             .attr("r", 20)
-            .transition().duration(4000)
+            .transition().duration(3000)
             .style("fill", function (d, i) {
                 console.log(d);
                 if (d.type == "Start") {
@@ -121,7 +121,12 @@
 
         node.append("title")
             .text(function (d) {
-                return d.id;
+                {#return d.id;#}
+                if (d.description) {
+                    return d.description;
+                } else {
+                    return d.type
+                }
             });
 
         node.append("text")
