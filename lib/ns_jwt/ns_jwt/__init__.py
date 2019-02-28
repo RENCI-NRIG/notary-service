@@ -1,1 +1,1 @@
-from .ns_jwt import NSJWT
+from .ns_jwt import NSJWT, NSJWTError

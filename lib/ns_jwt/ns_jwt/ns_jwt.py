@@ -2,6 +2,7 @@ import jwt
 import logging
 from datetime import datetime, timedelta
 from dateutil import tz
+from typing import Dict
 
 class NSJWT:
     """ JWT generation and verification for Notary Service """
@@ -12,14 +13,14 @@ class NSJWT:
 
     def setToken(self, jwt: str) -> None:
         if not self.unset:
-            raise NSJWTException("JWT already initialized")
+            raise NSJWTError("JWT already initialized")
         self.jwt = jwt
         self.encoded = True
         self.unset = False
 
     def setFields(self, projectId: str, userSet: str, nsToken: str, iss: str, nsName: str, sub: str, name: str):
         if not self.unset:
-            raise NSJWTException("Token or claims already initialized")
+            raise NSJWTError("Token or claims already initialized")
 
         self.claims = {
             'user-set': userSet,
@@ -33,10 +34,19 @@ class NSJWT:
         self.encoded = False
         self.unset = False
 
+    def getClaims(self) -> Dict[str, str]:
+        if self.unset:
+            raise NSJWTError("Token not initialized")
+
+        if self.claims is not None:
+            return self.claims
+        else:
+            raise NSJWTError("Token not decoded")
+
     def encode(self, privateKey: str, validity: timedelta) -> str:
         """ sign and base64 encode the token with validity from now until now + timedelta """
         if self.unset:
-            raise NSJWTException("Claims not initialized, unable to encode")
+            raise NSJWTError("Claims not initialized, unable to encode")
 
         if self.encoded:
             self.log.info("Returning previously encoded token for project %s user %s" % (self.projectId, self.name))
@@ -52,10 +62,10 @@ class NSJWT:
     def decode(self, publicKey: str, verify: bool = True) -> None:
         """ verify if key is not None and decode the token  """
         if self.unset:
-            raise NSJWTException("JWT not initilaized, unable to decode")
+            raise NSJWTError("JWT not initilaized, unable to decode")
 
         if not self.encoded:
-            raise NSJWTException("Token already in decoded form")
+            raise NSJWTError("Token already in decoded form")
 
         if publicKey is None:
             self.log.info("Decoding token without verification of origin or date")
@@ -65,12 +75,12 @@ class NSJWT:
 
     def validUntil(self) ->datetime:
         if self.unset:
-            raise NSJWTException("Claims not initialized")
+            raise NSJWTError("Claims not initialized")
 
         if 'exp' in self.claims:
             return self.getLocalFromUTC(self.claims['exp'])
         else:
-            raise NSJWTException("Expiration claim not present")
+            raise NSJWTError("Expiration claim not present")
 
     def getLocalFromUTC(self, utc: int) ->datetime:
         """ convert UTC in claims (iat and exp) into a python
@@ -97,7 +107,7 @@ class NSJWT:
 
         return fstring
 
-class NSJWTException(Exception):
+class NSJWTError(Exception):
     pass
 
 def main():
