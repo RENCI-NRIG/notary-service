@@ -50,8 +50,11 @@ def get_neo4j_workflow_by_uuid(workflow_uuid):
         entry = {}
         entry['id'] = node.id
         properties = {}
+        entry['description'] = ''
         for key in node.keys():
             properties[key] = node[key]
+            if key == 'description':
+                entry['description'] = properties['description']
         entry['type'] = properties['Type']
         entry['label'] = properties['label']
         entry['properties'] = properties
