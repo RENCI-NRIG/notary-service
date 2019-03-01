@@ -9,8 +9,8 @@ setup(name='ns_jwt',
       license='MIT',
       packages=['ns_jwt'],
       install_requires=[
-	'PyJWT',
-	'cryptography',
-	'python-dateutil'
+          'PyJWT',
+          'cryptography',
+          'python-dateutil',
       ],
       zip_safe=False)

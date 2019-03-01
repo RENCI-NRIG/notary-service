@@ -5,6 +5,7 @@ django-nose==1.4.6
 Django==2.1.7
 ldap3==2.5.2
 mozilla-django-oidc==1.2.1
+--editable ./lib/ns_jwt # ns-jwt==0.1
 --editable ./lib/ns_workflow # ns-workflow==0.1
 psycopg2-binary==2.7.7
 pytest==4.3.0

@@ -1,8 +1,10 @@
-import jwt
 import logging
 from datetime import datetime, timedelta
-from dateutil import tz
 from typing import Dict
+
+import jwt
+from dateutil import tz
+
 
 class NSJWT:
     """ JWT generation and verification for Notary Service """
@@ -73,7 +75,7 @@ class NSJWT:
 
         self.claims = jwt.decode(self.jwt, publicKey, verify=verify, algorithms='RS256')
 
-    def validUntil(self) ->datetime:
+    def validUntil(self) -> datetime:
         if self.unset:
             raise NSJWTError("Claims not initialized")
 
@@ -82,23 +84,23 @@ class NSJWT:
         else:
             raise NSJWTError("Expiration claim not present")
 
-    def getLocalFromUTC(self, utc: int) ->datetime:
+    def getLocalFromUTC(self, utc: int) -> datetime:
         """ convert UTC in claims (iat and exp) into a python
         datetime object """
         return datetime.fromtimestamp(utc, tz.tzlocal())
 
-    def __repr__(self) ->str:
+    def __repr__(self) -> str:
         return self.__str__()
 
     def __str__(self) -> str:
         if self.unset:
             return "JWT not initialized"
 
-        fstring = f"Token for {self.claims['sub']}/{self.claims['name']}:" +\
-            f"\n\tuser set: {self.claims['user-set']}" +\
-            f"\n\tissued by: {self.claims['iss']}/{self.claims['ns-name']}" +\
-            f"\n\tSAFE token: {self.claims['ns-token']}" +\
-            f"\n\tproject: {self.claims['project-id']}"
+        fstring = f"Token for {self.claims['sub']}/{self.claims['name']}:" + \
+                  f"\n\tuser set: {self.claims['user-set']}" + \
+                  f"\n\tissued by: {self.claims['iss']}/{self.claims['ns-name']}" + \
+                  f"\n\tSAFE token: {self.claims['ns-token']}" + \
+                  f"\n\tproject: {self.claims['project-id']}"
 
         if 'iat' in self.claims:
             fstring += f"\n\tIssued on: {self.getLocalFromUTC(self.claims['iat']).strftime('%Y-%m-%d %H:%M:%S')}"
@@ -107,16 +109,18 @@ class NSJWT:
 
         return fstring
 
+
 class NSJWTError(Exception):
     pass
+
 
 def main():
     """ simple test harness """
     tok = NSJWT()
     print(tok)
     tok.setFields("project1", "user-set",
-        "nstok", "ns-dev.cyberimpact.us",
-        "NS for ImPACT", "subject", "Test Subject")
+                  "nstok", "ns-dev.cyberimpact.us",
+                  "NS for ImPACT", "subject", "Test Subject")
     print(tok)
 
     with open('private.pem') as f:
@@ -133,6 +137,7 @@ def main():
     tok1.setToken(encodedTokString)
     tok1.decode(pubKey)
     print(tok1)
+
 
 if __name__ == "__main__":
     main()
