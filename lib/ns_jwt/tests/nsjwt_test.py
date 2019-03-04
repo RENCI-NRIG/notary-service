@@ -18,9 +18,9 @@ class TestNSJWT(unittest.TestCase):
 
     def test_encode_decode(self):
         tok = NSJWT()
-        tok.setFields("project1", "user-set",
-                      "nstok", "ns-dev.cyberimpact.us",
-                      "NS for ImPACT", "subject", "Test Subject")
+        tok.setClaims(projectId = "project1", userSet = "user-set",
+                      nsToken = "nstok", iss = "ns-dev.cyberimpact.us",
+                      nsName = "NS for ImPACT", sub = "subject", name = "Test Subject")
 
         with open(testdir + 'private.pem') as f:
             privKey = f.read()
@@ -40,9 +40,9 @@ class TestNSJWT(unittest.TestCase):
         with self.assertRaises(NSJWTError):
             tok.getClaims()
 
-        tok.setFields("project1", "user-set",
-                      "nstok", "ns-dev.cyberimpact.us",
-                      "NS for ImPACT", "subject", "Test Subject")
+        tok.setClaims(projectId = "project1", userSet = "user-set",
+                      nsToken = "nstok", iss = "ns-dev.cyberimpact.us",
+                      nsName = "NS for ImPACT", sub = "subject", name = "Test Subject")
 
         with self.assertRaises(NSJWTError):
             tok.decode(None)

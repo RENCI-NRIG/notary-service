@@ -9,6 +9,8 @@ from dateutil import tz
 class NSJWT:
     """ JWT generation and verification for Notary Service """
 
+    VERSION="1.0"
+
     def __init__(self):
         self.log = logging.getLogger(__name__)
         self.unset = True
@@ -20,7 +22,7 @@ class NSJWT:
         self.encoded = True
         self.unset = False
 
-    def setFields(self, projectId: str, userSet: str, nsToken: str, iss: str, nsName: str, sub: str, name: str):
+    def setClaims(self, *, projectId: str, userSet: str, nsToken: str, iss: str, nsName: str, sub: str, name: str):
         if not self.unset:
             raise NSJWTError("Token or claims already initialized")
 
@@ -32,6 +34,7 @@ class NSJWT:
             'iss': iss,
             'sub': sub,
             'name': name,
+            'ver': self.VERSION
         }
         self.encoded = False
         self.unset = False
@@ -62,7 +65,7 @@ class NSJWT:
         return self.jwt
 
     def decode(self, publicKey: str, verify: bool = True) -> None:
-        """ verify if key is not None and decode the token  """
+        """ verify signature and expiration date and decode the token  """
         if self.unset:
             raise NSJWTError("JWT not initilaized, unable to decode")
 
@@ -74,6 +77,9 @@ class NSJWT:
             verify = False
 
         self.claims = jwt.decode(self.jwt, publicKey, verify=verify, algorithms='RS256')
+
+        if self.claims['ver'] != self.VERSION:
+            raise NSJWTError("Version of encoding {self.claims['ver']} doesn't match the code {self.VERSION}")
 
     def validUntil(self) -> datetime:
         if self.unset:
@@ -118,9 +124,9 @@ def main():
     """ simple test harness """
     tok = NSJWT()
     print(tok)
-    tok.setFields("project1", "user-set",
-                  "nstok", "ns-dev.cyberimpact.us",
-                  "NS for ImPACT", "subject", "Test Subject")
+    tok.setClaims(projectId = "project1", userSet = "user-set",
+                  nsToken = "nstok", iss = "ns-dev.cyberimpact.us",
+                  nsName = "NS for ImPACT", sub = "subject", name = "Test Subject")
     print(tok)
 
     with open('private.pem') as f:
