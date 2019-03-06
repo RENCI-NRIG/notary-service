@@ -308,7 +308,7 @@ def project_edit(request, uuid):
             return redirect('project_detail', uuid=project.uuid)
     else:
         form = ProjectForm(instance=project)
-    return render(request, 'project_edit.html', {'projects_page': 'active', 'form': form})
+    return render(request, 'project_edit.html', {'projects_page': 'active', 'form': form, 'project_uuid': uuid})
 
 
 def project_delete(request, uuid):
@@ -317,6 +317,8 @@ def project_delete(request, uuid):
     comanage_groups = ComanageMemberActive.objects.filter(cn__contains=':active', project=project).order_by('cn')
     ds_list = MembershipDatasets.objects.values_list('dataset__uuid').filter(project__uuid=uuid)
     ds_objs = Dataset.objects.filter(uuid__in=ds_list).order_by('name')
+    wf_list = MembershipWorkflow.objects.values_list('workflow__uuid').filter(project__uuid=project.uuid)
+    wf_objs = WorkflowNeo4j.objects.filter(uuid__in=wf_list).order_by('name')
     if request.method == "POST":
         pr_wf_list = MembershipWorkflow.objects.values_list('workflow__uuid').filter(
             project=project)
@@ -334,4 +336,5 @@ def project_delete(request, uuid):
         'comanage_admins': comanage_admins,
         'comanage_groups': comanage_groups,
         'datasets': ds_objs,
+        'workflows': wf_objs,
     })

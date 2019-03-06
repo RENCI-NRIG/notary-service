@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static dataset_tags replace_tags %}
+
+{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        <div class="container">
+            <div class="post">
+                <form method="POST" class="post-form">
+                    <h2>{{ message.subject }}
+
+                        {% csrf_token %}
+                        <input style="font-family: FontAwesome;color: green;
+                                border: none; background: none" name="return-to-list"
+                               title="Return to list" value="&#xf04a;" type="submit">
+                        {% if message.is_active %}
+                            <input style="font-family: FontAwesome;color: #B22222;
+                                border: none; background: none" name="delete-message"
+                                   title="Move message to trash" value="&#xf1f8;" type="submit">
+                        {% else %}
+                            <input style="font-family: FontAwesome;color: #B22222;
+                                border: none; background: none" name="delete-message"
+                                   title="Delete message" value="&#xf00d;" type="submit">
+                        {% endif %}
+                        <input type="hidden" name="remove_message_uuid" value="{{ message.uuid }}">
+                    </h2>
+                </form>
+                <p>{{ message.body|linebreaksbr }}</p>
+                <b>Reference URL:</b>
+                <a href="{{ message.reference_url }}">
+                    {{ message.reference_url }}
+                </a>
+                <br>
+                {% if not message.is_active %}
+                    <br>
+                    <form method="POST" class="post-form">
+                        {% csrf_token %}
+                        <input type="submit" name="undelete-message" value="Make active" style="color: green">
+                    </form>
+                {% endif %}
+                <br>
+                <table style="font-size: small">
+                    <tr>
+                        <td width="60%">
+                            <b>Created By:</b> {{ message.created_by }}
+                        </td>
+                        <td>
+                            <b>Modified By:</b> {{ message.modified_by }}
+                        </td>
+                    <tr>
+                        <td>
+                            <b>Created Date:</b> {{ message.created_date|date:"m/d/Y g:i a" }}
+                        </td>
+                        <td>
+                            <b>Modified Date:</b> {{ message.modified_date|date:"m/d/Y g:i a" }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Active:</b> {{ message.is_active }}
+                            {% if message.is_active %}
+                                (<i class="fa fa-fw fa-check" style="color: green;"></i>)
+                            {% else %}
+                                (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            {% else %}
+            <div class="container">
+                <p>You are not currently logged in</p>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

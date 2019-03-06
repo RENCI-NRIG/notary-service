@@ -8,9 +8,10 @@
         <div class="container">
             <div class="post">
                 <h2>{{ template.name }}
-                    <a href="{% url 'template_edit' uuid=template.uuid %}" title="Edit" class="fa fa-fw fa-pencil"></a>
-                    <a href="{% url 'template_delete' uuid=template.uuid %}" title="Delete"
-                       class="fa fa-fw fa-trash"></a>
+                    <a href="{% url 'template_edit' uuid=template.uuid %}"
+                       title="Edit template" class="fa fa-fw fa-pencil" style="color: green;"></a>
+                    <a href="{% url 'template_delete' uuid=template.uuid %}"
+                       title="Delete template" class="fa fa-fw fa-trash" style="color: #B22222;"></a>
                 </h2>
                 {% if not template.is_valid %}
                     <form method="POST" class="post-form">
@@ -25,8 +26,20 @@
                         {{ template_error }}
                     </div>
                 {% endif %}
-                <table>
+                <p>{{ template.description|linebreaksbr }}</p>
 
+                <b>File:</b>
+                <a href="{{ template.graphml_definition.url }}">{{ template.graphml_definition | getfilename }}</a>
+                <br><br>
+                <b>Contents:</b><br>
+                <div style="background-color: #DCDCDC;color:darkblue;font-family:Courier;
+                font-size: 14px;overflow-x: scroll; height: 600px;overflow-y: scroll">
+                    {% if template.graphml_definition.file %}
+                        <p>{{ template_file|linebreaksbr|spacify }}</p>
+                    {% endif %}
+                </div>
+                <br>
+                <table style="font-size: small">
                     <tr>
                         <td width="60%">
                             <b>Created By:</b> {{ template.created_by }}
@@ -44,10 +57,6 @@
                     </tr>
                     <tr>
                         <td>
-                            <b>File:</b> <a
-                                href="{{ template.graphml_definition.url }}">{{ template.graphml_definition | getfilename }}</a>
-                        </td>
-                        <td>
                             <b>Validated:</b> {{ template.is_valid }}
                             {% if template.is_valid %}
                                 (<i class="fa fa-fw fa-check" style="color: green;"></i>)
@@ -57,18 +66,6 @@
                         </td>
                     </tr>
                 </table>
-                <b>Description:</b>
-                <p>{{ template.description|linebreaksbr }}</p>
-
-                <b>File Contents:</b><br>
-                <div style="background-color: #DCDCDC;color:darkblue;font-family:Courier;
-                font-size: 14px;overflow-x: scroll; height: 600px;overflow-y: scroll">
-                    {% if template.graphml_definition.file %}
-                        <p>{{ template_file|linebreaksbr|spacify }}</p>
-                    {% endif %}
-                </div>
-
-
             </div>
             {% else %}
             <div class="container">

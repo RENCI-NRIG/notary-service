@@ -1,8 +1,11 @@
+import uuid
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
 class NotaryServiceUser(AbstractUser):
+    uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
     given_name = models.CharField(max_length=200)
     family_name = models.CharField(max_length=200)
     idp = models.CharField(max_length=200)

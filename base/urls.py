@@ -26,6 +26,7 @@ urlpatterns = [
     path('', include('debug.urls')),
     path('', include('datasets.urls')),
     path('', include('workflows.urls')),
+    path('', include('apache_kafka.urls')),
 ]
 
 # Configure custom error pages

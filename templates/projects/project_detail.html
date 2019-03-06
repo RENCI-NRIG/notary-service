@@ -8,9 +8,10 @@
         <div class="container">
             <div class="post">
                 <h2>{{ project.name }}
-                    <a href="{% url 'project_edit' uuid=project.uuid %}" title="Regenerate"
-                       class="fa fa-fw fa-pencil"></a>
-                    <a href="{% url 'project_delete' uuid=project.uuid %}" title="Delete" class="fa fa-fw fa-trash"></a>
+                    <a href="{% url 'project_edit' uuid=project.uuid %}"
+                       title="Edit project" class="fa fa-fw fa-pencil" style="color: green;"></a>
+                    <a href="{% url 'project_delete' uuid=project.uuid %}"
+                       title="Delete project" class="fa fa-fw fa-trash" style="color: #B22222;"></a>
                 </h2>
                 {% if not project.is_valid %}
                     <form method="POST" class="post-form">
@@ -25,31 +26,6 @@
                         {{ project_error }}
                     </div>
                 {% endif %}
-                <table>
-                    <tr>
-                        <td width="60%">
-                            <b>Created By:</b> {{ project.created_by }}
-                        </td>
-                        <td>
-                            <b>Modified By:</b> {{ project.modified_by }}
-                        </td>
-                        </td>
-                    <tr>
-                        <td>
-                            <b>Created Date:</b> {{ project.created_date|date:"m/d/Y g:i a" }}
-                        </td>
-                        <td>
-                            <b>Modified Date:</b> {{ project.modified_date|date:"m/d/Y g:i a" }}
-                        </td>
-                    </tr>
-                </table>
-                <b>Validated:</b> {{ project.is_valid }}
-                {% if project.is_valid %}
-                    (<i class="fa fa-fw fa-check" style="color: green;"></i>)
-                {% else %}
-                    (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
-                {% endif %}<br>
-                <b>Description:</b>
                 <p>{{ project.description|linebreaksbr }}</p>
                 <h3>Permissions</h3>
                 <b>Administrative Groups</b>
@@ -183,6 +159,35 @@
                             <td><b>D:</b> {{ workflow.dataset.name }}<br><b>T:</b> {{ workflow.template.name }}</td>
                         </tr>
                     {% endfor %}
+                </table>
+                <br>
+                <table style="font-size: small">
+                    <tr>
+                        <td width="60%">
+                            <b>Created By:</b> {{ project.created_by }}
+                        </td>
+                        <td>
+                            <b>Modified By:</b> {{ project.modified_by }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Created Date:</b> {{ project.created_date|date:"m/d/Y g:i a" }}
+                        </td>
+                        <td>
+                            <b>Modified Date:</b> {{ project.modified_date|date:"m/d/Y g:i a" }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Validated:</b> {{ project.is_valid }}
+                            {% if project.is_valid %}
+                                (<i class="fa fa-fw fa-check" style="color: green;"></i>)
+                            {% else %}
+                                (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
+                            {% endif %}
+                        </td>
+                    </tr>
                 </table>
             </div>
             {% else %}

@@ -108,7 +108,7 @@ def dataset_edit(request, uuid):
             return redirect('dataset_detail', uuid=dataset.uuid)
     else:
         form = DatasetForm(instance=dataset)
-    return render(request, 'dataset_edit.html', {'datasets_page': 'active', 'form': form})
+    return render(request, 'dataset_edit.html', {'datasets_page': 'active', 'form': form, 'dataset_uuid': uuid})
 
 
 def dataset_delete(request, uuid):
@@ -235,7 +235,7 @@ def template_edit(request, uuid):
             return redirect('template_detail', uuid=template.uuid)
     else:
         form = TemplateForm(instance=template)
-    return render(request, 'template_edit.html', {'templates_page': 'active', 'form': form})
+    return render(request, 'template_edit.html', {'templates_page': 'active', 'form': form, 'template_uuid': uuid})
 
 
 def template_delete(request, uuid):

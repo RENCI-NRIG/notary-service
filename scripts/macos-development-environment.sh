@@ -53,6 +53,12 @@ if [[ ! -d neo4j/logs ]]; then
   mkdir -p neo4j/logs
 fi
 
+# check for kafka directory
+echo "INFO: create kafka directory if it does not exist"
+if [[ ! -d kafka ]]; then
+  mkdir -p kafka
+fi
+
 # check for nginx configuration
 echo "INFO: create nginx/default.conf if it does not exist"
 if [[ ! -e nginx/default.conf ]]; then
@@ -93,6 +99,14 @@ fi
 echo "INFO: start nginx container"
 if [[ ! $(docker-compose ps | grep nginx) ]]; then
   docker-compose up -d nginx
+fi
+echo "INFO: start zookeeper container"
+if [[ ! $(docker-compose ps | grep zookeeper) ]]; then
+  docker-compose up -d zookeeper
+fi
+echo "INFO: start kafka container"
+if [[ ! $(docker-compose ps | grep kafka) ]]; then
+  docker-compose up -d kafka
 fi
 echo "END: macos-development-environment.sh is done"
 

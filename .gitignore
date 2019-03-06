@@ -12,6 +12,7 @@ base/.env
 base/secrets.py
 !base/static
 cover/*
+kafka
 media
 !media/.include_this_dir
 migrations

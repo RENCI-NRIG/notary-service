@@ -10,7 +10,8 @@
             <p>Templates are directed acyclic graphs (DAGs) that provide the basis for permission
                 based workflows. The graphs are defined using graphml and are stored in a Neo4j database.</p>
             <h2>My Templates
-                <a href="{% url 'template_new' %}" title="Create new Template" class="fa fa-fw fa-plus-square"></a>
+                <a href="{% url 'template_new' %}"
+                   title="Create new Template" class="fa fa-fw fa-plus-square" style="color: green;"></a>
             </h2>
             <table border="1px solid black" cellpadding="5px">
                 <tr>
@@ -46,8 +47,8 @@
                     </a></td>
                     <td>{{ template.created_date|date:"m/d/Y g:i a" }}</td>
                     <td>{{ template.modified_date|date:"m/d/Y g:i a" }}</td>
-                    <td><a href="{% url 'template_edit' uuid=template.uuid %}" title="Edit"
-                           class="fa fa-fw fa-pencil"></a>
+                    <td><a href="{% url 'template_edit' uuid=template.uuid %}"
+                           title="Edit" class="fa fa-fw fa-pencil" style="color: green;"></a>
                     </td>
                 {% endfor %}
             </table>
