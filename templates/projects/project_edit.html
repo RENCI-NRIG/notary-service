@@ -6,7 +6,7 @@
 {% block content %}
     {% if user.is_authenticated %}
         <div class="container">
-            <h2>Add/Edit Project
+            <h2>Edit Project
                 <a href="{% url 'project_detail' uuid=project_uuid %}"
                    title="Cancel" class="fa fa-fw fa-ban" style="color: green;"></a>
             </h2>

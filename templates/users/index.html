@@ -31,18 +31,18 @@
                     {% for message in ns_messages %}
                         <tr>
                             {% if message.subject|length > 36 %}
-                            <td>
-                                <a href="{% url 'message_detail' uuid=message.uuid %}" style="color: #146885;">
-                                {{ message.subject|slice:":34" }}..
-                                </a>
-                            </td>
-                        {% else %}
-                            <td>
-                                <a href="{% url 'message_detail' uuid=message.uuid %}" style="color: #146885;">
-                                {{ message.subject }}
-                                </a>
-                            </td>
-                        {% endif %}
+                                <td>
+                                    <a href="{% url 'message_detail' uuid=message.uuid %}" style="color: #146885;">
+                                        {{ message.subject|slice:":34" }}..
+                                    </a>
+                                </td>
+                            {% else %}
+                                <td>
+                                    <a href="{% url 'message_detail' uuid=message.uuid %}" style="color: #146885;">
+                                        {{ message.subject }}
+                                    </a>
+                                </td>
+                            {% endif %}
                             {% if message.body|length > 36 %}
                                 <td>{{ message.body|slice:":34" }}..</td>
                             {% else %}

@@ -6,8 +6,8 @@
 {% block content %}
     {% if user.is_authenticated %}
         <div class="container">
-            <h2>Edit Dataset
-                <a href="{% url 'dataset_detail' uuid=dataset_uuid %}"
+            <h2>Add Dataset
+                <a href="{% url 'datasets' %}"
                    title="Cancel" class="fa fa-fw fa-ban" style="color: green;"></a>
             </h2>
             <form method="POST" class="post-form" enctype="multipart/form-data">

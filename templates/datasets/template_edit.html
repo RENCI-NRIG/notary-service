@@ -6,7 +6,7 @@
 {% block content %}
     {% if user.is_authenticated %}
         <div class="container">
-            <h2>Add/Edit Template
+            <h2>Edit Template
                 <a href="{% url 'template_detail' uuid=template_uuid %}"
                    title="Cancel edit" class="fa fa-fw fa-ban" style="color: green"></a>
             </h2>

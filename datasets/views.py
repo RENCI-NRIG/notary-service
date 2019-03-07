@@ -74,7 +74,7 @@ def dataset_new(request):
             return redirect('dataset_detail', uuid=dataset.uuid)
     else:
         form = DatasetForm()
-    return render(request, 'dataset_edit.html', {'datasets_page': 'active', 'form': form})
+    return render(request, 'dataset_new.html', {'datasets_page': 'active', 'form': form})
 
 
 def dataset_edit(request, uuid):
@@ -218,7 +218,7 @@ def template_new(request):
             return redirect('template_detail', uuid=template.uuid)
     else:
         form = TemplateForm()
-    return render(request, 'template_edit.html', {'templates_page': 'active', 'form': form})
+    return render(request, 'template_new.html', {'templates_page': 'active', 'form': form})
 
 
 def template_edit(request, uuid):

@@ -1,6 +1,6 @@
-from kafka import KafkaProducer
 import simplejson as json
 from django.conf import settings
+from kafka import KafkaProducer
 
 producer = KafkaProducer(
     bootstrap_servers=settings.KAFKA_SERVERS,

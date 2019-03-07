@@ -223,7 +223,7 @@ def project_new(request):
             return redirect('project_detail', uuid=project.uuid)
     else:
         form = ProjectForm()
-    return render(request, 'project_edit.html', {'projects_page': 'active', 'form': form})
+    return render(request, 'project_new.html', {'projects_page': 'active', 'form': form})
 
 
 def project_edit(request, uuid):
