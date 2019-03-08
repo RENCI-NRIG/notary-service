@@ -46,6 +46,7 @@ class Neo4jWorkflow(AbstractWorkflow):
 
         f1.close()
 
+        # add graph id to every node
         for n in list(g.nodes):
             g.nodes[n]['GraphID'] = graphId
 
@@ -72,7 +73,7 @@ class Neo4jWorkflow(AbstractWorkflow):
                     'call apoc.import.graphml( $fileName, {batchSize: 10000, readLabels: true, storeNodeIds: true, defaultRelationshipType: "isPrerequisiteFor" } ) ',
                     fileName=graphmlFile)
         except Exception as e:
-            msg = "Neo4j APOC error %s", str(e)
+            msg = "Neo4j APOC import error %s", str(e)
             raise WorkflowImportError(None, msg)
 
     def import_workflow(self, graphml: str, graphId: str = None) -> str:
@@ -148,7 +149,7 @@ class Neo4jWorkflow(AbstractWorkflow):
                 return session.run('MATCH (n {GraphID: $graphId }) RETURN count(n)',
                                    graphId=graphId).single().value()
             else:
-                return session.run('MATCH (n {GraphID: $graphId, Role: $nodeRole} ) RETURN count(n)',
+                return session.run('MATCH (n {GraphID: $graphId} ) WHERE $nodeRole IN split(n.Role, ",") RETURN count(n)',
                                    graphId=graphId, nodeRole=nodeRole).single().value()
 
     def _run_node_dict_query(self, graphId: str, nodeId: str, query: str) -> Dict[str, str]:
@@ -184,29 +185,29 @@ class Neo4jWorkflow(AbstractWorkflow):
                 raise WorkflowQueryError(graphId, nodeId, "Unable to find node")
             return val.data()['properties(n)']
 
-    def find_adjacent_nodes(self, graphId: str, nodeId: str, role: str = None) -> List[neo4j.types.graph.Node]:
+    def find_adjacent_nodes(self, graphId: str, nodeId: str, role: str = None) -> List[str]:
         """Get a list of nodes that are adjacent to the named node and optionally have a specific role
         See https://neo4j.com/docs/api/python-driver/current/types/graph.html for more info"""
         assert graphId is not None
         assert nodeId is not None
         if role is not None:
-            query = "MATCH ({GraphID: $graphId, ID: $nodeId}) --> (n) WHERE n.Role=$role RETURN n"
+            query = "MATCH ({GraphID: $graphId, ID: $nodeId}) --> (n {GraphID: $graphId}) WHERE $role IN split(n.Role, ',') RETURN n.ID"
         else:
-            query = "MATCH ({GraphID: $graphId, ID: $nodeId}) --> (n) RETURN n"
+            query = "MATCH ({GraphID: $graphId, ID: $nodeId}) --> (n {GraphID: $graphId}) RETURN n.ID"
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId, role=role)
             if val is None:
                 raise WorkflowQueryError(graphId, nodeId, "Unable to find adjacent nodes")
             return val.value()
 
-    def find_reachable_nodes(self, graphId: str, nodeId: str, role: str) -> List[neo4j.types.graph.Node]:
+    def find_reachable_nodes(self, graphId: str, nodeId: str, role: str) -> List[str]:
         """Get a list of nodes reachable from the specified node and have a specific role.
         See https://neo4j.com/docs/api/python-driver/current/types/graph.html for more info"""
         assert graphId is not None
         assert nodeId is not None
         assert role is not None
-        query = """MATCH (s {GraphID: $graphId, ID: $nodeId}), (pi {Role: $role}), p=(s) -[*]-> (pi)
-        WHERE ALL(x in tail(reverse(tail(nodes(p)))) WHERE NOT x.Role=$role) RETURN distinct(pi)"""
+        query = """MATCH (s {GraphID: $graphId, ID: $nodeId}), (pi), p=(s) -[*]-> (pi)
+        WHERE $role IN split(pi.Role, ',') AND ALL(x in tail(reverse(tail(nodes(p)))) WHERE NOT $role IN split(x.Role, ',') ) WITH distinct(pi) AS dpi return dpi.ID"""
 
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId, role=role)
@@ -219,11 +220,30 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert graphId is not None
         assert nodeId is not None
         assert propName is not None
-        query = "MATCH (s {GraphID: $graphId, ID: $nodeId}) set s+={ %s: $propVal} RETURN properties(s)" % propName
+        query = "MATCH (s {GraphID: $graphId, ID: $nodeId}) SET s+={ %s: $propVal} RETURN properties(s)" % propName
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId, propVal=propVal)
             if val is None:
                 raise WorkflowQueryError(graphId, nodeId, "Unable to set property")
+            pass
+
+    def update_node_properties(self, graphId: str, nodeId: str, props: Dict[str, str]) -> None:
+        """ update multiple properties at once """
+        assert graphId is not None
+        assert nodeId is not None
+        assert props is not None
+
+        allProps = ""
+        for k, v in props.items():
+            allProps += f'{k}: "{v}", '
+        if len(allProps) > 2:
+            allProps = allProps[:-2]
+
+        query = "MATCH (s {GraphID: $graphId, ID: $nodeId}) SET s+= { %s } RETURN properties(s)" % allProps
+        with self.driver.session() as session:
+            val = session.run(query, graphId=graphId, nodeId=nodeId)
+            if val is None:
+                raise WorkflowQueryError(graphId, nodeId, "Unable to set properties")
             pass
 
     def create_child_node(self, graphId: str, nodeId: str, childNode: str) -> None:
@@ -238,9 +258,9 @@ class Neo4jWorkflow(AbstractWorkflow):
 
         # using merge guarantees duplicates won't be created. copying properties ON CREATE
         # guarantees they will not be overwritten on existing node, however parent properties
-        # are immutable anyway 
-        query = """MATCH(n {GraphID: $graphId, ID: $nodeId}) MERGE (m {GraphID:$graphId, ID:$childNode})
-            -[:isChildOf]-> (n) ON CREATE SET m=n, m.ID=$childNode RETURN m"""
+        # are immutable anyway
+        query = """MATCH (n {GraphID: $graphId, ID: $nodeId}) MERGE (m {GraphID:$graphId, ID:$childNode})
+            -[:isChildOf]-> (n) ON CREATE SET m=n, m.ID=$childNode, m.SAFEType="user-set" RETURN m"""
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId, childNode=childNode)
             if val is None or len(val.value()) == 0:
@@ -252,7 +272,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert graphId is not None
         assert nodeId is not None
 
-        query = "MATCH(n {GraphID: $graphId, ID: $nodeId}) RETURN n"
+        query = "MATCH (n {GraphID: $graphId, ID: $nodeId}) RETURN n"
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId)
             if val is None or len(val.value()) == 0:
@@ -264,7 +284,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert graphId is not None
         assert nodeId is not None
 
-        query = "MATCH(n {GraphID: $graphId, ID: $nodeId}), (m) -[:isChildOf]-> (n) RETURN collect(m.ID)"
+        query = "MATCH (n {GraphID: $graphId, ID: $nodeId}), (m) -[:isChildOf]-> (n) RETURN collect(m.ID)"
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId)
             if val is None:
@@ -282,3 +302,86 @@ class Neo4jWorkflow(AbstractWorkflow):
             if val is None:
                 raise WorkflowQueryError(graphId, nodeId, "Unable to check for child relation")
             return val.value()[0]
+
+    def is_conditional_node(self, graphId: str, nodeId: str) -> bool:
+        """ is this a conditional node """
+        assert graphId is not None
+        assert nodeId is not None
+
+        query = "MATCH (n {GraphID:$graphId, ID: $nodeId}) -[r:isPrerequisiteFor]-> (m) WITH n, count(DISTINCT r.ParameterValue) AS pc, count(r) AS c RETURN c > 1 AND c = pc"
+        with self.driver.session() as session:
+            val = session.run(query, graphId=graphId, nodeId=nodeId)
+            if val is None:
+                raise WorkflowQueryError(graphId, nodeId, "Unable to check if node is conditional")
+            return val.value()[0]
+
+    def find_adjacent_conditional_node(self, graphId: str, nodeId: str, parameterValue: str, role: str = None) -> str:
+        assert graphId is not None
+        assert nodeId is not None
+        assert parameterValue is not None
+
+        if role is not None:
+            query = "MATCH (n {GraphID: $graphId, ID: $nodeId}) -[r:isPrerequisiteFor {ParameterValue: $parameterValue}]-> (m {GraphID: $graphId}) WHERE $role IN split(m.Role, ',') RETURN m.ID"
+        else:
+            query = "MATCH (n {GraphID: $graphId, ID: $nodeId}) -[r:isPrerequisiteFor {ParameterValue: $parameterValue}]-> (m {GraphID: $graphId}) RETURN m.ID"
+        with self.driver.session() as session:
+            val = session.run(query, graphId=graphId, nodeId=nodeId, role=role, parameterValue=parameterValue)
+            if val is None:
+                raise WorkflowQueryError(graphId, nodeId, "Unable to find conditional successor")
+            myVal = val.value()
+            if len(myVal) > 0:
+                return myVal[0]
+            else:
+                return None
+
+    def find_fan_out_parent(self, graphId: str, nodeId: str) ->str:
+        """ find the nearest fan-out node (or Start) """
+        assert graphId is not None
+        assert nodeId is not None
+
+        query = """MATCH path = (p {GraphID: $graphId}) -[:isPrerequisiteFor*]-> (c {GraphID: $graphId, ID: $nodeId})
+            <-[:isPrerequisiteFor*]- (p {GraphID: $graphId}) RETURN p.ID ORDER BY length(path) LIMIT 1"""
+        with self.driver.session() as session:
+            val = session.run(query, graphId=graphId, nodeId=nodeId)
+            if val is None:
+                raise WorkflowQueryError(graphId, nodeId, "Unable to find common completed parent")
+            myVal = val.value()
+            if len(myVal) > 0:
+                return myVal[0]
+            else:
+                return None
+
+    def find_immediate_common_set_parent_nodes(self, graphId: str, nodeId: str) ->List[str]:
+        """ find immediate parent nodes, skipping template-user-set nodes """
+
+        assert graphId is not None
+        assert nodeId is not None
+
+        query = """match (n {GraphID: $graphId, ID: $nodeId}) <-[:isPrerequisiteFor]-
+           (ip {GraphID: $graphId, SAFEType: "template-user-set"}) <-[:isPrerequisiteFor*]- (p1 {GraphID: $graphId, SAFEType: "common-set"})
+           WITH p1 MATCH (p1)-[:isPrerequisiteFor]-> (m {GraphID: $graphId, SAFEType: "template-user-set"})
+           RETURN DISTINCT p1.ID as id UNION
+           MATCH (n {GraphID: $graphId, ID: $nodeId}) <-[:isPrerequisiteFor]- (p2 {GraphID: $graphId, SAFEType: "common-set"})
+           RETURN p2.ID as id"""
+        with self.driver.session() as session:
+            val = session.run(query, graphId=graphId, nodeId=nodeId)
+            if val is None:
+                raise WorkflowQueryError(graphId, nodeId, "Unable to find common completed parent")
+            return val.value()
+
+    def list_not_completed_common_set(self, graphId: str) -> bool:
+        """ list all common set nodes that haven't been completed """
+
+        assert graphId is not None
+
+        query = """MATCH (n {GraphID: $graphId, SAFEType: "common-set"}) WHERE NOT exists(n.completed) OR n.completed <> "True"  RETURN collect(n.ID) as id"""
+
+        with self.driver.session() as session:
+            val = session.run(query, graphId=graphId)
+            if val is None:
+                raise WorkflowQueryError(graphId, None, "Unable to list incomplete common-set")
+            myVal = val.value()
+            if len(myVal) > 0:
+                return myVal[0]
+            else:
+                return None
