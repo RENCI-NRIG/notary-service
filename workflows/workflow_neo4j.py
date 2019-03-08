@@ -42,7 +42,8 @@ def delete_workflow_from_uuid(workflow_uuid):
 def get_neo4j_workflow_by_uuid(workflow_uuid):
     bolt_driver = GraphDatabase.driver(bolt_url, auth=basic_auth(neo_user, neo_pass))
     db = bolt_driver.session()
-    statement = "MATCH path = (n)-[r]->(m) WHERE n.GraphID = '" + str(workflow_uuid) + "' RETURN path"
+    statement = "MATCH path = (n)-[r]->(m) WHERE n.GraphID = '" + str(workflow_uuid) + \
+                "' AND n.SAFEType in ['common-set', 'template-user-set', 'None'] RETURN path"
     results = db.run(statement).graph()
     db.close()
     nodes = []
@@ -53,8 +54,12 @@ def get_neo4j_workflow_by_uuid(workflow_uuid):
         entry['description'] = ''
         for key in node.keys():
             properties[key] = node[key]
+            if key == 'Role':
+                entry['description'] += str('Role: ' + properties['Role'] + '\n')
             if key == 'description':
-                entry['description'] = properties['description']
+                entry['description'] += str('Description: ' + properties['description'])
+            if key == 'SAFEType':
+                entry['safetype'] = properties['SAFEType']
         entry['type'] = properties['Type']
         entry['label'] = properties['label']
         entry['properties'] = properties

@@ -115,7 +115,13 @@
                 } else if (d.type == "Stop") {
                     return "firebrick";
                 } else {
-                    return "gray";
+                    if (d.safetype == "common-set") {
+                        return "lightblue";
+                    } else if (d.safetype == "template-user-set") {
+                        return "goldenrod";
+                    } else {
+                        return "gray";
+                    }
                 }
             });
 
