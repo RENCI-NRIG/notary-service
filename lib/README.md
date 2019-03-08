@@ -125,6 +125,7 @@ NS tokens carry the following claims:
 | exp | Expiration date | Date, Registered |
 | iat | Issued at date | Date, Registered |
 | name | Full name of subject | String, Public |
+| ver | Version of the encoding | Private |
 
 For dates, a JSON numeric value representing the number of seconds from 1970-01-01T00:00:00Z UTC until the specified UTC date/time, ignoring leap seconds.  This is equivalent to the IEEE Std 1003.1, 2013 Edition definition "Seconds Since the Epoch", in which each day is accounted for by exactly 86400 seconds, other than that non-integer values can be represented.  See RFC 3339 for details regarding date/times in general and UTC in particular.
 
