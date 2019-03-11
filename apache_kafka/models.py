@@ -13,7 +13,7 @@ class Message(models.Model):
     subject = models.CharField(max_length=255)
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
     body = models.TextField()
-    reference_url = models.URLField()
+    reference_url = models.URLField(blank=True)
     is_active = models.BooleanField(default=True)
     created_by = models.CharField(max_length=255, default='System Account')
     created_date = models.DateTimeField(default=timezone.now)
