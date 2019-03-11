@@ -20,15 +20,39 @@
     "msg": "Stop node must be reachable from any node."
   },
   {
-    "rule": "MATCH (n {GraphID: $graphId, Type: \"Condition\"}) -[rel]-> () RETURN ALL(r IN collect(rel) WHERE r.Type IN [\"ConditionTrue\", \"ConditionFalse\"])",
-    "msg": "Condition nodes must have two branches only (ConditionTrue and ConditionFalse)"
+    "rule": "MATCH(n {GraphID: $graphId}) RETURN ALL(r IN collect(n) WHERE exists(r.Type) AND exists(r.Role) AND exists(r.ID) AND exists(r.SAFEType))",
+    "msg": "Type, Role, ID, SAFEType properties must be present on each node"
+  },
+  {
+    "rule": "MATCH (n {GraphID: $graphId}) -[r]-> (m {GraphID: $graphId}) RETURN ALL(r IN collect(r) WHERE exists(r.ParameterValue))",
+    "msg": "All relationships must have ParameterValue properties"
+  },
+  {
+    "rule": "MATCH(n {GraphID: $graphId}) -[r:isPrerequisiteFor]-> (m {GraphID: $graphId}) with n, count(DISTINCT r.ParameterValue) AS pc, count(r) AS c WHERE pc > 1 AND c <> pc RETURN count(n) = 0",
+    "msg": "Branches of conditional nodes must have distinct values"
   },
   {
     "rule": "MATCH (n {GraphID: $graphId}), (m {GraphID: $graphId}) WHERE n.ID=m.ID AND NOT id(n)=id(m) RETURN count(n) = 0",
     "msg": "All node IDs must be distinct."
   },
   {
-    "rule": "MATCH (n {GraphID: $graphId}) RETURN ALL(r IN collect(n) WHERE r.Role IN [\"None\", \"STAFF\", \"DP\", \"INP\", \"PI\", \"IG\"])",
-    "msg": "Node roles should be \"None\", \"STAFF\", \"DP\", \"INP\", \"IG\", or \"PI\"."
+    "rule": "MATCH (n {GraphID: $graphId}) RETURN ALL(m IN collect(n) WHERE ALL(r IN split(m.Role, ',') WHERE r IN [\"None\", \"STAFF\", \"DP\", \"INP\", \"PI\", \"IG\"]))",
+    "msg": "Node roles should be None, STAFF, DP, INP, IG, or PI."
+  },
+  {
+    "rule": "MATCH (n {GraphID: $graphId}) RETURN ALL(r IN collect(n) WHERE r.Type IN [\"Start\", \"Stop\", \"AssertionItem\"])",
+    "msg": "Node types must be Start, Stop and AssertionItem"
+  },
+  {
+    "rule": "MATCH (n {GraphID: $graphId}) WHERE NOT n.SAFEType IN ['common-set', 'template-user-set', 'None'] RETURN count(n) = 0",
+    "msg": "SAFEType can only by common-set or template-user-set"
+  },
+  {
+    "rule": "MATCH (n {GraphID: $graphId}) WHERE NOT n.ID IN ['Start', 'Stop'] AND NOT 'PI' IN split(n.Role, ',') AND NOT 'STAFF' IN split(n.Role,',') AND n.SAFEType <> 'common-set' RETURN count(n) = 0",
+    "msg": "Non-PI, non-STAFF nodes must always have 'common-set' type"
+  },
+  {
+    "rule": "MATCH path=(o {GraphID: $graphId}) <-[:isPrerequisiteFor]- (n {GraphID: $graphId, SAFEType: 'template-user-set'}) -[:isPrerequisiteFor]-> (m {GraphID: $graphId}) RETURN count(path) = 0",
+    "msg": "template-user-set nodes must not have fanouts"
   }
 ]
