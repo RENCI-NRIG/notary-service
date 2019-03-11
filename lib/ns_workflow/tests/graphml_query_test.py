@@ -361,8 +361,16 @@ class TestGraphQuery(unittest.TestCase):
             "NoCopiesPledge" in nextSet)
         self.assertTrue(len(nextSet) == 4)
 
-        # mark more done
+        # test split user-set nodes
         self.neo4j.save_safe_token_and_complete(self.gid, "NoBackupPledge", "ABCDEFGH")
+        # CodedBackupSelectionPledge should be among the next
+        nextSet = set()
+        self.neo4j.find_reachable_not_completed_nodes("Bob", "PI",
+            self.gid, "Start", nextSet, localLog)
+        self.log.info(f"List of PI nodes {nextSet}")
+        self.assertFalse("CodedBackupSelectionPledge" in nextSet)
+
+        # mark more done
         self.neo4j.save_safe_token_and_complete(self.gid, "CodeBackupSelectionPledge", "ABCDEFGH")
         self.neo4j.save_safe_token_and_complete(self.gid, "NoCopiesPledge", "ABCDEFGH")
         nextSet = set()

@@ -112,7 +112,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         return id
 
     def _validate_workflow(self, graphId: str, rulesFile: str) -> None:
-        """ validate the graph imported in Neo4j according to a set of given Cipher rules"""
+        """ validate the graph imported in Neo4j according to a set of given Cypher rules"""
         f = open(rulesFile)
         rulesDict = json.load(f)
         f.close()
@@ -128,7 +128,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         return True
 
     def validate_workflow(self, graphId: str) -> None:
-        """ validate the graph imported in Neo4j according to standard Cipher rules """
+        """ validate the graph imported in Neo4j according to standard Cypher rules """
         assert graphId is not None
         self.log.info('Validating workflow %s', graphId)
         return self._validate_workflow(graphId, os.path.dirname(__file__) + '/rules.json')

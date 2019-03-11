@@ -42,5 +42,17 @@
   {
     "rule": "MATCH (n {GraphID: $graphId}) RETURN ALL(r IN collect(n) WHERE r.Type IN [\"Start\", \"Stop\", \"AssertionItem\"])",
     "msg": "Node types must be Start, Stop and AssertionItem"
+  },
+  {
+    "rule": "MATCH (n {GraphID: $graphId}) WHERE NOT n.SAFEType IN ['common-set', 'template-user-set', 'None'] RETURN count(n) = 0",
+    "msg": "SAFEType can only by common-set or template-user-set"
+  },
+  {
+    "rule": "MATCH (n {GraphID: $graphId}) WHERE NOT n.ID IN ['Start', 'Stop'] AND NOT 'PI' IN split(n.Role, ',') AND NOT 'STAFF' IN split(n.Role,',') AND n.SAFEType <> 'common-set' RETURN count(n) = 0",
+    "msg": "Non-PI, non-STAFF nodes must always have 'common-set' type"
+  },
+  {
+    "rule": "MATCH path=(o {GraphID: $graphId}) <-[:isPrerequisiteFor]- (n {GraphID: $graphId, SAFEType: 'template-user-set'}) -[:isPrerequisiteFor]-> (m {GraphID: $graphId}) RETURN count(path) = 0",
+    "msg": "template-user-set nodes must not have fanouts"
   }
 ]
