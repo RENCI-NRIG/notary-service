@@ -25,6 +25,7 @@ rm -rf \
   media \
   pg_data \
   neo4j \
+  kafka \
   venv \
   .venv
 while read line; do

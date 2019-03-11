@@ -6,12 +6,11 @@
 {% block content %}
     {% if user.is_authenticated %}
         <div class="container">
-            <h2>Edit Dataset
-                <a href="{% url 'dataset_detail' uuid=dataset_uuid %}"
+            <h2>Add Project
+                <a href="{% url 'projects' %}"
                    title="Cancel" class="fa fa-fw fa-ban" style="color: green;"></a>
             </h2>
-            <form method="POST" class="post-form" enctype="multipart/form-data">
-
+            <form method="POST" class="post-form">
                 {% csrf_token %}
                 {{ form.as_p }}
                 <input type="submit" value="Save" style="color: darkgreen">

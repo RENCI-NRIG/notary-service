@@ -4,6 +4,8 @@ from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 
 from .ldapsearch import get_ldap_attributes
 from .models import IsMemberOf, MembershipIsMemberOf, LdapOther, MembershipLdapOther
+from apache_kafka.producer import send_ns_message
+import uuid
 
 
 def generate_username(email):
@@ -99,6 +101,16 @@ class MyOIDCAB(OIDCAuthenticationBackend):
             update_membership_ismemberof(user, ldap_attributes)
             check_ldapother_attributes(ldap_attributes)
             update_ldapother_ismemberof(user, ldap_attributes)
+
+        # generate welcome message
+        subject = 'Welcome'
+        body = 'Hello ' + str(user.name) + ', welcome to the Notary Service!'
+        reference_url = 'https://ns-dev-1.cyberimpact.us'
+        is_active = True
+        ns_message = {
+            "ns-message": {'subject': subject, 'body': body, 'reference_url': reference_url, 'is_active': is_active}}
+        print('topic: ' + str(user.uuid) + ', message: ' + str(ns_message))
+        send_ns_message(str(user.uuid), ns_message)
 
         return user
 

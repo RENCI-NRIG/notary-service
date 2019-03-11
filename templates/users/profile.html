@@ -6,15 +6,84 @@
 {% block content %}
     <div class="container">
         {% if user.is_authenticated %}
-            <h1>Profile</h1>
-            <h3>My Preferences</h3>
+            <h1>User profile</h1>
+            <table>
+                <tr>
+                    <td style="width: 50%"><b>First name: </b>{{ user.given_name }}</td>
+                    <td><b>Last name: </b>{{ user.family_name }}</td>
+                </tr>
+                <tr>
+                    <td><b>Email: </b>{{ user.email }}</td>
+                    <td><b>Identity provider: </b>{{ user.idp_name }}</td>
+                </tr>
+            </table>
+            <hr>
+            <b style="font-size: larger">Site preferences</b>
             <form method="POST" class="post-form">
                 {% csrf_token %}
+                <input type="submit" name="update-preferences" value="Update preferences" style="color: darkgreen">
+                <br><br>
                 {{ form.as_p }}
-                <input type="submit" value="Update Preferences" style="color: darkgreen">
+            </form>
+            <hr>
+            <b style="font-size: larger">Messages</b>
+            <form method="POST" class="post-form">
+                {% csrf_token %}
+                <input type="submit" name="check-messages" value="Check for new messages" style="color: darkgreen">
             </form>
             <br>
-            <h3>My Identity (CILogon)</h3>
+            <table border="1px solid black" cellpadding="5px">
+                <tr>
+                    <td align="center"><b>Subject</b></td>
+                    <td align="center"><b>Body</b></td>
+                    <td align="center"><b>Created Date</b></td>
+                    <td align="center"><b>Modified Date</b></td>
+                </tr>
+
+                {% for message in ns_messages %}
+                    <tr>
+                        {% if message.subject|length > 36 %}
+                            <td>
+                                <a href="{% url 'message_detail' uuid=message.uuid %}" style="color: #146885;">
+                                    {{ message.subject|slice:":34" }}..
+                                </a>
+                            </td>
+                        {% else %}
+                            <td>
+                                <a href="{% url 'message_detail' uuid=message.uuid %}" style="color: #146885;">
+                                    {{ message.subject }}
+                                </a>
+                            </td>
+                        {% endif %}
+                        {% if message.body|length > 36 %}
+                            <td>{{ message.body|slice:":34" }}..</td>
+                        {% else %}
+                            <td>{{ message.body }}</td>
+                        {% endif %}
+                        <td>{{ message.created_date }}</td>
+                        <td>{{ message.modified_date }}</td>
+                        <td>
+                            <a href="{% url 'message_detail' uuid=message.uuid %}"
+                               title="View message" class="fa fa-fw fa-eye" style="color: #146885;"></a>
+                        </td>
+                        <td>
+                            <form method="POST" class="post-form">
+                                {% csrf_token %}
+                                <input style="font-family: FontAwesome;color: #B22222;
+                                border: none; background: none" name="delete-message"
+                                       title="Move message to trash" value="&#xf1f8;" type="submit">
+                                <input type="hidden" name="remove_message_uuid" value="{{ message.uuid }}">
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <p>
+                <a href="{% url 'messages' %}" title="View My Messages">View all active messages</a>
+            </p>
+
+            <hr>
+            <b style="font-size: larger">Identity: CILogon Claims</b>
             <table border="1px solid black" cellpadding="5px">
                 <tr>
                     <td>name</td>
@@ -79,7 +148,7 @@
             </table>
             {% if isMemberOf %}
                 <br>
-                <h3>My Memberships</h3>
+                <b style="font-size: larger">COmanage membership</b>
                 <table border="1px solid black" cellpadding="5px">
                     {% for group in isMemberOf %}
                         <tr>
@@ -91,7 +160,7 @@
             {% endif %}
             {% if LDAPOther %}
                 <br>
-                <h3>My Other Attributes</h3>
+                <b style="font-size: larger">Other attributes</b>
                 <table border="1px solid black" cellpadding="5px">
                     {% for group in LDAPOther %}
                         <tr>

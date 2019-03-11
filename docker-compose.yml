@@ -24,6 +24,10 @@ services:
       dockerfile: Dockerfile
     image: django
     container_name: django
+    depends_on:
+      - database
+      - neo4j
+      - kafka
     ports:
       - 8000:8000
     networks:
@@ -75,6 +79,34 @@ services:
       - ${NGINX_SSL_KEY:-./ssl/ssl_dev.key}:/ssl/neo4j.key    # SSL development key
     environment:
       - NEO4J_AUTH=${NEO4J_USER:-neo4j}/${NEO4J_PASS:-password}
+
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    container_name: zookeeper
+    ports:
+      - 2181:2181
+    networks:
+      ns_net:
+        ipv4_address: 172.16.238.14
+
+  kafka:
+    image: wurstmeister/kafka:2.12-2.1.1
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092
+    networks:
+      ns_net:
+        ipv4_address: 172.16.238.15
+    environment:
+      - KAFKA_ZOOKEEPER_CONNECT=${KAFKA_ZOOKEEPER_CONNECT:-zookeeper:2181}
+      - KAFKA_LISTENERS=${KAFKA_LISTENERS:-PLAINTEXT://:9092}
+      - KAFKA_ADVERTISED_LISTENERS=${KAFKA_ADVERTISED_LISTENERS:-PLAINTEXT://127.0.0.1:9092}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${KAFKA_DATA_PATH_HOST:-./kafka}:/kafka
+
 networks:
   ns_net:
     driver: bridge

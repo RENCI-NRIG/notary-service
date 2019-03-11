@@ -15,31 +15,65 @@
             <div class="container">
                 <p>Hello <b>{{ user.name }}</b>, You are logged in as username: <b>{{ user.username }}</b></p>
                 <h2>My Messages</h2>
+                <form method="POST" class="post-form">
+                    {% csrf_token %}
+                    <input type="submit" name="check-messages" value="Check for new messages" style="color: darkgreen">
+                </form>
+                <br>
                 <table border="1px solid black" cellpadding="5px">
                     <tr>
-                        <td align="center"><b>Message ID</b></td>
-                        <td align="center"><b>Content</b></td>
+                        <td align="center"><b>Subject</b></td>
+                        <td align="center"><b>Body</b></td>
                         <td align="center"><b>Created Date</b></td>
-                        <td align="center"><b>Completed Date</b></td>
+                        <td align="center"><b>Modified Date</b></td>
                     </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>Example content</td>
-                        <td>Jan. 24, 2019, 5:20 p.m.</td>
-                        <td>Feb. 7, 2019, 6:09 p.m.</td>
-                        <td>
-                            <a href="{% url 'datasets' %}" title="Show me more" class="fa fa-fw fa-eye"></a>
-                        </td>
-                        <td>
-                            <a href="{% url 'datasets' %}" title="Dismiss message" class="fa fa-fw fa-trash"></a>
-                        </td>
-                    </tr>
+
+                    {% for message in ns_messages %}
+                        <tr>
+                            {% if message.subject|length > 36 %}
+                                <td>
+                                    <a href="{% url 'message_detail' uuid=message.uuid %}" style="color: #146885;">
+                                        {{ message.subject|slice:":34" }}..
+                                    </a>
+                                </td>
+                            {% else %}
+                                <td>
+                                    <a href="{% url 'message_detail' uuid=message.uuid %}" style="color: #146885;">
+                                        {{ message.subject }}
+                                    </a>
+                                </td>
+                            {% endif %}
+                            {% if message.body|length > 36 %}
+                                <td>{{ message.body|slice:":34" }}..</td>
+                            {% else %}
+                                <td>{{ message.body }}</td>
+                            {% endif %}
+                            <td>{{ message.created_date }}</td>
+                            <td>{{ message.modified_date }}</td>
+                            <td>
+                                <a href="{% url 'message_detail' uuid=message.uuid %}"
+                                   title="View message" class="fa fa-fw fa-eye" style="color: #146885;"></a>
+                            </td>
+                            <td>
+                                <form method="POST" class="post-form">
+                                    {% csrf_token %}
+                                    <input style="font-family: FontAwesome;color: #B22222;
+                                border: none; background: none" name="delete-message"
+                                           title="Move message to trash" value="&#xf1f8;" type="submit">
+                                    <input type="hidden" name="remove_message_uuid" value="{{ message.uuid }}">
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
                 </table>
+                <p>
+                    <a href="{% url 'messages' %}" title="View My Messages">View all active messages</a>
+                </p>
             </div>
         {% else %}
             <div class="container">
                 <p>You are not currently logged in</p>
             </div>
         {% endif %}
-    </div>
+
 {% endblock %}

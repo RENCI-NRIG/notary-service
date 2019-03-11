@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'debug.apps.DebugConfig',  # debug dashboard for notary service
     'datasets.apps.DatasetsConfig',  # datasets in notary service
     'workflows.apps.WorkflowsConfig',  # workflows in notary service
+    'apache_kafka.apps.ApacheKafkaConfig',  # messages using apache kafka
     'django_cleanup',
 ]
 
@@ -81,6 +82,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'templates/debug'),
             os.path.join(BASE_DIR, 'templates/datasets'),
             os.path.join(BASE_DIR, 'templates/workflows'),
+            os.path.join(BASE_DIR, 'templates/apache_kafka'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -199,5 +201,11 @@ try:
     from .secrets import *
 except ImportError:
     pass
+
+# Kafka servers
+KAFKA_SERVERS = os.getenv('KAFKA_SERVERS', '127.0.0.1:9092')
+KAFKA_SEND_KEY = os.getenv('KAFKA_SEND_KEY', 'ns-dev-1')
+KAFKA_LISTENERS = os.getenv('KAFKA_LISTENERS', 'PLAINTEXT://:9092')
+KAFKA_ADVERTISED_LISTENERS = os.getenv('KAFKA_ADVERTISED_LISTENERS', 'PLAINTEXT://127.0.0.1:9092')
 
 AUTH_USER_MODEL = 'users.NotaryServiceUser'  # custom user model

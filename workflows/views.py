@@ -37,6 +37,7 @@ def workflow_detail(request, uuid):
 def workflow_delete(request, uuid):
     workflow = get_object_or_404(WorkflowNeo4j, uuid=uuid)
     project = MembershipWorkflow.objects.get(workflow__uuid=workflow.uuid)
+    workflow_graph = wf.get_neo4j_workflow_by_uuid(str(uuid))
     if request.method == "POST":
         if request.POST.get("workflow_delete"):
             delete_neo4j_workflow(
@@ -48,12 +49,14 @@ def workflow_delete(request, uuid):
         'projects_page': 'active',
         'workflow': workflow,
         'project': project,
+        'workflow_graph': workflow_graph,
     })
 
 
 def workflow_reset(request, uuid):
     workflow = get_object_or_404(WorkflowNeo4j, uuid=uuid)
     project = MembershipWorkflow.objects.get(workflow__uuid=workflow.uuid)
+    workflow_graph = wf.get_neo4j_workflow_by_uuid(str(uuid))
     if request.method == "POST":
         if request.POST.get("workflow_reset"):
             graphml_file = workflow.template.graphml_definition.name
@@ -72,6 +75,7 @@ def workflow_reset(request, uuid):
         'projects_page': 'active',
         'workflow': workflow,
         'project': project,
+        'workflow_graph': workflow_graph,
     })
 
 

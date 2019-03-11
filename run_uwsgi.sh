@@ -10,6 +10,7 @@ APPS_LIST=(
   "projects"
   "datasets"
   "workflows"
+  "apache_kafka"
 )
 
 for app in "${APPS_LIST[@]}";do

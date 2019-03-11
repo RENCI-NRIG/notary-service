@@ -8,9 +8,10 @@
         <div class="container">
             <div class="post">
                 <h2>{{ dataset.name }}
-                    <a href="{% url 'dataset_edit' uuid=dataset.uuid %}" title="Edit" class="fa fa-fw fa-pencil"></a>
-                    <a href="{% url 'dataset_delete' uuid=dataset.uuid %}" title="Delete"
-                       class="fa fa-fw fa-trash"></a>
+                    <a href="{% url 'dataset_edit' uuid=dataset.uuid %}"
+                       title="Edit dataset" class="fa fa-fw fa-pencil" style="color: green;"></a>
+                    <a href="{% url 'dataset_delete' uuid=dataset.uuid %}"
+                       title="Delete dataset" class="fa fa-fw fa-trash" style="color: #B22222;"></a>
                 </h2>
                 {% if not dataset.is_valid %}
                     <form method="POST" class="post-form">
@@ -25,51 +26,28 @@
                         {{ dataset_error }}
                     </div>
                 {% endif %}
+                <p>{{ dataset.description|linebreaksbr }}</p>
                 <table>
                     <tr>
-                        <td width="60%">
-                            <b>Created By:</b> {{ dataset.created_by }}
-                        </td>
+                        <td><b>DOI or Metadata URL:</b></td>
                         <td>
-                            <b>Modified By:</b> {{ dataset.modified_by }}
+                            <a href="{{ dataset.dataset_identifier_as_doi_or_meta }}" target="_blank">
+                                {{ dataset.dataset_identifier_as_doi_or_meta }}</a>
                         </td>
-
                     </tr>
                     <tr>
+                        <td><b>Presidio URL:</b></td>
                         <td>
-                            <b>Created Date:</b> {{ dataset.created_date|date:"m/d/Y g:i a" }}
-                        </td>
-                        <td>
-                            <b>Modified Date:</b> {{ dataset.modified_date|date:"m/d/Y g:i a" }}
-                        </td>
-
-                    </tr>
-                    <tr>
-                        <td>
-                            <b>Presidio URL:</b>
                             <a href="{{ dataset.dataset_identifier_as_url }}" target="_blank">
                                 {{ dataset.dataset_identifier_as_url }}
-                            </a><br>
-                        </td>
-                        <td>
-                            <b>SAFE SCID:</b> {{ dataset.safe_identifier_as_scid }}<br>
+                            </a>
                         </td>
                     </tr>
+                    <tr>
+                        <td><b>SAFE SCID:</b></td>
+                        <td>{{ dataset.safe_identifier_as_scid }}</td>
+                    </tr>
                 </table>
-                <b>DOI or Metadata URL:</b>
-                <a href="{{ dataset.dataset_identifier_as_doi_or_meta }}" target="_blank">
-                    {{ dataset.dataset_identifier_as_doi_or_meta }}
-                </a>
-                <br>
-                <b>Validated:</b> {{ dataset.is_valid }}
-                {% if dataset.is_valid %}
-                    (<i class="fa fa-fw fa-check" style="color: green;"></i>)
-                {% else %}
-                    (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
-                {% endif %}<br>
-
-                <b>Description:</b><br>
-                <p>{{ dataset.description|linebreaksbr }}</p>
                 <b>Templates:</b><br>
                 <table border="1px solid black" cellpadding="5px">
                     <tr>
@@ -85,7 +63,6 @@
                         <td align="center"><b>GraphML Definition File</b></td>
                     </tr>
                     {% for template in templates %}
-                        {{ template }}
                         <tr>
                             <td>{{ template.name }}</td>
                             <td align="center">
@@ -106,6 +83,36 @@
                         </tr>
                     {% endfor %}
                 </table>
+                <br>
+                <table style="font-size: small">
+                    <tr>
+                        <td width="60%">
+                            <b>Created By:</b> {{ dataset.created_by }}
+                        </td>
+                        <td>
+                            <b>Modified By:</b> {{ dataset.modified_by }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Created Date:</b> {{ dataset.created_date|date:"m/d/Y g:i a" }}
+                        </td>
+                        <td>
+                            <b>Modified Date:</b> {{ dataset.modified_date|date:"m/d/Y g:i a" }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Validated:</b> {{ dataset.is_valid }}
+                            {% if dataset.is_valid %}
+                                (<i class="fa fa-fw fa-check" style="color: green;"></i>)
+                            {% else %}
+                                (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+
             </div>
             {% else %}
             <div class="container">
