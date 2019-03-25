@@ -57,9 +57,10 @@ def get_neo4j_workflow_by_uuid(workflow_uuid):
             if key == 'Role':
                 entry['description'] += str('Role: ' + properties['Role'] + '\n')
             if key == 'description':
-                entry['description'] += str('Description: ' + properties['description'])
+                entry['description'] += str('Description: ' + properties['description'] + '\n')
             if key == 'SAFEType':
                 entry['safetype'] = properties['SAFEType']
+        entry['description'] = entry['description'].rstrip('\n')
         entry['type'] = properties['Type']
         entry['label'] = properties['label']
         entry['properties'] = properties
