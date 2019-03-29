@@ -18,10 +18,10 @@ class Role(models.Model):
     NO_ROLE = 8  # No role found in COmanage
     ROLE_CHOICES = (
         (NSADMIN, 'Administrator'),
-        (STAFF, 'Project member'),
-        (DP, 'Data provider'),
-        (INP, 'Infrastructure provider'),
-        (IG, 'Institutional governance'),
+        (STAFF, 'Project Member'),
+        (DP, 'Data Provider'),
+        (INP, 'Infrastructure Provider'),
+        (IG, 'Institutional Governance'),
         (PI_ADMIN, 'Project PI Admin'),
         (PI_MEMBER, 'Project PI'),
         (NO_ROLE, 'No Role'),

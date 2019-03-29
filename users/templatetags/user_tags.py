@@ -41,7 +41,7 @@ def display_datasets(context):
 @register.simple_tag(takes_context=True)
 def display_templates(context):
     u = context['request'].user
-    if u.is_nsadmin or u.is_dp:
+    if u.is_nsadmin or u.is_piadmin or u.is_dp:
         return True
     else:
         return False

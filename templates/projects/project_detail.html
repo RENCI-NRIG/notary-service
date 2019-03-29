@@ -8,16 +8,20 @@
         <div class="container">
             <div class="post">
                 <h2>{{ project.name }}
-                    <a href="{% url 'project_edit' uuid=project.uuid %}"
-                       title="Edit project" class="fa fa-fw fa-pencil" style="color: green;"></a>
-                    <a href="{% url 'project_delete' uuid=project.uuid %}"
-                       title="Delete project" class="fa fa-fw fa-trash" style="color: #B22222;"></a>
+                    {% if user.is_piadmin or user.is_nsadmin %}
+                        <a href="{% url 'project_edit' uuid=project.uuid %}"
+                           title="Edit project" class="fa fa-fw fa-pencil" style="color: green;"></a>
+                        <a href="{% url 'project_delete' uuid=project.uuid %}"
+                           title="Delete project" class="fa fa-fw fa-trash" style="color: #B22222;"></a>
+                    {% endif %}
                 </h2>
-                {% if not project.is_valid %}
-                    <form method="POST" class="post-form">
-                        {% csrf_token %}
-                        <input type="submit" name="validate" value="Validate Now" style="color: darkgreen">
-                    </form>
+                {% if user.is_piadmin or user.is_nsadmin %}
+                    {% if not project.is_valid %}
+                        <form method="POST" class="post-form">
+                            {% csrf_token %}
+                            <input type="submit" name="validate" value="Validate Now" style="color: darkgreen">
+                        </form>
+                    {% endif %}
                 {% endif %}
                 {% if project_error %}
                     <div style="background-color: cornsilk;color:darkblue;font-family:Courier;
@@ -115,17 +119,20 @@
                 </table>
                 <br>
                 <h3>Workflows</h3>
-                <form method="POST" class="post-form">
-                    {% csrf_token %}
-                    {% if project.is_valid %}
-                        <input type="submit" name="generate_workflow" value="Generate Workflow(s)"
-                               style="color: darkgreen">
-                    {% else %}
-                        <input type="submit" name="generate_workflow" value="Generate Workflow(s)" style="color: grey"
-                               disabled>
-                    {% endif %}
-                </form>
-                <br>
+                {% if user.is_piadmin or user.is_nsadmin %}
+                    <form method="POST" class="post-form">
+                        {% csrf_token %}
+                        {% if project.is_valid %}
+                            <input type="submit" name="generate_workflow" value="Generate Workflow(s)"
+                                   style="color: darkgreen">
+                        {% else %}
+                            <input type="submit" name="generate_workflow" value="Generate Workflow(s)"
+                                   style="color: grey"
+                                   disabled>
+                        {% endif %}
+                    </form>
+                    <br>
+                {% endif %}
                 <table border="1px solid black" cellpadding="5px">
                     <tr>
                         <td align="center"><b>Name</b></td>

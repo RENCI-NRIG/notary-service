@@ -6,6 +6,7 @@ from .ldapsearch import get_ldap_attributes
 from .models import IsMemberOf, MembershipIsMemberOf, LdapOther, MembershipLdapOther
 from apache_kafka.producer import send_ns_message
 from users.models import Role
+from users.views import set_role_boolean
 from builtins import any
 
 
@@ -104,8 +105,9 @@ class MyOIDCAB(OIDCAuthenticationBackend):
             user.is_staff = True
             user.is_superuser = True
         else:
-            user.is_staff = True
-            user.is_superuser = True
+            user.is_staff = False
+            user.is_superuser = False
+        set_role_boolean(user)
 
 
     def create_user(self, claims):
