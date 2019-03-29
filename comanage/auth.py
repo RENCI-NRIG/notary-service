@@ -5,7 +5,8 @@ from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 from .ldapsearch import get_ldap_attributes
 from .models import IsMemberOf, MembershipIsMemberOf, LdapOther, MembershipLdapOther
 from apache_kafka.producer import send_ns_message
-import uuid
+from users.models import Role
+from builtins import any
 
 
 def generate_username(email):
@@ -73,6 +74,40 @@ def update_ldapother_ismemberof(user, attributelist):
 
 
 class MyOIDCAB(OIDCAuthenticationBackend):
+    def set_user_roles(self, user):
+        ns_roles = [
+            ('NSADMIN', '-NSADMIN:admins'),
+            ('STAFF', '-STAFF:members:active'),
+            ('DP', '-DP:members:active'),
+            ('INP', '-INP:members:active'),
+            ('IG', '-IG:members:active'),
+            ('PI_ADMIN', '-PI:admins'),
+            ('PI_MEMBER', '-PI:members:active'),
+            ('NO_ROLE', '-NOROLE'),
+        ]
+        ismember_list = MembershipIsMemberOf.objects.values_list(
+            'ismemberof__value', flat=True
+        ).filter(user=user)
+        for role_pair in ns_roles:
+            role = role_pair[0]
+            expr = role_pair[1]
+            # if role is part of user ismemberof list, add role if it does not already exist
+            if any(expr in x for x in ismember_list):
+                if not user.roles.filter(id=int(getattr(Role, role))).exists():
+                    user.roles.add(int(getattr(Role, role)))
+                    print("Adding role " + str(Role.objects.get(id=int(getattr(Role, role)))))
+            else:
+                if user.roles.filter(id=int(getattr(Role, role))).exists() and getattr(Role, role) != Role.NO_ROLE:
+                    user.roles.remove(int(getattr(Role, role)))
+                    print("Removing role " + str(Role.objects.get(id=int(getattr(Role, role)))))
+        if any('-NSADMIN:admins' in x for x in ismember_list):
+            user.is_staff = True
+            user.is_superuser = True
+        else:
+            user.is_staff = True
+            user.is_superuser = True
+
+
     def create_user(self, claims):
         user = super(MyOIDCAB, self).create_user(claims)
         user.first_name = claims.get('given_name', '')
@@ -109,8 +144,14 @@ class MyOIDCAB(OIDCAuthenticationBackend):
         is_active = True
         ns_message = {
             "ns-message": {'subject': subject, 'body': body, 'reference_url': reference_url, 'is_active': is_active}}
-        print('topic: ' + str(user.uuid) + ', message: ' + str(ns_message))
+        # print('topic: ' + str(user.uuid) + ', message: ' + str(ns_message))
         send_ns_message(str(user.uuid), ns_message)
+
+        # set roles
+        self.set_user_roles(user)
+        user.roles.add(int(getattr(Role, 'NO_ROLE')))
+        user.is_norole = True
+        user.save()
 
         return user
 
@@ -140,5 +181,9 @@ class MyOIDCAB(OIDCAuthenticationBackend):
             update_membership_ismemberof(user, ldap_attributes)
             check_ldapother_attributes(ldap_attributes)
             update_ldapother_ismemberof(user, ldap_attributes)
+
+        # set roles
+        self.set_user_roles(user)
+        user.save()
 
         return user

@@ -1,0 +1,58 @@
+[
+  {
+    "model": "users.role",
+    "pk": 1,
+    "fields": {
+      "id": "1"
+    }
+  },
+  {
+    "model": "users.role",
+    "pk": 2,
+    "fields": {
+      "id": "2"
+    }
+  },
+  {
+    "model": "users.role",
+    "pk": 3,
+    "fields": {
+      "id": "3"
+    }
+  },
+  {
+    "model": "users.role",
+    "pk": 4,
+    "fields": {
+      "id": "4"
+    }
+  },
+  {
+    "model": "users.role",
+    "pk": 5,
+    "fields": {
+      "id": "5"
+    }
+  },
+  {
+    "model": "users.role",
+    "pk": 6,
+    "fields": {
+      "id": "6"
+    }
+  },
+  {
+    "model": "users.role",
+    "pk": 7,
+    "fields": {
+      "id": "7"
+    }
+  },
+  {
+    "model": "users.role",
+    "pk": 8,
+    "fields": {
+      "id": "8"
+    }
+  }
+]

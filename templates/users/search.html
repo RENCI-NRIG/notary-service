@@ -3,7 +3,13 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    <div class="container">
-        <h1>Search</h1>
-    </div>
+    {% if user.is_authenticated %}
+        <div class="container">
+            <h1>Search</h1>
+        </div>
+    {% else %}
+        <div class="container">
+            <p>You are not currently logged in or not authorized to view this page</p>
+        </div>
+    {% endif %}
 {% endblock %}

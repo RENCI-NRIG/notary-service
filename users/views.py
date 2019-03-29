@@ -1,9 +1,10 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 
 from apache_kafka.models import Message
 from apache_kafka.views import index_page_messages, check_for_new_messages
 from comanage.models import IsMemberOf, LdapOther, NotaryServiceUser
 from .forms import UserPreferences
+from .models import Role
 
 
 def index(request):
@@ -43,6 +44,18 @@ def faq(request):
     return render(request, 'faq.html', context)
 
 
+def set_role_boolean(user):
+    user.is_nsadmin = (int(user.role) == int(getattr(Role, 'NSADMIN')))
+    user.is_staff = (int(user.role) == int(getattr(Role, 'STAFF')))
+    user.is_pi = (int(user.role) == int(getattr(Role, 'PI_MEMBER')))
+    user.is_piadmin = (int(user.role) == int(getattr(Role, 'PI_ADMIN')))
+    user.is_dp = (int(user.role) == int(getattr(Role, 'DP')))
+    user.is_inp = (int(user.role) == int(getattr(Role, 'INP')))
+    user.is_ig = (int(user.role) == int(getattr(Role, 'IG')))
+    user.is_norole = (int(user.role) == int(getattr(Role, 'NO_ROLE')))
+    user.save()
+
+
 def profile(request):
     if request.user.is_authenticated:
         user = get_object_or_404(NotaryServiceUser, id=request.user.id)
@@ -50,22 +63,27 @@ def profile(request):
             membershipismemberof__user_id=request.user.id).order_by('value')
         ldapother = LdapOther.objects.filter(
             membershipldapother__user_id=request.user.id).order_by('attribute', 'value')
-        form = UserPreferences(instance=user)
         if request.method == "POST":
-            if request.POST.get("delete-message"):
-                message = get_object_or_404(Message, uuid=request.POST.get('remove_message_uuid'))
-                message.is_active = False
-                message.save()
-            if request.POST.get("update-preferences"):
-                form = UserPreferences(request.POST, instance=user)
-                if form.is_valid():
+            form = UserPreferences(request.POST, instance=user, user=request.user)
+            if form.is_valid():
+                if request.POST.get("delete-message"):
+                    message = get_object_or_404(Message, uuid=request.POST.get('remove_message_uuid'))
+                    message.is_active = False
+                    message.save()
+                if request.POST.get("update-preferences"):
                     user.show_uuid = form.data.get('show_uuid')
+                    user.role = form.data.get('role')
                     user.save()
-                elif request.POST.get("check-messages"):
+                    set_role_boolean(user=user)
+                if request.POST.get("check-messages"):
                     check_for_new_messages(str(request.user.uuid))
+                return redirect('profile')
+        else:
+            form = UserPreferences(instance=user, user=request.user)
         ns_messages = Message.objects.filter(
             kafka_topic=str(request.user.uuid),
-            is_active=True).order_by('-created_date')[:5]
+            is_active=True
+        ).order_by('-created_date')[:5]
         return render(request, 'profile.html',
                       {'profile_page': 'active',
                        'isMemberOf': ismemberof,

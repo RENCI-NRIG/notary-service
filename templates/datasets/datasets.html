@@ -1,18 +1,21 @@
 {% extends 'base.html' %}
-{% load static dataset_tags %}
+{% load static dataset_tags user_tags %}
 
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
+    {% display_datasets as show_datasets %}
+    {% if user.is_authenticated and show_datasets %}
         <div class="container">
             <h1>Datasets</h1>
             <p>Datasets are composed from a URL dataset identifier, a SAFE SCID, and one or more
                 notary service templates which define the permission workflow.
             </p>
             <h2>My Datasets
-                <a href="{% url 'dataset_new' %}"
-                   title="Create new Dataset" class="fa fa-fw fa-plus-square" style="color: green;"></a>
+                {% if user.is_dp or user.is_nsadmin %}
+                    <a href="{% url 'dataset_new' %}"
+                       title="Create new Dataset" class="fa fa-fw fa-plus-square" style="color: green;"></a>
+                {% endif %}
             </h2>
             <table border="1px solid black" cellpadding="5px">
                 <tr>
@@ -55,7 +58,7 @@
         </div>
     {% else %}
         <div class="container">
-            <p>You are not currently logged in</p>
+            <p>You are not currently logged in or not authorized to view this page</p>
         </div>
     {% endif %}
 {% endblock %}
