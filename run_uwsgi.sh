@@ -13,12 +13,22 @@ APPS_LIST=(
   "apache_kafka"
 )
 
+FIXTURES_LIST=(
+  "roles"
+)
+
+#APPS_LIST=()
+
 for app in "${APPS_LIST[@]}";do
     python manage.py makemigrations $app
 done
 python manage.py makemigrations
 python manage.py showmigrations
 python manage.py migrate
+
+for fixture in "${FIXTURES_LIST[@]}";do
+    python manage.py loaddata $fixture
+done
 python manage.py collectstatic --noinput
 
 if [[ "${USE_DOT_VENV}" -eq 1 ]]; then
