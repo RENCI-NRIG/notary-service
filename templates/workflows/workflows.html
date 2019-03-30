@@ -1,22 +1,24 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static user_tags %}
 
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
+    {% display_workflows as show_workflows %}
+    {% if user.is_authenticated and show_workflows%}
         <div class="container">
             <h1>Workflows</h1>
             <p>Workflows are Neo4j graphs where nodes represent the state of personnel or infrastructure
                 decision points and relationships represent completed actions between states.</p>
-            <i>TODO: put behind user.is_admin check</i>
-            <h3>Neo4j Browser</h3>
-            <a href="{{ neo4j_vars.neo4j_https }}" target="_blank">{{ neo4j_vars.neo4j_https }}/</a>
-            <ul>
-                <li><b>Connect URL</b>: {{ neo4j_vars.neo4j_bolt_url }}</li>
-                <li><b>Username</b>: {{ neo4j_vars.neo4j_user }}</li>
-                <li><b>Password</b>: {{ neo4j_vars.neo4j_pass }}</li>
-            </ul>
+            {% if user.is_nsadmin %}
+                <h3>Neo4j Browser</h3>
+                <a href="{{ neo4j_vars.neo4j_https }}" target="_blank">{{ neo4j_vars.neo4j_https }}/</a>
+                <ul>
+                    <li><b>Connect URL</b>: {{ neo4j_vars.neo4j_bolt_url }}</li>
+                    <li><b>Username</b>: {{ neo4j_vars.neo4j_user }}</li>
+                    <li><b>Password</b>: {{ neo4j_vars.neo4j_pass }}</li>
+                </ul>
+            {% endif %}
             <h3>My Workflows</h3>
             <table border="1px solid black" cellpadding="5px">
                 <tr>

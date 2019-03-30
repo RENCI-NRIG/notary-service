@@ -26,10 +26,12 @@
         <div class="container">
             <div class="post">
                 <h2>{{ workflow.name }}
-                    <a href="{% url 'workflow_reset' uuid=workflow.uuid %}"
-                       title="Reset workflow" class="fa fa-fw fa-refresh" style="color: green;"></a>
-                    <a href="{% url 'workflow_delete' uuid=workflow.uuid %}"
-                       title="Delete workflow" class="fa fa-fw fa-trash" style="color: #B22222;"></a>
+                    {% if user.is_piadmin or user.is_nsadmin %}
+                        <a href="{% url 'workflow_reset' uuid=workflow.uuid %}"
+                           title="Reset workflow" class="fa fa-fw fa-refresh" style="color: green;"></a>
+                        <a href="{% url 'workflow_delete' uuid=workflow.uuid %}"
+                           title="Delete workflow" class="fa fa-fw fa-trash" style="color: #B22222;"></a>
+                    {% endif %}
                 </h2>
                 <p>{{ workflow.description|linebreaksbr }}</p>
                 <h3>Provenance</h3>
@@ -54,30 +56,33 @@
                     {% endif %}
                 </a>
                 <br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <i class="fa fa-fw fa-level-down"></i>
-                <b>Template:</b> {{ workflow.template.name }} -
-                <a href="{% url 'template_detail' uuid=workflow.template.uuid %}"
-                   title="Edit" style="font-family: Courier">
-                    {% if user.show_uuid %}
-                        {{ workflow.template.uuid }}
-                    {% else %}
-                        {{ workflow.template.description|slice:":34" }}..
-                    {% endif %}
-                </a>
+                {% if user.is_piadmin or user.is_nsadmin %}
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <i class="fa fa-fw fa-level-down"></i>
+                    <b>Template:</b> {{ workflow.template.name }} -
+                    <a href="{% url 'template_detail' uuid=workflow.template.uuid %}"
+                       title="Edit" style="font-family: Courier">
+                        {% if user.show_uuid %}
+                            {{ workflow.template.uuid }}
+                        {% else %}
+                            {{ workflow.template.description|slice:":34" }}..
+                        {% endif %}
+                    </a>
+                    <br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <i class="fa fa-fw fa-long-arrow-right"></i>
+                    <b>Workflow:</b> {{ workflow.name }} -
+                    <a href="{% url 'workflow_detail' uuid=workflow.uuid %}"
+                       title="Edit" style="font-family: Courier">
+                        {% if user.show_uuid %}
+                            {{ workflow.uuid }}
+                        {% else %}
+                            {{ workflow.description|slice:":34" }}..
+                        {% endif %}
+                    </a>
+                    <br>
+                {% endif %}
                 <br>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <i class="fa fa-fw fa-long-arrow-right"></i>
-                <b>Workflow:</b> {{ workflow.name }} -
-                <a href="{% url 'workflow_detail' uuid=workflow.uuid %}"
-                   title="Edit" style="font-family: Courier">
-                    {% if user.show_uuid %}
-                        {{ workflow.uuid }}
-                    {% else %}
-                        {{ workflow.description|slice:":34" }}..
-                    {% endif %}
-                </a>
-                <br><br>
                 <h3>Graph</h3>
             </div>
             <div style="border:3px solid #434343;width:960px;height:600px;overflow:scroll;">
