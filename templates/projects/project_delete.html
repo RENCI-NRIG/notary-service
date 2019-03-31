@@ -4,7 +4,7 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and user.is_piadmin or user.is_nsadmin %}
         <div class="container">
             <div class="post">
                 <h1 style="color: #B22222;">Are you sure you want to delete?</h1>
@@ -132,7 +132,7 @@
 
             {% else %}
             <div class="container">
-                <p>You are not currently logged in</p>
+                <p>You are not currently logged in or not authorized to view this page</p>
             </div>
         </div>
     {% endif %}

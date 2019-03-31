@@ -18,7 +18,7 @@
                 </tr>
             </table>
             <hr>
-            <b style="font-size: larger">Site preferences</b>
+            <b style="font-size: larger">Preferences</b>
             <form method="POST" class="post-form">
                 {% csrf_token %}
                 <input type="submit" name="update-preferences" value="Update preferences" style="color: darkgreen">
@@ -172,7 +172,7 @@
             {% endif %}
         {% else %}
             <div class="container">
-                <p>You are not currently logged in</p>
+                <p>You are not currently logged in or not authorized to view this page</p>
             </div>
         {% endif %}
     </div>

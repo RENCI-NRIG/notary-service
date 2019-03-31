@@ -4,7 +4,7 @@
 {% block title %}Debug Dashboard{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and user.is_nsadmin %}
         {% if user.is_superuser %}
             <div class="container">
                 <h2>Debug Console</h2>

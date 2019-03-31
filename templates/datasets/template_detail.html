@@ -5,19 +5,24 @@
 
 {% block content %}
     {% if user.is_authenticated %}
-        <div class="container">
+        {% if user.is_dp or user.is_nsadmin or user.is_piadmin %}
+            <div class="container">
             <div class="post">
                 <h2>{{ template.name }}
-                    <a href="{% url 'template_edit' uuid=template.uuid %}"
-                       title="Edit template" class="fa fa-fw fa-pencil" style="color: green;"></a>
-                    <a href="{% url 'template_delete' uuid=template.uuid %}"
-                       title="Delete template" class="fa fa-fw fa-trash" style="color: #B22222;"></a>
+                    {% if user.is_dp or user.is_nsadmin %}
+                        <a href="{% url 'template_edit' uuid=template.uuid %}"
+                           title="Edit template" class="fa fa-fw fa-pencil" style="color: green;"></a>
+                        <a href="{% url 'template_delete' uuid=template.uuid %}"
+                           title="Delete template" class="fa fa-fw fa-trash" style="color: #B22222;"></a>
+                    {% endif %}
                 </h2>
-                {% if not template.is_valid %}
-                    <form method="POST" class="post-form">
-                        {% csrf_token %}
-                        <input type="submit" value="Validate Now" style="color: darkgreen">
-                    </form>
+                {% if user.is_dp or user.is_nsadmin %}
+                    {% if not template.is_valid %}
+                        <form method="POST" class="post-form">
+                            {% csrf_token %}
+                            <input type="submit" value="Validate Now" style="color: darkgreen">
+                        </form>
+                    {% endif %}
                 {% endif %}
                 {% if template_error %}
                     <div style="background-color: cornsilk;color:darkblue;font-family:Courier;
@@ -29,7 +34,11 @@
                 <p>{{ template.description|linebreaksbr }}</p>
 
                 <b>File:</b>
-                <a href="{{ template.graphml_definition.url }}">{{ template.graphml_definition | getfilename }}</a>
+                {% if user.is_dp or user.is_nsadmin %}
+                    <a href="{{ template.graphml_definition.url }}">{{ template.graphml_definition | getfilename }}</a>
+                {% elif user.is_piadmin %}
+                    {{ template.graphml_definition | getfilename }}
+                {% endif %}
                 <br><br>
                 <b>Contents:</b><br>
                 <div style="background-color: #DCDCDC;color:darkblue;font-family:Courier;
@@ -67,10 +76,11 @@
                     </tr>
                 </table>
             </div>
-            {% else %}
-            <div class="container">
-                <p>You are not currently logged in</p>
-            </div>
-        </div>
+        {% endif %}
+    {% else %}
+    <div class="container">
+        <p>You are not currently logged in or not authorized to view this page</p>
+    </div>
+    </div>
     {% endif %}
 {% endblock %}
