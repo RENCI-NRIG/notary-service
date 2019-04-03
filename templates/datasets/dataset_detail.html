@@ -82,7 +82,11 @@
                                     {% if user.show_uuid %}
                                         {{ template.uuid }}
                                     {% else %}
-                                        {{ template.description|slice:":34" }}..
+                                        {% if template.description|length > 36 %}
+                                            {{ template.description|slice:":34" }}..
+                                        {% else %}
+                                            {{ template.description }}
+                                        {% endif %}
                                     {% endif %}
                                 </a></td>
                                 <td>{{ template.graphml_definition|getfilename }}</td>

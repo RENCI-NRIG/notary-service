@@ -54,6 +54,13 @@
                         <i class="fa fa-fw fa-code"></i> Templates</a>
                 </li>
             {% endif %}
+            {% display_infrastructure as show_infrastructure %}
+            {% if show_infrastructure %}
+                <li class="nav-item {{ infrastructure_page }}">
+                    <a class="nav-link" href="{% url 'infrastructure' %}">
+                        <i class="fa fa-fw fa-gears"></i> Infrastructure</a>
+                </li>
+            {% endif %}
             <li class="nav-item {{ profile_page }}">
                 <a class="nav-link" href="{% url 'profile' %}">
                     <i class="fa fa-fw fa-user"></i> {{ user.username }} ({{ user.role|rolename }})</a>

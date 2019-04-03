@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from datasets.models import Dataset, NSTemplate
 from workflows.models import WorkflowNeo4j
+from infrastructure.models import Infrastructure
 
 User = get_user_model()
 
@@ -119,3 +120,11 @@ class MembershipComanagePersonnel(models.Model):
 
     class Meta:
         verbose_name = 'Membership COmanage Person'
+
+
+class MembershipInfrastructure(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    infrastructure = models.ForeignKey(Infrastructure, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'Membership Infrastructure'

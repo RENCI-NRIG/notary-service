@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static dataset_tags replace_tags user_tags %}
+
+{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        {% if user.is_inp or user.is_nsadmin or user.is_piadmin %}
+            <div class="container">
+            <div class="post">
+                <h2>{{ infrastructure.name }}
+                    {% if user.is_inp or user.is_nsadmin %}
+                        <a href="{% url 'infrastructure_edit' uuid=infrastructure.uuid %}"
+                           title="Edit infrastructure" class="fa fa-fw fa-pencil" style="color: green;"></a>
+                        <a href="{% url 'infrastructure_delete' uuid=infrastructure.uuid %}"
+                           title="Delete infrastructure" class="fa fa-fw fa-trash" style="color: #B22222;"></a>
+                    {% endif %}
+                </h2>
+                {% if user.is_inp or user.is_nsadmin %}
+                    {% if not infrastructure.is_valid %}
+                        <form method="POST" class="post-form">
+                            {% csrf_token %}
+                            <input type="submit" value="Validate Now" style="color: darkgreen">
+                        </form>
+                    {% endif %}
+                {% endif %}
+                {% if infrastructure_error %}
+                    <div style="background-color: cornsilk;color:darkblue;font-family:Courier;
+                font-size: 14px;overflow-y: scroll; border-style: solid; border-color: #B22222;
+                padding: 10px;">
+                        {{ infrastructure_error }}
+                    </div>
+                {% endif %}
+                <p>{{ infrastructure.description|linebreaksbr }}</p>
+                <b>Affiliation:</b> {{ infrastructure.affiliation }}
+                <br><br>
+                <table style="font-size: small">
+                    <tr>
+                        <td width="60%">
+                            <b>Created By:</b> {{ infrastructure.created_by }}
+                        </td>
+                        <td>
+                            <b>Modified By:</b> {{ infrastructure.modified_by }}
+                        </td>
+                    <tr>
+                        <td>
+                            <b>Created Date:</b> {{ infrastructure.created_date|date:"m/d/Y g:i a" }}
+                        </td>
+                        <td>
+                            <b>Modified Date:</b> {{ infrastructure.modified_date|date:"m/d/Y g:i a" }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Validated:</b> {{ infrastructure.is_valid }}
+                            {% if infrastructure.is_valid %}
+                                (<i class="fa fa-fw fa-check" style="color: green;"></i>)
+                            {% else %}
+                                (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        {% endif %}
+    {% else %}
+    <div class="container">
+        <p>You are not currently logged in or not authorized to view this page</p>
+    </div>
+    </div>
+    {% endif %}
+{% endblock %}

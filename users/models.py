@@ -53,7 +53,7 @@ class NotaryServiceUser(AbstractUser):
     roles = models.ManyToManyField(Role)
     role = models.PositiveSmallIntegerField(default=Role.NO_ROLE)
     is_nsadmin = models.BooleanField(default=False)
-    is_staff = models.BooleanField(default=False)
+    is_nsstaff = models.BooleanField(default=False)
     is_pi = models.BooleanField(default=False)
     is_piadmin = models.BooleanField(default=False)
     is_dp = models.BooleanField(default=False)

@@ -14,7 +14,7 @@ def rolename(value):
 @register.simple_tag(takes_context=True)
 def display_search(context):
     u = context['request'].user
-    if u.is_nsadmin or u.is_staff or u.is_pi or u.is_piadmin or u.is_dp or u.is_inp or u.is_ig:
+    if u.is_nsadmin or u.is_nsstaff or u.is_pi or u.is_piadmin or u.is_dp or u.is_inp or u.is_ig:
         return True
     else:
         return False
@@ -23,7 +23,7 @@ def display_search(context):
 @register.simple_tag(takes_context=True)
 def display_projects(context):
     u = context['request'].user
-    if u.is_nsadmin or u.is_staff or u.is_pi or u.is_piadmin or u.is_dp or u.is_inp or u.is_ig:
+    if u.is_nsadmin or u.is_nsstaff or u.is_pi or u.is_piadmin or u.is_dp or u.is_inp or u.is_ig:
         return True
     else:
         return False
@@ -32,7 +32,7 @@ def display_projects(context):
 @register.simple_tag(takes_context=True)
 def display_datasets(context):
     u = context['request'].user
-    if u.is_nsadmin or u.is_staff or u.is_pi or u.is_piadmin or u.is_dp or u.is_inp or u.is_ig:
+    if u.is_nsadmin or u.is_nsstaff or u.is_pi or u.is_piadmin or u.is_dp or u.is_inp or u.is_ig:
         return True
     else:
         return False
@@ -50,7 +50,16 @@ def display_templates(context):
 @register.simple_tag(takes_context=True)
 def display_workflows(context):
     u = context['request'].user
-    if u.is_nsadmin or u.is_staff or u.is_pi or u.is_piadmin or u.is_dp or u.is_inp or u.is_ig:
+    if u.is_nsadmin or u.is_nsstaff or u.is_pi or u.is_piadmin or u.is_dp or u.is_inp or u.is_ig:
+        return True
+    else:
+        return False
+
+
+@register.simple_tag(takes_context=True)
+def display_infrastructure(context):
+    u = context['request'].user
+    if u.is_nsadmin or u.is_piadmin or u.is_inp:
         return True
     else:
         return False

@@ -11,6 +11,7 @@ APPS_LIST=(
   "datasets"
   "workflows"
   "apache_kafka"
+  "infrastructure"
 )
 
 FIXTURES_LIST=(
