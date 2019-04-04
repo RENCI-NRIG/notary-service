@@ -22,7 +22,7 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and not user.is_norole %}
         <div class="container">
             <div class="post">
                 <h2>{{ workflow.name }}
@@ -41,7 +41,11 @@
                     {% if user.show_uuid %}
                         {{ project.project.uuid }}
                     {% else %}
-                        {{ project.project.description|slice:":34" }}..
+                        {% if project.project.description|length > 36 %}
+                            {{ project.project.description|slice:":34" }}..
+                        {% else %}
+                            {{ project.project.description }}
+                        {% endif %}
                     {% endif %}
                 </a>
                 <br>
@@ -52,7 +56,11 @@
                     {% if user.show_uuid %}
                         {{ workflow.dataset.uuid }}
                     {% else %}
-                        {{ workflow.dataset.description|slice:":34" }}..
+                        {% if workflow.dataset.description|length > 36 %}
+                            {{ workflow.dataset.description|slice:":34" }}..
+                        {% else %}
+                            {{ workflow.dataset.description }}
+                        {% endif %}
                     {% endif %}
                 </a>
                 <br>
@@ -65,7 +73,11 @@
                         {% if user.show_uuid %}
                             {{ workflow.template.uuid }}
                         {% else %}
-                            {{ workflow.template.description|slice:":34" }}..
+                            {% if workflow.template.description|length > 36 %}
+                                {{ workflow.template.description|slice:":34" }}..
+                            {% else %}
+                                {{ workflow.template.description }}
+                            {% endif %}
                         {% endif %}
                     </a>
                     <br>
@@ -77,7 +89,11 @@
                         {% if user.show_uuid %}
                             {{ workflow.uuid }}
                         {% else %}
-                            {{ workflow.description|slice:":34" }}..
+                            {% if workflow.description|length > 36 %}
+                                {{ workflow.description|slice:":34" }}..
+                            {% else %}
+                                {{ workflow.description }}
+                            {% endif %}
                         {% endif %}
                     </a>
                     <br>

@@ -46,7 +46,7 @@ def faq(request):
 
 def set_role_boolean(user):
     user.is_nsadmin = (int(user.role) == int(getattr(Role, 'NSADMIN')))
-    user.is_staff = (int(user.role) == int(getattr(Role, 'STAFF')))
+    user.is_nsstaff = (int(user.role) == int(getattr(Role, 'STAFF')))
     user.is_pi = (int(user.role) == int(getattr(Role, 'PI_MEMBER')))
     user.is_piadmin = (int(user.role) == int(getattr(Role, 'PI_ADMIN')))
     user.is_dp = (int(user.role) == int(getattr(Role, 'DP')))

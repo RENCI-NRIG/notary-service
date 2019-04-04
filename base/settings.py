@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'datasets.apps.DatasetsConfig',  # datasets in notary service
     'workflows.apps.WorkflowsConfig',  # workflows in notary service
     'apache_kafka.apps.ApacheKafkaConfig',  # messages using apache kafka
+    'infrastructure.apps.InfrastructureConfig',  # infrastructure in notary service
     'django_cleanup',
 ]
 
@@ -83,6 +84,7 @@ TEMPLATES = [
             os.path.join(BASE_DIR, 'templates/datasets'),
             os.path.join(BASE_DIR, 'templates/workflows'),
             os.path.join(BASE_DIR, 'templates/apache_kafka'),
+            os.path.join(BASE_DIR, 'templates/infrastructure'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {

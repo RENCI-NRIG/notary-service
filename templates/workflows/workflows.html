@@ -5,7 +5,7 @@
 
 {% block content %}
     {% display_workflows as show_workflows %}
-    {% if user.is_authenticated and show_workflows%}
+    {% if user.is_authenticated and show_workflows %}
         <div class="container">
             <h1>Workflows</h1>
             <p>Workflows are Neo4j graphs where nodes represent the state of personnel or infrastructure
@@ -47,7 +47,11 @@
                             {% if user.show_uuid %}
                                 {{ workflow.uuid }}
                             {% else %}
-                                {{ workflow.description|slice:":34" }}..
+                                {% if workflow.description|length > 36 %}
+                                    {{ workflow.description|slice:":34" }}..
+                                {% else %}
+                                    {{ workflow.description }}
+                                {% endif %}
                             {% endif %}
                         </a></td>
                         <td><b>D:</b> {{ workflow.dataset.name }}<br><b>T:</b> {{ workflow.template.name }}</td>

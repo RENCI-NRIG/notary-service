@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
-{% load static dataset_tags replace_tags %}
+{% load static dataset_tags replace_tags user_tags %}
 
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and not user.is_norole %}
         <div class="container">
             <div class="post">
                 <h2>{{ dataset.name }}
@@ -82,7 +82,11 @@
                                     {% if user.show_uuid %}
                                         {{ template.uuid }}
                                     {% else %}
-                                        {{ template.description|slice:":34" }}..
+                                        {% if template.description|length > 36 %}
+                                            {{ template.description|slice:":34" }}..
+                                        {% else %}
+                                            {{ template.description }}
+                                        {% endif %}
                                     {% endif %}
                                 </a></td>
                                 <td>{{ template.graphml_definition|getfilename }}</td>

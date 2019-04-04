@@ -4,7 +4,7 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and not user.is_norole %}
         {% if user.is_dp or user.is_nsadmin or user.is_piadmin %}
             <div class="container">
             <div class="post">

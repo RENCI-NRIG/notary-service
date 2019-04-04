@@ -4,7 +4,7 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and not user.is_norole %}
         <div class="container">
             <div class="post">
                 <h2>{{ project.name }}
@@ -31,21 +31,27 @@
                     </div>
                 {% endif %}
                 <p>{{ project.description|linebreaksbr }}</p>
-                <h3>Permissions</h3>
-                <b>Administrative Groups</b>
+                <h3>PI Affiliations</h3>
                 <ul>
-                    {% for group in comanage_admins %}
-                        <li>{{ group.cn|slice:"7:" }}</li>
+                    {% for affiliation in project.affiliation %}
+                        <li>{{ affiliation }}</li>
                     {% endfor %}
                 </ul>
-                <b>Membership Groups</b>
-                <ul>
-                    {% for group in comanage_groups %}
-                        <li>{{ group.cn|slice:"7:" }}</li>
-                    {% endfor %}
-                </ul>
+                {#                <h3>Permissions</h3>#}
+                {#                <b>Administrative Groups</b>#}
+                {#                <ul>#}
+                {#                    {% for group in comanage_pi_admins %}#}
+                {#                        <li>{{ group.cn|slice:"7:" }}</li>#}
+                {#                    {% endfor %}#}
+                {#                </ul>#}
+                {#                <b>Membership Groups</b>#}
+                {#                <ul>#}
+                {#                    {% for group in comanage_staff %}#}
+                {#                        <li>{{ group.cn|slice:"7:" }}</li>#}
+                {#                    {% endfor %}#}
+                {#                </ul>#}
                 <h3>Personnel</h3>
-                <b>Administrators</b>
+                <b>Project PI Admins</b>
                 <table border="1px solid black" cellpadding="5px">
                     <tr>
                         <td align="center"><b>Group</b></td>
@@ -65,7 +71,7 @@
                     {% endfor %}
                 </table>
                 <br>
-                <b>Active Members</b>
+                <b>Project Members</b>
                 <table border="1px solid black" cellpadding="5px">
                     <tr>
                         <td align="center"><b>Group</b></td>
@@ -82,6 +88,52 @@
                             <td>{{ eppn }}</td>
                             <td>{{ email }}</td>
                         </tr>
+                    {% endfor %}
+                </table>
+                <br>
+                <h3>Infrastructure</h3>
+                <table border="1px solid black" cellpadding="5px">
+                    <tr>
+                        <td align="center"><b>Name</b></td>
+                        <td align="center"><b>Validated</b></td>
+                        <td align="center"><b>
+                            {% if user.show_uuid %}
+                                UUID
+                            {% else %}
+                                Description
+                            {% endif %}
+                        </b></td>
+                        <td align="center"><b>Affiliation (== PI Affiliation)</b></td>
+                    </tr>
+                    {% for infra in infrastructure %}
+                        <tr>
+                        <td>{{ infra.name }}</td>
+                        <td align="center">{% if infra.is_valid %}
+                            <i class="fa fa-fw fa-check" style="color: green;"></i>
+                        {% else %}
+                            <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
+                        {% endif %}
+                        </td>
+                        <td style="font-family: Courier"><a href="{% url 'infrastructure_detail' uuid=infra.uuid %}"
+                                                            title="Infrastructure Details">
+                            {% if user.show_uuid %}
+                                {{ infra.uuid }}
+                            {% else %}
+                                {% if infra.description|length > 36 %}
+                                    {{ infra.description|slice:":34" }}..
+                                {% else %}
+                                    {{ infra.description }}
+                                {% endif %}
+                            {% endif %}
+                        </a></td>
+                        <td>
+                            {{ infra.affiliation }}
+                            {% if infra.affiliation in project.affiliation %}
+                                (<i class="fa fa-fw fa-check" style="color: green;"></i>)
+                            {% else %}
+                                (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
+                            {% endif %}
+                        </td>
                     {% endfor %}
                 </table>
                 <br>
@@ -112,7 +164,11 @@
                             {% if user.show_uuid %}
                                 {{ dataset.uuid }}
                             {% else %}
-                                {{ dataset.description|slice:":34" }}..
+                                {% if dataset.description|length > 36 %}
+                                    {{ dataset.description|slice:":34" }}..
+                                {% else %}
+                                    {{ dataset.description }}
+                                {% endif %}
                             {% endif %}
                         </a></td>
                     {% endfor %}
@@ -160,7 +216,11 @@
                                 {% if user.show_uuid %}
                                     {{ workflow.uuid }}
                                 {% else %}
-                                    {{ workflow.description|slice:":34" }}..
+                                    {% if workflow.description|length > 36 %}
+                                        {{ workflow.description|slice:":34" }}..
+                                    {% else %}
+                                        {{ workflow.description }}
+                                    {% endif %}
                                 {% endif %}
                             </a></td>
                             <td><b>D:</b> {{ workflow.dataset.name }}<br><b>T:</b> {{ workflow.template.name }}</td>
