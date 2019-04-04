@@ -4,9 +4,8 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
-        {% if user.is_inp or user.is_nsadmin or user.is_piadmin %}
-            <div class="container">
+    {% if user.is_authenticated and not user.is_norole %}
+        <div class="container">
             <div class="post">
                 <h2>{{ infrastructure.name }}
                     {% if user.is_inp or user.is_nsadmin %}
@@ -62,11 +61,10 @@
                     </tr>
                 </table>
             </div>
-        {% endif %}
+        </div>
     {% else %}
-    <div class="container">
-        <p>You are not currently logged in or not authorized to view this page</p>
-    </div>
-    </div>
+        <div class="container">
+            <p>You are not currently logged in or not authorized to view this page</p>
+        </div>
     {% endif %}
 {% endblock %}

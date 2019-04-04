@@ -1,36 +1,37 @@
 import uuid
 
 from django.contrib.auth import get_user_model
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.utils import timezone
 
 from datasets.models import Dataset, NSTemplate
-from workflows.models import WorkflowNeo4j
 from infrastructure.models import Infrastructure
+from workflows.models import WorkflowNeo4j
 
 User = get_user_model()
 
 
 # Create your models here.
-class ComanageMemberActive(models.Model):
+class ComanageStaff(models.Model):
     dn = models.CharField(max_length=255)
     cn = models.CharField(max_length=255)
     active = models.BooleanField(default=False)
 
     class Meta:
-        verbose_name = 'COmanage Active Member'
+        verbose_name = 'COmanage Staff'
 
     def __str__(self):
         return self.cn[7:]
 
 
-class ComanageAdmin(models.Model):
+class ComanagePIAdmin(models.Model):
     dn = models.CharField(max_length=255)
     cn = models.CharField(max_length=255)
     active = models.BooleanField(default=False)
 
     class Meta:
-        verbose_name = 'COmanage Admin'
+        verbose_name = 'COmanage PI Admin'
 
     def __str__(self):
         return self.cn[7:]
@@ -56,8 +57,11 @@ class Project(models.Model):
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
     description = models.TextField()
     is_valid = models.BooleanField(default=False)
-    comanage_admins = models.ManyToManyField(ComanageAdmin, through="MembershipComanageAdmin")
-    comanage_groups = models.ManyToManyField(ComanageMemberActive, through="MembershipComanageMemberActive")
+    affiliation = ArrayField(models.CharField(max_length=255))
+    idp = ArrayField(models.CharField(max_length=255))
+    infrastructure = models.ManyToManyField(Infrastructure, through="MembershipInfrastructure")
+    comanage_pi_admins = models.ManyToManyField(ComanagePIAdmin, through="MembershipComanagePIAdmin")
+    comanage_staff = models.ManyToManyField(ComanageStaff, through="MembershipComanageStaff")
     comanage_personnel = models.ManyToManyField(ComanagePersonnel, through="MembershipComanagePersonnel")
     datasets = models.ManyToManyField(Dataset, through="MembershipDatasets")
     workflows = models.ManyToManyField(WorkflowNeo4j, through="MembershipWorkflow")
@@ -68,10 +72,6 @@ class Project(models.Model):
 
     class Meta:
         verbose_name = 'NS Project'
-
-    def publish(self):
-        self.modified_date = timezone.now()
-        self.save()
 
     def __str__(self):
         return self.name
@@ -85,16 +85,16 @@ class MembershipDatasets(models.Model):
         verbose_name = 'Membership Dataset'
 
 
-class MembershipComanageMemberActive(models.Model):
-    comanage_group = models.ForeignKey(ComanageMemberActive, on_delete=models.CASCADE)
+class MembershipComanageStaff(models.Model):
+    comanage_group = models.ForeignKey(ComanageStaff, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Membership COmanage Active Member'
 
 
-class MembershipComanageAdmin(models.Model):
-    comanage_group = models.ForeignKey(ComanageAdmin, on_delete=models.CASCADE)
+class MembershipComanagePIAdmin(models.Model):
+    comanage_group = models.ForeignKey(ComanagePIAdmin, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     class Meta:
@@ -114,8 +114,8 @@ class MembershipWorkflow(models.Model):
 
 class MembershipComanagePersonnel(models.Model):
     person = models.ForeignKey(ComanagePersonnel, on_delete=models.CASCADE)
-    comanage_admins = models.ForeignKey(ComanageAdmin, on_delete=models.CASCADE, null=True)
-    comanage_groups = models.ForeignKey(ComanageMemberActive, on_delete=models.CASCADE, null=True)
+    comanage_pi_admins = models.ForeignKey(ComanagePIAdmin, on_delete=models.CASCADE, null=True)
+    comanage_staff = models.ForeignKey(ComanageStaff, on_delete=models.CASCADE, null=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     class Meta:

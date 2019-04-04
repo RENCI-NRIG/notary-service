@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 
 from projects.models import MembershipInfrastructure
+from projects.models import Project
 from .forms import InfrastructureForm
 from .models import Infrastructure
 
@@ -49,12 +50,13 @@ def infrastructure_detail(request, uuid):
 
 def infrastructure_new(request):
     if request.method == "POST":
-        form = InfrastructureForm(request.POST)
+        form = InfrastructureForm(request.POST, initial={'affiliation': request.user.idp_name})
         if form.is_valid():
             infra = form.save(commit=False)
             infra.created_by = request.user
             infra.modified_by = request.user
             infra.modified_date = timezone.now()
+            infra.idp = request.user.idp
             infra.save()
             return redirect('infrastructure_detail', uuid=infra.uuid)
     else:
@@ -71,6 +73,7 @@ def infrastructure_edit(request, uuid):
             infra.modified_by = request.user
             infra.modified_date = timezone.now()
             infra.is_valid = False
+            infra.idp = request.user.idp
             infra.save()
             return redirect('infrastructure_detail', uuid=infra.uuid)
     else:
@@ -89,3 +92,13 @@ def infrastructure_delete(request, uuid):
         'infrastructure': infra,
         'used_by': used_by,
     })
+
+
+def infrastructure_in_use(infra_uuid):
+    proj_list = MembershipInfrastructure.objects.values_list(
+        'project__uuid',
+    ).filter(
+        infrastructure__uuid=infra_uuid,
+    )
+    proj_objs = Project.objects.filter(uuid__in=proj_list).order_by('name')
+    return proj_objs

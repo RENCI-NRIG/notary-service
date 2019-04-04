@@ -22,7 +22,7 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and not user.is_norole %}
         <div class="container">
             <div class="post">
                 <h2>{{ workflow.name }}

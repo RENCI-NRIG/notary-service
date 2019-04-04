@@ -61,6 +61,5 @@ class NotaryServiceUser(AbstractUser):
     is_ig = models.BooleanField(default=False)
     is_norole = models.BooleanField(default=False)
 
-
     def __str__(self):
         return self.email

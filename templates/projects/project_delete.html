@@ -16,13 +16,13 @@
                 <h3>Permissions</h3>
                 <b>Administrative Groups</b>
                 <ul>
-                    {% for group in comanage_admins %}
+                    {% for group in comanage_pi_admins %}
                         <li>{{ group.cn|slice:"7:" }}</li>
                     {% endfor %}
                 </ul>
                 <b>Membership Groups</b>
                 <ul>
-                    {% for group in comanage_groups %}
+                    {% for group in comanage_staff %}
                         <li>{{ group.cn|slice:"7:" }}</li>
                     {% endfor %}
                 </ul>

@@ -37,14 +37,17 @@
                     {% if user.show_uuid %}
                         {{ proj.uuid }}
                     {% else %}
-                        {{ proj.description|slice:":34" }}..
+                        {% if proj.description|length > 36 %}
+                            {{ proj.description|slice:":34" }}..
+                        {% else %}
+                            {{ proj.description }}
+                        {% endif %}
                     {% endif %}
                 </a>)<br>
                 {% endfor %}
             {% endif %}
             <br>
             <table style="font-size: small">
-
                 <tr>
                     <td width="60%">
                         <b>Created By:</b> {{ infrastructure.created_by }}
