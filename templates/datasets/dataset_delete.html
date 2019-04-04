@@ -13,7 +13,7 @@
                        title="Cancel" class="fa fa-fw fa-ban" style="color: green;"></a>
                 </h2>
                 <p>{{ dataset.description|linebreaksbr }}</p>
-                <table>
+                <table width="100%">
                     <tr>
                         <td><b>DOI or Metadata URL:</b></td>
                         <td>
@@ -35,7 +35,7 @@
                     </tr>
                 </table>
                 <b>Templates:</b><br>
-                <table border="1px solid black" cellpadding="5px">
+                <table width="100%" border="1px solid black" cellpadding="5px">
                     <tr>
                         <td align="center"><b>Name</b></td>
                         <td align="center"><b>Validated</b></td>
@@ -103,7 +103,7 @@
                 {% endfor %}
             {% endif %}
             <br>
-            <table style="font-size: small">
+            <table width="100%" style="font-size: small">
                 <tr>
                     <td width="60%">
                         <b>Created By:</b> {{ dataset.created_by }}

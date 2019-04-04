@@ -7,7 +7,7 @@
     <div class="container">
         {% if user.is_authenticated %}
             <h1>User profile</h1>
-            <table>
+            <table width="100%" cellpadding="5px">
                 <tr>
                     <td style="width: 50%"><b>First name: </b>{{ user.given_name }}</td>
                     <td><b>Last name: </b>{{ user.family_name }}</td>
@@ -18,21 +18,44 @@
                 </tr>
             </table>
             <hr>
-            <b style="font-size: larger">Preferences</b>
+
             <form method="POST" class="post-form">
                 {% csrf_token %}
-                <input type="submit" name="update-preferences" value="Update preferences" style="color: darkgreen">
-                <br><br>
-                {{ form.as_p }}
+                <table width="100%" cellpadding="5px">
+                    <tr>
+                        <td style="width: 50%">
+                            <b style="font-size: larger">Preferences</b>
+                        </td>
+                        <td>
+                            <input type="submit" name="update-preferences" value="Update preferences"
+                                   style="color: darkgreen">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                        {{ form.as_p }}
+                        </td>
+                        <td></td>
+                    </tr>
+                </table>
             </form>
             <hr>
-            <b style="font-size: larger">Messages</b>
             <form method="POST" class="post-form">
                 {% csrf_token %}
-                <input type="submit" name="check-messages" value="Check for new messages" style="color: darkgreen">
+                <table width="100%" cellpadding="5px">
+                    <tr>
+                        <td style="width: 50%">
+                            <b style="font-size: larger">Messages</b>
+                        </td>
+                        <td>
+                            <input type="submit" name="check-messages" value="Check for new messages"
+                                   style="color: darkgreen">
+                        </td>
+                    </tr>
+                </table>
             </form>
             <br>
-            <table border="1px solid black" cellpadding="5px">
+            <table width="100%" border="1px solid black" cellpadding="5px">
                 <tr>
                     <td align="center"><b>Subject</b></td>
                     <td align="center"><b>Body</b></td>
@@ -84,7 +107,7 @@
 
             <hr>
             <b style="font-size: larger">Identity: CILogon Claims</b>
-            <table border="1px solid black" cellpadding="5px">
+            <table width="100%" border="1px solid black" cellpadding="5px">
                 <tr>
                     <td>name</td>
                     <td><b>{{ user.name }}</b></td>
@@ -149,7 +172,7 @@
             {% if isMemberOf %}
                 <br>
                 <b style="font-size: larger">COmanage membership</b>
-                <table border="1px solid black" cellpadding="5px">
+                <table width="100%" border="1px solid black" cellpadding="5px">
                     {% for group in isMemberOf %}
                         <tr>
                             <td>{{ group.attribute }}</td>
@@ -161,7 +184,7 @@
             {% if LDAPOther %}
                 <br>
                 <b style="font-size: larger">Other attributes</b>
-                <table border="1px solid black" cellpadding="5px">
+                <table width="100%" border="1px solid black" cellpadding="5px">
                     {% for group in LDAPOther %}
                         <tr>
                             <td>{{ group.attribute }}</td>

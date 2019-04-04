@@ -31,7 +31,7 @@
                     </div>
                 {% endif %}
                 <p>{{ dataset.description|linebreaksbr }}</p>
-                <table>
+                <table width="100%">
                     <tr>
                         <td><b>DOI or Metadata URL:</b></td>
                         <td>
@@ -54,7 +54,7 @@
                 </table>
                 {% if user.is_dp or user.is_nsadmin or user.is_piadmin %}
                     <b>Templates:</b><br>
-                    <table border="1px solid black" cellpadding="5px">
+                    <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
                             <td align="center"><b>Name</b></td>
                             <td align="center"><b>Validated</b></td>
@@ -95,7 +95,7 @@
                     </table>
                 {% endif %}
                 <br>
-                <table style="font-size: small">
+                <table width="100%" style="font-size: small">
                     <tr>
                         <td width="60%">
                             <b>Created By:</b> {{ dataset.created_by }}
