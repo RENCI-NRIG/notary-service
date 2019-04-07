@@ -8,8 +8,8 @@ from workflows import views as wf_views
 from workflows.models import WorkflowNeo4j
 from workflows.workflow_neo4j import delete_workflow_from_uuid
 from .forms import ProjectForm
-from .models import Project, ComanageStaff, ComanagePIAdmin, MembershipComanageStaff, \
-    MembershipComanagePIAdmin, MembershipComanagePersonnel, \
+from .models import Project, ComanageStaff, ComanagePIAdmin, ComanagePIMember, MembershipComanageStaff, \
+    MembershipComanagePIAdmin, MembershipComanagePersonnel, MembershipComanagePIMember, \
     MembershipDatasets, MembershipWorkflow, MembershipInfrastructure
 from .projects import update_comanage_group, personnel_by_comanage_group, update_comanage_personnel
 
@@ -34,9 +34,19 @@ def project_validate(ds_objs, show_uuid):
 
 def project_detail(request, uuid):
     project = get_object_or_404(Project, uuid=uuid)
-    comanage_pi_admins = ComanagePIAdmin.objects.filter(cn__contains=':admins', project=project).order_by('cn')
-    comanage_staff = ComanageStaff.objects.filter(cn__contains=':active', project=project).order_by('cn')
-    admin_group = list(MembershipComanagePersonnel.objects.values_list(
+    comanage_pi_admins = ComanagePIAdmin.objects.filter(
+        cn__contains='-PI:admins',
+        project=project
+    ).order_by('cn')
+    comanage_pi_members = ComanagePIMember.objects.filter(
+        cn__contains='-PI:members:active',
+        project=project
+    ).order_by('cn')
+    comanage_staff = ComanageStaff.objects.filter(
+        cn__contains='-STAFF:members:active',
+        project=project
+    ).order_by('cn')
+    project_pi_admins = list(MembershipComanagePersonnel.objects.values_list(
         'comanage_pi_admins__cn',
         'person__cn',
         'person__employee_number',
@@ -49,7 +59,20 @@ def project_detail(request, uuid):
         project=project,
         comanage_pi_admins__in=comanage_pi_admins
     ))
-    member_group = list(MembershipComanagePersonnel.objects.values_list(
+    project_pi_members = list(MembershipComanagePersonnel.objects.values_list(
+        'comanage_pi_members__cn',
+        'person__cn',
+        'person__employee_number',
+        'person__eppn',
+        'person__email',
+    ).order_by(
+        'comanage_pi_members__cn',
+        'person__cn'
+    ).filter(
+        project=project,
+        comanage_pi_members__in=comanage_pi_members
+    ))
+    project_staff = list(MembershipComanagePersonnel.objects.values_list(
         'comanage_staff__cn',
         'person__cn',
         'person__employee_number',
@@ -118,9 +141,11 @@ def project_detail(request, uuid):
         'projects_page': 'active',
         'project': project,
         'comanage_pi_admins': comanage_pi_admins,
+        'comanage_pi_members': comanage_pi_members,
         'comanage_staff': comanage_staff,
-        'admin_group': admin_group,
-        'member_group': member_group,
+        'project_pi_admins': project_pi_admins,
+        'project_pi_members': project_pi_members,
+        'project_staff': project_staff,
         'datasets': ds_objs,
         'project_error': project_error,
         'workflows': wf_objs,
@@ -197,6 +222,28 @@ def project_new(request):
                                 person=person,
                                 project=project,
                                 comanage_pi_admins=ComanagePIAdmin.objects.get(id=group_pk),
+                                comanage_pi_members=None,
+                                comanage_staff=None
+                            )
+            # project pi members
+            for group_pk in form.data.getlist('comanage_pi_members'):
+                if not MembershipComanagePIMember.objects.filter(project=project.id,
+                                                                comanage_group=group_pk).exists():
+                    MembershipComanagePIMember.objects.create(
+                        project=project,
+                        comanage_group=ComanagePIMember.objects.get(id=group_pk)
+                    )
+                    personnel = personnel_by_comanage_group(ComanagePIMember.objects.get(id=group_pk).cn)
+                    for person in personnel:
+                        if not MembershipComanagePersonnel.objects.filter(
+                                person=person,
+                                project=project,
+                                comanage_pi_members=ComanagePIMember.objects.get(id=group_pk)):
+                            MembershipComanagePersonnel.objects.create(
+                                person=person,
+                                project=project,
+                                comanage_pi_admins=None,
+                                comanage_pi_members=ComanagePIMember.objects.get(id=group_pk),
                                 comanage_staff=None
                             )
             # staff / project members
@@ -217,6 +264,7 @@ def project_new(request):
                                 person=person,
                                 project=project,
                                 comanage_pi_admins=None,
+                                comanage_pi_members=None,
                                 comanage_staff=ComanageStaff.objects.get(id=group_pk),
                             )
             # datasets
@@ -253,7 +301,6 @@ def project_edit(request, uuid):
             project.modified_by = request.user
             project.modified_date = timezone.now()
             project.save()
-
             # project pi admins
             current_groups = MembershipComanagePIAdmin.objects.filter(project=project.id)
             for group in current_groups:
@@ -277,6 +324,33 @@ def project_edit(request, uuid):
                                 person=person,
                                 project=project,
                                 comanage_pi_admins=ComanagePIAdmin.objects.get(id=group_pk),
+                                comanage_pi_members=None,
+                                comanage_staff=None
+                            )
+            # project pi members
+            current_groups = MembershipComanagePIMember.objects.filter(project=project.id)
+            for group in current_groups:
+                if str(group.comanage_group.id) not in form.data.getlist('comanage_pi_admins'):
+                    MembershipComanagePersonnel.objects.filter(project=project.id,
+                                                               comanage_pi_members=group.comanage_group.id).delete()
+                    group.delete()
+            for group_pk in form.data.getlist('comanage_pi_members'):
+                if not MembershipComanagePIMember.objects.filter(project=project.id, comanage_group=group_pk).exists():
+                    MembershipComanagePIMember.objects.create(
+                        project=project,
+                        comanage_group=ComanagePIMember.objects.get(id=group_pk)
+                    )
+                    personnel = personnel_by_comanage_group(ComanagePIMember.objects.get(id=group_pk).cn)
+                    for person in personnel:
+                        if not MembershipComanagePersonnel.objects.filter(
+                                person=person,
+                                project=project,
+                                comanage_pi_members=ComanagePIMember.objects.get(id=group_pk)):
+                            MembershipComanagePersonnel.objects.create(
+                                person=person,
+                                project=project,
+                                comanage_pi_admins=None,
+                                comanage_pi_members=ComanagePIMember.objects.get(id=group_pk),
                                 comanage_staff=None
                             )
             # staff / project members
@@ -305,6 +379,7 @@ def project_edit(request, uuid):
                                 person=person,
                                 project=project,
                                 comanage_pi_admins=None,
+                                comanage_pi_members=None,
                                 comanage_staff=ComanageStaff.objects.get(id=group_pk)
                             )
             # datasets

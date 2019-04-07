@@ -60,7 +60,27 @@
                         <td align="center"><b>eppn</b></td>
                         <td align="center"><b>email</b></td>
                     </tr>
-                    {% for group, name, employee_number, eppn, email in admin_group %}
+                    {% for group, name, employee_number, eppn, email in project_pi_admins %}
+                        <tr>
+                            <td>{{ group|slice:"7:" }}</td>
+                            <td>{{ name }}</td>
+                            <td>{{ employee_number }}</td>
+                            <td>{{ eppn }}</td>
+                            <td>{{ email }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                <br>
+            <b>Project PI Members</b>
+                <table width="100%" border="1px solid black" cellpadding="5px">
+                    <tr>
+                        <td align="center"><b>Group</b></td>
+                        <td align="center"><b>Name</b></td>
+                        <td align="center"><b>COmanage ID</b></td>
+                        <td align="center"><b>eppn</b></td>
+                        <td align="center"><b>email</b></td>
+                    </tr>
+                    {% for group, name, employee_number, eppn, email in project_pi_members %}
                         <tr>
                             <td>{{ group|slice:"7:" }}</td>
                             <td>{{ name }}</td>
@@ -80,7 +100,7 @@
                         <td align="center"><b>eppn</b></td>
                         <td align="center"><b>email</b></td>
                     </tr>
-                    {% for group, name, employee_number, eppn, email in member_group %}
+                    {% for group, name, employee_number, eppn, email in project_staff %}
                         <tr>
                             <td>{{ group|slice:"7:" }}</td>
                             <td>{{ name }}</td>

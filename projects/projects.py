@@ -2,7 +2,7 @@ import os
 
 from ldap3 import Connection, Server, ALL
 
-from .models import ComanageStaff, ComanagePIAdmin, ComanagePersonnel
+from .models import ComanageStaff, ComanagePIAdmin, ComanagePIMember, ComanagePersonnel
 
 ldap_host = os.getenv('LDAP_HOST', '')
 ldap_user = os.getenv('LDAP_USER', '')
@@ -31,16 +31,22 @@ def get_ldap_comanage_staff():
 def update_comanage_group():
     group_list = get_ldap_comanage_staff()
     ComanagePIAdmin.objects.update(active=False)
+    ComanagePIMember.objects.update(active=False)
     ComanageStaff.objects.update(active=False)
     for group in group_list:
         dn = str(group.entry_dn)
         cn = str(group.cn[0])
-        if ":admins" in cn:
+        if "-PI:admins" in cn:
             if not ComanagePIAdmin.objects.filter(dn=dn).exists():
                 ComanagePIAdmin.objects.create(dn=dn, cn=cn, active=True)
             else:
                 ComanagePIAdmin.objects.filter(dn=dn, cn=cn).update(active=True)
-        else:
+        elif "-PI:members:active" in cn:
+            if not ComanagePIMember.objects.filter(dn=dn).exists():
+                ComanagePIMember.objects.create(dn=dn, cn=cn, active=True)
+            else:
+                ComanagePIMember.objects.filter(dn=dn, cn=cn).update(active=True)
+        elif "-STAFF:members:active" in cn:
             if not ComanageStaff.objects.filter(dn=dn).exists():
                 ComanageStaff.objects.create(dn=dn, cn=cn, active=True)
             else:

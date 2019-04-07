@@ -22,9 +22,21 @@ def check_ismemberof(attributelist):
 
 
 def update_membership_ismemberof(user, attributelist):
+    ismeberof_new = list(attributelist['isMemberOf'])
+    ismeberof_cur = list(MembershipIsMemberOf.objects.values_list('ismemberof__value').filter(
+        user=user
+    ))
+    for cou in ismeberof_cur:
+        if not any(cou[0] in x for x in ismeberof_new):
+            print('Deletiing COU: ' + str(cou[0]))
+            MembershipIsMemberOf.objects.filter(
+                user=user,
+                ismemberof__value=cou[0],
+            ).delete()
     for attribute in attributelist['isMemberOf']:
         attr_id = IsMemberOf.objects.get(attribute='isMemberOf', value=attribute).pk
         if not MembershipIsMemberOf.objects.filter(user=user.id, ismemberof=attr_id).exists():
+            print('Adding COU: ' + str(attribute))
             MembershipIsMemberOf.objects.create(user=user, ismemberof=IsMemberOf.objects.get(id=attr_id))
 
 

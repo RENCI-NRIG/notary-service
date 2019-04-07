@@ -37,6 +37,18 @@ class ComanagePIAdmin(models.Model):
         return self.cn[7:]
 
 
+class ComanagePIMember(models.Model):
+    dn = models.CharField(max_length=255)
+    cn = models.CharField(max_length=255)
+    active = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'COmanage PI Member'
+
+    def __str__(self):
+        return self.cn[7:]
+
+
 class ComanagePersonnel(models.Model):
     dn = models.CharField(max_length=255)
     cn = models.CharField(max_length=255)
@@ -61,6 +73,7 @@ class Project(models.Model):
     idp = ArrayField(models.CharField(max_length=255))
     infrastructure = models.ManyToManyField(Infrastructure, through="MembershipInfrastructure")
     comanage_pi_admins = models.ManyToManyField(ComanagePIAdmin, through="MembershipComanagePIAdmin")
+    comanage_pi_members = models.ManyToManyField(ComanagePIMember, through="MembershipComanagePIMember")
     comanage_staff = models.ManyToManyField(ComanageStaff, through="MembershipComanageStaff")
     comanage_personnel = models.ManyToManyField(ComanagePersonnel, through="MembershipComanagePersonnel")
     datasets = models.ManyToManyField(Dataset, through="MembershipDatasets")
@@ -90,7 +103,7 @@ class MembershipComanageStaff(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     class Meta:
-        verbose_name = 'Membership COmanage Active Member'
+        verbose_name = 'Membership COmanage Staff'
 
 
 class MembershipComanagePIAdmin(models.Model):
@@ -98,7 +111,15 @@ class MembershipComanagePIAdmin(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     class Meta:
-        verbose_name = 'Membership COmanage Admin'
+        verbose_name = 'Membership COmanage PI Admin'
+
+
+class MembershipComanagePIMember(models.Model):
+    comanage_group = models.ForeignKey(ComanagePIMember, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'Membership COmanage PI Member'
 
 
 class MembershipWorkflow(models.Model):
@@ -115,6 +136,7 @@ class MembershipWorkflow(models.Model):
 class MembershipComanagePersonnel(models.Model):
     person = models.ForeignKey(ComanagePersonnel, on_delete=models.CASCADE)
     comanage_pi_admins = models.ForeignKey(ComanagePIAdmin, on_delete=models.CASCADE, null=True)
+    comanage_pi_members = models.ForeignKey(ComanagePIMember, on_delete=models.CASCADE, null=True)
     comanage_staff = models.ForeignKey(ComanageStaff, on_delete=models.CASCADE, null=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
