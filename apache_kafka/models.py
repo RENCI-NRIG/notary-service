@@ -27,9 +27,5 @@ class Message(models.Model):
     class Meta:
         verbose_name = 'NS Message'
 
-    def publish(self):
-        self.modified_date = timezone.now()
-        self.save()
-
     def __str__(self):
         return self.subject

@@ -13,19 +13,77 @@
                        title="Cancel" class="fa fa-fw fa-ban" style="color: green;"></a>
                 </h2>
                 <p>{{ project.description|linebreaksbr }}</p>
+                <h3>PI Affiliations</h3>
+                <ul>
+                    {% for affiliation in project.affiliation %}
+                        <li>{{ affiliation }}</li>
+                    {% endfor %}
+                </ul>
                 <h3>Permissions</h3>
-                <b>Administrative Groups</b>
+                <b>Project PI Admiins</b>
                 <ul>
                     {% for group in comanage_pi_admins %}
                         <li>{{ group.cn|slice:"7:" }}</li>
                     {% endfor %}
                 </ul>
-                <b>Membership Groups</b>
+                <b>Project PI Members</b>
+                <ul>
+                    {% for group in comanage_pi_members %}
+                        <li>{{ group.cn|slice:"7:" }}</li>
+                    {% endfor %}
+                </ul>
+                <b>Project Members/Staff</b>
                 <ul>
                     {% for group in comanage_staff %}
                         <li>{{ group.cn|slice:"7:" }}</li>
                     {% endfor %}
                 </ul>
+                <h3>Infrastructure</h3>
+                <table width="100%" border="1px solid black" cellpadding="5px">
+                    <tr>
+                        <td align="center"><b>Name</b></td>
+                        <td align="center"><b>Validated</b></td>
+                        <td align="center"><b>
+                            {% if user.show_uuid %}
+                                UUID
+                            {% else %}
+                                Description
+                            {% endif %}
+                        </b></td>
+                        <td align="center"><b>Affiliation (== PI Affiliation)</b></td>
+                    </tr>
+                    {% for infra in infrastructure %}
+                        <tr>
+                        <td>{{ infra.name }}</td>
+                        <td align="center">{% if infra.is_valid %}
+                            <i class="fa fa-fw fa-check" style="color: green;"></i>
+                        {% else %}
+                            <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
+                        {% endif %}
+                        </td>
+                        <td style="font-family: Courier"><a href="{% url 'infrastructure_detail' uuid=infra.uuid %}"
+                                                            title="Infrastructure Details">
+                            {% if user.show_uuid %}
+                                {{ infra.uuid }}
+                            {% else %}
+                                {% if infra.description|length > 36 %}
+                                    {{ infra.description|slice:":34" }}..
+                                {% else %}
+                                    {{ infra.description }}
+                                {% endif %}
+                            {% endif %}
+                        </a></td>
+                        <td>
+                            {{ infra.affiliation }}
+                            {% if infra.affiliation in project.affiliation %}
+                                (<i class="fa fa-fw fa-check" style="color: green;"></i>)
+                            {% else %}
+                                (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                </table>
+                <br>
                 <h3>Datasets</h3>
                 <table width="100%" border="1px solid black" cellpadding="5px">
                     <tr>

@@ -12,7 +12,6 @@ from workflows.models import WorkflowNeo4j
 User = get_user_model()
 
 
-# Create your models here.
 class ComanageStaff(models.Model):
     dn = models.CharField(max_length=255)
     cn = models.CharField(max_length=255)
@@ -49,6 +48,30 @@ class ComanagePIMember(models.Model):
         return self.cn[7:]
 
 
+class ComanageInfrastructureProvider(models.Model):
+    dn = models.CharField(max_length=255)
+    cn = models.CharField(max_length=255)
+    active = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'COmanage Infrastructure Provider'
+
+    def __str__(self):
+        return self.cn[7:]
+
+
+class ComanageInstitutionalGovernance(models.Model):
+    dn = models.CharField(max_length=255)
+    cn = models.CharField(max_length=255)
+    active = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'COmanage Institutional Governance'
+
+    def __str__(self):
+        return self.cn[7:]
+
+
 class ComanagePersonnel(models.Model):
     dn = models.CharField(max_length=255)
     cn = models.CharField(max_length=255)
@@ -75,6 +98,12 @@ class Project(models.Model):
     comanage_pi_admins = models.ManyToManyField(ComanagePIAdmin, through="MembershipComanagePIAdmin")
     comanage_pi_members = models.ManyToManyField(ComanagePIMember, through="MembershipComanagePIMember")
     comanage_staff = models.ManyToManyField(ComanageStaff, through="MembershipComanageStaff")
+    comanage_inp = models.ManyToManyField(
+        ComanageInfrastructureProvider, through="MembershipComanageInfrastructureProvider"
+    )
+    comanage_ig = models.ManyToManyField(
+        ComanageInstitutionalGovernance, through="MembershipComanageInstitutionalGovernance"
+    )
     comanage_personnel = models.ManyToManyField(ComanagePersonnel, through="MembershipComanagePersonnel")
     datasets = models.ManyToManyField(Dataset, through="MembershipDatasets")
     workflows = models.ManyToManyField(WorkflowNeo4j, through="MembershipWorkflow")
@@ -122,6 +151,22 @@ class MembershipComanagePIMember(models.Model):
         verbose_name = 'Membership COmanage PI Member'
 
 
+class MembershipComanageInfrastructureProvider(models.Model):
+    comanage_group = models.ForeignKey(ComanageInfrastructureProvider, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'Membership COmanage Infrastructure Provider'
+
+
+class MembershipComanageInstitutionalGovernance(models.Model):
+    comanage_group = models.ForeignKey(ComanageInstitutionalGovernance, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'Membership COmanage Institutional Governance'
+
+
 class MembershipWorkflow(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
@@ -138,6 +183,8 @@ class MembershipComanagePersonnel(models.Model):
     comanage_pi_admins = models.ForeignKey(ComanagePIAdmin, on_delete=models.CASCADE, null=True)
     comanage_pi_members = models.ForeignKey(ComanagePIMember, on_delete=models.CASCADE, null=True)
     comanage_staff = models.ForeignKey(ComanageStaff, on_delete=models.CASCADE, null=True)
+    comanage_inp = models.ForeignKey(ComanageInfrastructureProvider, on_delete=models.CASCADE, null=True)
+    comanage_ig = models.ForeignKey(ComanageInstitutionalGovernance, on_delete=models.CASCADE, null=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     class Meta:

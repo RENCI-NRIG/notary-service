@@ -24,9 +24,5 @@ class WorkflowNeo4j(models.Model):
     class Meta:
         verbose_name = 'Neo4j Workflow'
 
-    def publish(self):
-        self.modified_date = timezone.now()
-        self.save()
-
     def __str__(self):
         return self.name
