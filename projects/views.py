@@ -35,6 +35,34 @@ def project_validate(ds_objs, show_uuid):
 
 def project_detail(request, uuid):
     project = get_object_or_404(Project, uuid=uuid)
+    if request.method == "POST":
+        if request.POST.get("refresh-personnel"):
+            print('hello')
+            update_comanage_group()
+            update_comanage_personnel()
+            for group_pk in MembershipComanageStaff.objects.values_list('comanage_group_id').filter(
+                project=project.id
+            ):
+                if not MembershipComanageStaff.objects.filter(project=project.id,
+                                                              comanage_group=group_pk).exists():
+                    MembershipComanageStaff.objects.create(
+                        project=project,
+                        comanage_group=ComanageStaff.objects.get(id=group_pk)
+                    )
+                    personnel = personnel_by_comanage_group(ComanageStaff.objects.get(id=group_pk).cn)
+                    for person in personnel:
+                        if not MembershipComanagePersonnel.objects.filter(
+                                person=person,
+                                project=project,
+                                comanage_staff=ComanageStaff.objects.get(id=group_pk)):
+                            MembershipComanagePersonnel.objects.create(
+                                person=person,
+                                project=project,
+                                comanage_pi_admins=None,
+                                comanage_pi_members=None,
+                                comanage_staff=ComanageStaff.objects.get(id=group_pk)
+                            )
+
     comanage_pi_admins = ComanagePIAdmin.objects.filter(
         cn__contains='-PI:admins',
         project=project
@@ -390,7 +418,7 @@ def project_edit(request, uuid):
                                 comanage_pi_members=ComanagePIMember.objects.get(id=group_pk),
                                 comanage_staff=None
                             )
-            # staff / project members
+            # project members/staff
             current_groups = MembershipComanageStaff.objects.filter(project=project.id)
             for group in current_groups:
                 if str(group.comanage_group.id) not in form.data.getlist('comanage_staff'):

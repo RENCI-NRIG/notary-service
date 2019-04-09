@@ -37,7 +37,16 @@
                         <li>{{ affiliation }}</li>
                     {% endfor %}
                 </ul>
-                <h3>Personnel</h3>
+                <form method="POST" class="post-form">
+                    <h3>Personnel
+                        {% if user.is_piadmin or user.is_nsadmin %}
+                            {% csrf_token %}
+                            <input style="font-family: FontAwesome;color: green;
+                                border: none; background: none" name="refresh-personnel"
+                                   title="Refresh personnel" value="&#xf021;" type="submit">
+                        {% endif %}
+                    </h3>
+                </form>
                 <b>Project PI Admins</b>
                 <table width="100%" border="1px solid black" cellpadding="5px">
                     <tr>
