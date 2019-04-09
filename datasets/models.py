@@ -26,10 +26,6 @@ class NSTemplate(models.Model):
     class Meta:
         verbose_name = 'NS Template Description'
 
-    def publish(self):
-        self.modified_date = timezone.now()
-        self.save()
-
     def __str__(self):
         return self.name
 
@@ -50,10 +46,6 @@ class Dataset(models.Model):
 
     class Meta:
         verbose_name = 'NS Dataset Description'
-
-    def publish(self):
-        self.modified_date = timezone.now()
-        self.save()
 
     def __str__(self):
         return self.name

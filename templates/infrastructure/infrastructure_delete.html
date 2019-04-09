@@ -29,7 +29,7 @@
             {% if used_by %}
                 <br>
                 <h3 style="color: #B22222;">Cannot Delete</h3>
-                <b>Infrastructure used by Dataset(s):</b><br>
+                <b>Infrastructure used by Project(s):</b><br>
                 {% for proj in used_by %}
                     - {{ proj.name }}
                     (<a href="{% url 'project_detail' uuid=proj.uuid %}"
