@@ -4,61 +4,63 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% display_workflows as show_workflows %}
-    {% if user.is_authenticated and show_workflows %}
-        <div class="container">
-            <h1>Workflows</h1>
-            <p>Workflows are Neo4j graphs where nodes represent the state of personnel or infrastructure
-                decision points and relationships represent completed actions between states.</p>
-            {% if user.is_nsadmin %}
-                <h3>Neo4j Browser</h3>
-                <a href="{{ neo4j_vars.neo4j_https }}" target="_blank">{{ neo4j_vars.neo4j_https }}/</a>
-                <ul>
-                    <li><b>Connect URL</b>: {{ neo4j_vars.neo4j_bolt_url }}</li>
-                    <li><b>Username</b>: {{ neo4j_vars.neo4j_user }}</li>
-                    <li><b>Password</b>: {{ neo4j_vars.neo4j_pass }}</li>
-                </ul>
-            {% endif %}
-            <h3>My Workflows</h3>
-            <table width="100%" border="1px solid black" cellpadding="5px">
-                <tr>
-                    <td align="center"><b>Name</b></td>
-                    <td align="center"><b>Loaded</b></td>
-                    <td align="center"><b>
-                        {% if user.show_uuid %}
-                            UUID
-                        {% else %}
-                            Description
-                        {% endif %}
-                    </b></td>
-                    <td align="center"><b>Provenance</b></td>
-                </tr>
-                {% for workflow in workflows %}
+    {% if user.is_authenticated %}
+        {% display_workflows as show_workflows %}
+        {% if show_workflows %}
+            <div class="container">
+                <h1>Workflows</h1>
+                <p>Workflows are Neo4j graphs where nodes represent the state of personnel or infrastructure
+                    decision points and relationships represent completed actions between states.</p>
+                {% if user.is_nsadmin %}
+                    <h3>Neo4j Browser</h3>
+                    <a href="{{ neo4j_vars.neo4j_https }}" target="_blank">{{ neo4j_vars.neo4j_https }}/</a>
+                    <ul>
+                        <li><b>Connect URL</b>: {{ neo4j_vars.neo4j_bolt_url }}</li>
+                        <li><b>Username</b>: {{ neo4j_vars.neo4j_user }}</li>
+                        <li><b>Password</b>: {{ neo4j_vars.neo4j_pass }}</li>
+                    </ul>
+                {% endif %}
+                <h3>My Workflows</h3>
+                <table width="100%" border="1px solid black" cellpadding="5px">
                     <tr>
-                        <td>{{ workflow.name }}</td>
-                        <td align="center">{% if workflow.loaded_in_neo4j %}
-                            <i class="fa fa-fw fa-check" style="color: green;"></i>
-                        {% else %}
-                            <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
-                        {% endif %}
-                        </td>
-                        <td style="font-family: Courier"><a href="{% url 'workflow_detail' uuid=workflow.uuid %}"
-                                                            title="Workflow Details">
+                        <td align="center"><b>Name</b></td>
+                        <td align="center"><b>Loaded</b></td>
+                        <td align="center"><b>
                             {% if user.show_uuid %}
-                                {{ workflow.uuid }}
+                                UUID
                             {% else %}
-                                {% if workflow.description|length > 36 %}
-                                    {{ workflow.description|slice:":34" }}..
-                                {% else %}
-                                    {{ workflow.description }}
-                                {% endif %}
+                                Description
                             {% endif %}
-                        </a></td>
-                        <td><b>D:</b> {{ workflow.dataset.name }}<br><b>T:</b> {{ workflow.template.name }}</td>
+                        </b></td>
+                        <td align="center"><b>Provenance</b></td>
                     </tr>
-                {% endfor %}
-            </table>
-        </div>
+                    {% for workflow in workflows %}
+                        <tr>
+                            <td>{{ workflow.name }}</td>
+                            <td align="center">{% if workflow.loaded_in_neo4j %}
+                                <i class="fa fa-fw fa-check" style="color: green;"></i>
+                            {% else %}
+                                <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
+                            {% endif %}
+                            </td>
+                            <td style="font-family: Courier"><a href="{% url 'workflow_detail' uuid=workflow.uuid %}"
+                                                                title="Workflow Details">
+                                {% if user.show_uuid %}
+                                    {{ workflow.uuid }}
+                                {% else %}
+                                    {% if workflow.description|length > 36 %}
+                                        {{ workflow.description|slice:":34" }}..
+                                    {% else %}
+                                        {{ workflow.description }}
+                                    {% endif %}
+                                {% endif %}
+                            </a></td>
+                            <td><b>D:</b> {{ workflow.dataset.name }}<br><b>T:</b> {{ workflow.template.name }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        {% endif %}
     {% else %}
         <div class="container">
             <p>You are not currently logged in or not authorized to view this page</p>

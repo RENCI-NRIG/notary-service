@@ -4,34 +4,36 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated and not user.is_norole %}
-        <div class="container">
-            <div class="post">
-                <h2>{{ infrastructure.name }}
+    {% if user.is_authenticated %}
+        {% if not user.is_norole %}
+            <div class="container">
+                <div class="post">
+                    <h2>{{ infrastructure.name }}
+                        {% if user.is_inp or user.is_nsadmin %}
+                            <a href="{% url 'infrastructure_edit' uuid=infrastructure.uuid %}"
+                               title="Edit infrastructure" class="fa fa-fw fa-pencil" style="color: green;"></a>
+                            <a href="{% url 'infrastructure_delete' uuid=infrastructure.uuid %}"
+                               title="Delete infrastructure" class="fa fa-fw fa-trash" style="color: #B22222;"></a>
+                        {% endif %}
+                    </h2>
                     {% if user.is_inp or user.is_nsadmin %}
-                        <a href="{% url 'infrastructure_edit' uuid=infrastructure.uuid %}"
-                           title="Edit infrastructure" class="fa fa-fw fa-pencil" style="color: green;"></a>
-                        <a href="{% url 'infrastructure_delete' uuid=infrastructure.uuid %}"
-                           title="Delete infrastructure" class="fa fa-fw fa-trash" style="color: #B22222;"></a>
+                        {% if not infrastructure.is_valid %}
+                            <form method="POST" class="post-form">
+                                {% csrf_token %}
+                                <input type="submit" value="Validate Now" style="color: darkgreen">
+                            </form>
+                        {% endif %}
                     {% endif %}
-                </h2>
-                {% if user.is_inp or user.is_nsadmin %}
-                    {% if not infrastructure.is_valid %}
-                        <form method="POST" class="post-form">
-                            {% csrf_token %}
-                            <input type="submit" value="Validate Now" style="color: darkgreen">
-                        </form>
-                    {% endif %}
-                {% endif %}
-                {% if infrastructure_error %}
-                    <div style="background-color: cornsilk;color:darkblue;font-family:Courier;
+                    {% if infrastructure_error %}
+                        <div style="background-color: cornsilk;color:darkblue;font-family:Courier;
                 font-size: 14px;overflow-y: scroll; border-style: solid; border-color: #B22222;
                 padding: 10px;">
-                        {{ infrastructure_error }}
-                    </div>
-                {% endif %}
-                <p>{{ infrastructure.description|linebreaksbr }}</p>
-                <b>Affiliation:</b> {{ infrastructure.affiliation }}
+                            {{ infrastructure_error }}
+                        </div>
+                    {% endif %}
+                    <p>{{ infrastructure.description|linebreaksbr }}</p>
+                    <b>Affiliation:</b> {{ infrastructure.affiliation }}
+                </div>
                 <br><br>
                 <table width="100%" style="font-size: small">
                     <tr>
@@ -61,7 +63,7 @@
                     </tr>
                 </table>
             </div>
-        </div>
+        {% endif %}
     {% else %}
         <div class="container">
             <p>You are not currently logged in or not authorized to view this page</p>
