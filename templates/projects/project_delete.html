@@ -4,202 +4,204 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated and user.is_piadmin or user.is_nsadmin %}
-        <div class="container">
-            <div class="post">
-                <h1 style="color: #B22222;">Are you sure you want to delete?</h1>
-                <h2>{{ project.name }}
-                    <a href="{% url 'project_detail' uuid=project.uuid %}"
-                       title="Cancel" class="fa fa-fw fa-ban" style="color: green;"></a>
-                </h2>
-                <p>{{ project.description|linebreaksbr }}</p>
-                <h3>PI Affiliations</h3>
-                <ul>
-                    {% for affiliation in project.affiliation %}
-                        <li>{{ affiliation }}</li>
-                    {% endfor %}
-                </ul>
-                <h3>Permissions</h3>
-                <b>Project PI Admiins</b>
-                <ul>
-                    {% for group in comanage_pi_admins %}
-                        <li>{{ group.cn|slice:"7:" }}</li>
-                    {% endfor %}
-                </ul>
-                <b>Project PI Members</b>
-                <ul>
-                    {% for group in comanage_pi_members %}
-                        <li>{{ group.cn|slice:"7:" }}</li>
-                    {% endfor %}
-                </ul>
-                <b>Project Members/Staff</b>
-                <ul>
-                    {% for group in comanage_staff %}
-                        <li>{{ group.cn|slice:"7:" }}</li>
-                    {% endfor %}
-                </ul>
-                <h3>Infrastructure</h3>
-                <table width="100%" border="1px solid black" cellpadding="5px">
-                    <tr>
-                        <td align="center"><b>Name</b></td>
-                        <td align="center"><b>Validated</b></td>
-                        <td align="center"><b>
-                            {% if user.show_uuid %}
-                                UUID
-                            {% else %}
-                                Description
-                            {% endif %}
-                        </b></td>
-                        <td align="center"><b>Affiliation (== PI Affiliation)</b></td>
-                    </tr>
-                    {% for infra in infrastructure %}
+    {% if user.is_authenticated %}
+        {% if user.is_piadmin or user.is_nsadmin %}
+            <div class="container">
+                <div class="post">
+                    <h1 style="color: #B22222;">Are you sure you want to delete?</h1>
+                    <h2>{{ project.name }}
+                        <a href="{% url 'project_detail' uuid=project.uuid %}"
+                           title="Cancel" class="fa fa-fw fa-ban" style="color: green;"></a>
+                    </h2>
+                    <p>{{ project.description|linebreaksbr }}</p>
+                    <h3>PI Affiliations</h3>
+                    <ul>
+                        {% for affiliation in project.affiliation %}
+                            <li>{{ affiliation }}</li>
+                        {% endfor %}
+                    </ul>
+                    <h3>Permissions</h3>
+                    <b>Project PI Admiins</b>
+                    <ul>
+                        {% for group in comanage_pi_admins %}
+                            <li>{{ group.cn|slice:"7:" }}</li>
+                        {% endfor %}
+                    </ul>
+                    <b>Project PI Members</b>
+                    <ul>
+                        {% for group in comanage_pi_members %}
+                            <li>{{ group.cn|slice:"7:" }}</li>
+                        {% endfor %}
+                    </ul>
+                    <b>Project Members/Staff</b>
+                    <ul>
+                        {% for group in comanage_staff %}
+                            <li>{{ group.cn|slice:"7:" }}</li>
+                        {% endfor %}
+                    </ul>
+                    <h3>Infrastructure</h3>
+                    <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
-                        <td>{{ infra.name }}</td>
-                        <td align="center">{% if infra.is_valid %}
-                            <i class="fa fa-fw fa-check" style="color: green;"></i>
-                        {% else %}
-                            <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
-                        {% endif %}
-                        </td>
-                        <td style="font-family: Courier"><a href="{% url 'infrastructure_detail' uuid=infra.uuid %}"
-                                                            title="Infrastructure Details">
-                            {% if user.show_uuid %}
-                                {{ infra.uuid }}
-                            {% else %}
-                                {% if infra.description|length > 36 %}
-                                    {{ infra.description|slice:":34" }}..
+                            <td align="center"><b>Name</b></td>
+                            <td align="center"><b>Validated</b></td>
+                            <td align="center"><b>
+                                {% if user.show_uuid %}
+                                    UUID
                                 {% else %}
-                                    {{ infra.description }}
+                                    Description
                                 {% endif %}
-                            {% endif %}
-                        </a></td>
-                        <td>
-                            {{ infra.affiliation }}
-                            {% if infra.affiliation in project.affiliation %}
-                                (<i class="fa fa-fw fa-check" style="color: green;"></i>)
-                            {% else %}
-                                (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
-                            {% endif %}
-                        </td>
-                    {% endfor %}
-                </table>
-                <br>
-                <h3>Datasets</h3>
-                <table width="100%" border="1px solid black" cellpadding="5px">
-                    <tr>
-                        <td align="center"><b>Name</b></td>
-                        <td align="center"><b>Validated</b></td>
-                        <td align="center"><b>
-                            {% if user.show_uuid %}
-                                UUID
-                            {% else %}
-                                Description
-                            {% endif %}
-                        </b></td>
-                    </tr>
-                    {% for dataset in datasets %}
-                        <tr>
-                        <td>{{ dataset.name }}</td>
-                        <td align="center">{% if dataset.is_valid %}
-                            <i class="fa fa-fw fa-check" style="color: green;"></i>
-                        {% else %}
-                            <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
-                        {% endif %}
-                        </td>
-                        <td style="font-family: Courier"><a href="{% url 'dataset_detail' uuid=dataset.uuid %}"
-                                                            title="Dataset Details">
-                            {% if user.show_uuid %}
-                                {{ dataset.uuid }}
-                            {% else %}
-                                {% if dataset.description|length > 36 %}
-                                    {{ dataset.description|slice:":34" }}..
-                                {% else %}
-                                    {{ dataset.description }}
-                                {% endif %}
-                            {% endif %}
-                        </a></td>
-                    {% endfor %}
-                </table>
-                <br>
-                <h3>Workflows</h3>
-                <table width="100%" border="1px solid black" cellpadding="5px">
-                    <tr>
-                        <td align="center"><b>Name</b></td>
-                        <td align="center"><b>Loaded</b></td>
-                        <td align="center"><b>
-                            {% if user.show_uuid %}
-                                UUID
-                            {% else %}
-                                Description
-                            {% endif %}
-                        </b></td>
-                        <td align="center"><b>Provenance</b></td>
-                    </tr>
-                    {% for workflow in workflows %}
-                        <tr>
-                            <td>{{ workflow.name }}</td>
-                            <td align="center">{% if workflow.loaded_in_neo4j %}
+                            </b></td>
+                            <td align="center"><b>Affiliation (== PI Affiliation)</b></td>
+                        </tr>
+                        {% for infra in infrastructure %}
+                            <tr>
+                            <td>{{ infra.name }}</td>
+                            <td align="center">{% if infra.is_valid %}
                                 <i class="fa fa-fw fa-check" style="color: green;"></i>
                             {% else %}
                                 <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
                             {% endif %}
                             </td>
-                            <td style="font-family: Courier"><a href="{% url 'workflow_detail' uuid=workflow.uuid %}"
-                                                                title="Workflow Details">
+                            <td style="font-family: Courier"><a href="{% url 'infrastructure_detail' uuid=infra.uuid %}"
+                                                                title="Infrastructure Details">
                                 {% if user.show_uuid %}
-                                    {{ workflow.uuid }}
+                                    {{ infra.uuid }}
                                 {% else %}
-                                    {% if workflow.description|length > 36 %}
-                                        {{ workflow.description|slice:":34" }}..
+                                    {% if infra.description|length > 36 %}
+                                        {{ infra.description|slice:":34" }}..
                                     {% else %}
-                                        {{ workflow.description }}
+                                        {{ infra.description }}
                                     {% endif %}
                                 {% endif %}
                             </a></td>
-                            <td><b>D:</b> {{ workflow.dataset.name }}<br><b>T:</b> {{ workflow.template.name }}</td>
+                            <td>
+                                {{ infra.affiliation }}
+                                {% if infra.affiliation in project.affiliation %}
+                                    (<i class="fa fa-fw fa-check" style="color: green;"></i>)
+                                {% else %}
+                                    (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </table>
+                    <br>
+                    <h3>Datasets</h3>
+                    <table width="100%" border="1px solid black" cellpadding="5px">
+                        <tr>
+                            <td align="center"><b>Name</b></td>
+                            <td align="center"><b>Validated</b></td>
+                            <td align="center"><b>
+                                {% if user.show_uuid %}
+                                    UUID
+                                {% else %}
+                                    Description
+                                {% endif %}
+                            </b></td>
                         </tr>
-                    {% endfor %}
-                </table>
+                        {% for dataset in datasets %}
+                            <tr>
+                            <td>{{ dataset.name }}</td>
+                            <td align="center">{% if dataset.is_valid %}
+                                <i class="fa fa-fw fa-check" style="color: green;"></i>
+                            {% else %}
+                                <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
+                            {% endif %}
+                            </td>
+                            <td style="font-family: Courier"><a href="{% url 'dataset_detail' uuid=dataset.uuid %}"
+                                                                title="Dataset Details">
+                                {% if user.show_uuid %}
+                                    {{ dataset.uuid }}
+                                {% else %}
+                                    {% if dataset.description|length > 36 %}
+                                        {{ dataset.description|slice:":34" }}..
+                                    {% else %}
+                                        {{ dataset.description }}
+                                    {% endif %}
+                                {% endif %}
+                            </a></td>
+                        {% endfor %}
+                    </table>
+                    <br>
+                    <h3>Workflows</h3>
+                    <table width="100%" border="1px solid black" cellpadding="5px">
+                        <tr>
+                            <td align="center"><b>Name</b></td>
+                            <td align="center"><b>Loaded</b></td>
+                            <td align="center"><b>
+                                {% if user.show_uuid %}
+                                    UUID
+                                {% else %}
+                                    Description
+                                {% endif %}
+                            </b></td>
+                            <td align="center"><b>Provenance</b></td>
+                        </tr>
+                        {% for workflow in workflows %}
+                            <tr>
+                                <td>{{ workflow.name }}</td>
+                                <td align="center">{% if workflow.loaded_in_neo4j %}
+                                    <i class="fa fa-fw fa-check" style="color: green;"></i>
+                                {% else %}
+                                    <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
+                                {% endif %}
+                                </td>
+                                <td style="font-family: Courier"><a
+                                        href="{% url 'workflow_detail' uuid=workflow.uuid %}"
+                                        title="Workflow Details">
+                                    {% if user.show_uuid %}
+                                        {{ workflow.uuid }}
+                                    {% else %}
+                                        {% if workflow.description|length > 36 %}
+                                            {{ workflow.description|slice:":34" }}..
+                                        {% else %}
+                                            {{ workflow.description }}
+                                        {% endif %}
+                                    {% endif %}
+                                </a></td>
+                                <td><b>D:</b> {{ workflow.dataset.name }}<br><b>T:</b> {{ workflow.template.name }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                    <br>
+                </div>
+                <form method="POST" class="post-form">
+                    {% csrf_token %}
+                    <input type="submit" value="Delete" style="color: #B22222;">
+                </form>
                 <br>
+                <table width="100%" style="font-size: small">
+                    <tr>
+                        <td width="60%">
+                            <b>Created By:</b> {{ project.created_by }}
+                        </td>
+                        <td>
+                            <b>Modified By:</b> {{ project.modified_by }}
+                        </td>
+                        </td>
+                    <tr>
+                        <td>
+                            <b>Created Date:</b> {{ project.created_date|date:"m/d/Y g:i a" }}
+                        </td>
+                        <td>
+                            <b>Modified Date:</b> {{ project.modified_date|date:"m/d/Y g:i a" }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Validated:</b> {{ project.is_valid }}
+                            {% if project.is_valid %}
+                                (<i class="fa fa-fw fa-check" style="color: green;"></i>)
+                            {% else %}
+                                (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
             </div>
-            <form method="POST" class="post-form">
-                {% csrf_token %}
-                <input type="submit" value="Delete" style="color: #B22222;">
-            </form>
-            <br>
-            <table width="100%" style="font-size: small">
-                <tr>
-                    <td width="60%">
-                        <b>Created By:</b> {{ project.created_by }}
-                    </td>
-                    <td>
-                        <b>Modified By:</b> {{ project.modified_by }}
-                    </td>
-                    </td>
-                <tr>
-                    <td>
-                        <b>Created Date:</b> {{ project.created_date|date:"m/d/Y g:i a" }}
-                    </td>
-                    <td>
-                        <b>Modified Date:</b> {{ project.modified_date|date:"m/d/Y g:i a" }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>Validated:</b> {{ project.is_valid }}
-                        {% if project.is_valid %}
-                            (<i class="fa fa-fw fa-check" style="color: green;"></i>)
-                        {% else %}
-                            (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
-                        {% endif %}
-                    </td>
-                </tr>
-            </table>
-
-            {% else %}
-            <div class="container">
-                <p>You are not currently logged in or not authorized to view this page</p>
-            </div>
+        {% endif %}
+    {% else %}
+        <div class="container">
+            <p>You are not currently logged in or not authorized to view this page</p>
         </div>
     {% endif %}
 {% endblock %}
