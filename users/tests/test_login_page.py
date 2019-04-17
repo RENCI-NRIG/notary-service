@@ -5,7 +5,7 @@ from django.urls import reverse
 class LoginPageTests(SimpleTestCase):
 
     def test_login_page_status_code(self):
-        response = self.client.get('/login/')
+        response = self.client.get('/login')
         self.assertEqual(response.status_code, 200)
 
     def test_view_url_by_name(self):
@@ -16,10 +16,6 @@ class LoginPageTests(SimpleTestCase):
         response = self.client.get(reverse('login'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'login.html')
-
-    # def test_login_page_contains_correct_html(self):
-    #     response = self.client.get('/about/')
-    #     self.assertContains(response, '<h1>Login page</h1>')
 
     def test_login_page_does_not_contain_incorrect_html(self):
         response = self.client.get('/')
