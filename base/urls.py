@@ -22,7 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('oidc/', include('mozilla_django_oidc.urls')),
     path('users/', include('django.contrib.auth.urls')),
-    path('whoami/', views.whoami, name='whoami'),
+    path('whoami', views.whoami, name='whoami'),
     path('', include('users.urls')),
     path('', include('comanage.urls')),
     path('', include('projects.urls')),
