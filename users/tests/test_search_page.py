@@ -5,7 +5,7 @@ from django.urls import reverse
 class SearchPageTests(SimpleTestCase):
 
     def test_search_page_status_code(self):
-        response = self.client.get('/search/')
+        response = self.client.get('/search')
         self.assertEqual(response.status_code, 200)
 
     def test_view_url_by_name(self):
@@ -16,10 +16,6 @@ class SearchPageTests(SimpleTestCase):
         response = self.client.get(reverse('search'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'search.html')
-
-    # def test_search_page_contains_correct_html(self):
-    #     response = self.client.get('/about/')
-    #     self.assertContains(response, '<h1>Search page</h1>')
 
     def test_search_page_does_not_contain_incorrect_html(self):
         response = self.client.get('/')

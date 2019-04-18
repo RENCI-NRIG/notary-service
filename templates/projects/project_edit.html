@@ -4,18 +4,20 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated and user.is_piadmin or user.is_nsadmin %}
-        <div class="container">
-            <h2>Edit Project
-                <a href="{% url 'project_detail' uuid=project_uuid %}"
-                   title="Cancel" class="fa fa-fw fa-ban" style="color: green;"></a>
-            </h2>
-            <form method="POST" class="post-form">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <input type="submit" value="Save" style="color: darkgreen">
-            </form>
-        </div>
+    {% if user.is_authenticated %}
+        {% if user.is_piadmin or user.is_nsadmin %}
+            <div class="container">
+                <h2>Edit Project
+                    <a href="{% url 'project_detail' uuid=project_uuid %}"
+                       title="Cancel" class="fa fa-fw fa-ban" style="color: green;"></a>
+                </h2>
+                <form method="POST" class="post-form">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <input type="submit" value="Save" style="color: darkgreen">
+                </form>
+            </div>
+        {% endif %}
     {% else %}
         <div class="container">
             <p>You are not currently logged in or not authorized to view this page</p>

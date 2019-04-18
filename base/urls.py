@@ -16,10 +16,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from . import views
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('oidc/', include('mozilla_django_oidc.urls')),
     path('users/', include('django.contrib.auth.urls')),
+    path('whoami', views.whoami, name='whoami'),
     path('', include('users.urls')),
     path('', include('comanage.urls')),
     path('', include('projects.urls')),
