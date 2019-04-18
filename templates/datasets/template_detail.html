@@ -60,30 +60,34 @@
                             {{ template.graphml_definition | getfilename }}
                         {% endif %}
                         {% if template.is_valid %}
-                            <br><br>
-                            <table width="100%" cellpadding="0" cellspacing="0">
+                            <br>
+                            <table width="100%">
                                 <tr>
-                                    <td width="40%">
+                                    <td width="20%">
                                         <b>Graph template:</b>
                                     </td>
-                                    <td width="30%">
-                                        <i class="fa fa-circle" aria-hidden="true" style="color: darkgreen;"></i>
-                                        Start Node
-                                    </td>
-                                    <td width="30%">
-                                        <i class="fa fa-circle" aria-hidden="true" style="color: lightblue;"></i>
-                                        Common Set Node
-                                    </td>
+                                    <td width="20%"></td>
+                                    <td width="20%"></td>
+                                    <td width="20%"></td>
+                                    <td width="20%"></td>
                                 </tr>
                                 <tr>
                                     <td></td>
-                                    <td>
+                                    <td align="left">
+                                        <i class="fa fa-circle" aria-hidden="true" style="color: darkgreen;"></i>
+                                        Start Node
+                                    </td>
+                                    <td align="left">
                                         <i class="fa fa-circle" aria-hidden="true" style="color: firebrick;"></i>
                                         Stop Node
                                     </td>
-                                    <td>
+                                    <td align="left">
                                         <i class="fa fa-circle" aria-hidden="true" style="color: goldenrod;"></i>
                                         User Set Node
+                                    </td>
+                                    <td align="left">
+                                        <i class="fa fa-circle" aria-hidden="true" style="color: lightblue;"></i>
+                                        Common Set Node
                                     </td>
                                 </tr>
                             </table>
@@ -94,7 +98,7 @@
                                 {% include "workflow_graph.html" %}
                             </div>
                         {% endif %}
-                        <br><br>
+                        <br>
                         <b>File contents:</b><br>
                         <div style="background-color: #DCDCDC;color:darkblue;font-family:Courier;
                 font-size: 14px;overflow-x: scroll; height: 600px;overflow-y: scroll">
