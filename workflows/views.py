@@ -88,4 +88,4 @@ def create_neo4j_workflow(graphml_file, workflow_uuid):
 
 
 def delete_neo4j_workflow(workflow_uuid):
-    wf.delete_workflow_from_uuid(workflow_uuid)
+    wf.delete_workflow_by_uuid(workflow_uuid)

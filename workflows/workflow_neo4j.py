@@ -21,14 +21,14 @@ def create_workflow_from_template(graphml_file, workflow_uuid):
         importDir=import_dir,
         importHostDir=import_host_dir
     )
-    gid = neo4j.import_workflow(graphml=graphml, graphId=workflow_uuid)
-    if gid == workflow_uuid:
+    gid = neo4j.import_workflow(graphml=graphml, graphId=str(workflow_uuid))
+    if gid == str(workflow_uuid):
         return True
     else:
         return False
 
 
-def delete_workflow_from_uuid(workflow_uuid):
+def delete_workflow_by_uuid(workflow_uuid):
     neo4j = Neo4jWorkflow(
         url=bolt_url,
         user=neo_user,
@@ -36,7 +36,7 @@ def delete_workflow_from_uuid(workflow_uuid):
         importDir=import_dir,
         importHostDir=import_host_dir
     )
-    neo4j.delete_workflow(workflow_uuid)
+    neo4j.delete_workflow(str(workflow_uuid))
 
 
 def get_neo4j_workflow_by_uuid(workflow_uuid):
