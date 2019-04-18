@@ -6,7 +6,7 @@ from infrastructure.models import Infrastructure
 from users.models import NotaryServiceUser
 from workflows import views as wf_views
 from workflows.models import WorkflowNeo4j
-from workflows.workflow_neo4j import delete_workflow_from_uuid
+from workflows.workflow_neo4j import delete_workflow_by_uuid
 from .forms import ProjectForm
 from .models import Project, ComanageStaff, ComanagePIAdmin, ComanagePIMember, ComanageInfrastructureProvider, \
     ComanageInstitutionalGovernance, MembershipComanageStaff, MembershipComanagePIAdmin, \
@@ -167,7 +167,7 @@ def project_detail(request, uuid):
                         project=project, dataset=ds)
                     rm_wf_objs = WorkflowNeo4j.objects.filter(uuid__in=rm_wf_list)
                     for wf in rm_wf_objs:
-                        delete_workflow_from_uuid(workflow_uuid=str(wf.uuid))
+                        delete_workflow_by_uuid(workflow_uuid=str(wf.uuid))
                         wf.delete()
                     MembershipWorkflow.objects.filter(project=project, dataset=ds).delete()
                 else:
@@ -181,7 +181,7 @@ def project_detail(request, uuid):
                             )
                             rm_wf_objs = WorkflowNeo4j.objects.filter(uuid__in=rm_wf_list)
                             for wf in rm_wf_objs:
-                                delete_workflow_from_uuid(workflow_uuid=str(wf.uuid))
+                                delete_workflow_by_uuid(workflow_uuid=str(wf.uuid))
                                 wf.delete()
                                 MembershipWorkflow.objects.filter(
                                     project=project, dataset=ds, template=tpl
@@ -499,7 +499,7 @@ def project_delete(request, uuid):
             project=project)
         pr_wf_objs = WorkflowNeo4j.objects.filter(uuid__in=pr_wf_list)
         for wf in pr_wf_objs:
-            delete_workflow_from_uuid(workflow_uuid=str(wf.uuid))
+            delete_workflow_by_uuid(workflow_uuid=str(wf.uuid))
             wf.delete()
         MembershipComanagePIAdmin.objects.filter(project=project.id).delete()
         MembershipComanagePIMember.objects.filter(project=project.id).delete()

@@ -5,6 +5,8 @@ from django.utils import timezone
 from ns_workflow import Neo4jWorkflow, WorkflowError
 
 from projects.models import Project, MembershipDatasets
+from workflows.workflow_neo4j import create_workflow_from_template, delete_workflow_by_uuid, \
+    get_neo4j_workflow_by_uuid
 from .forms import TemplateForm, DatasetForm
 from .models import NSTemplate, Dataset, MembershipNSTemplate
 
@@ -157,22 +159,34 @@ def template_validate(graphml_file, template_uuid):
     neo_pass = os.getenv('NEO4J_PASS')
     import_dir = os.getenv('NEO4J_IMPORTS_PATH_DOCKER')
     import_host_dir = os.getenv('NEO4J_IMPORTS_PATH_HOST')
+    template_error = None
+    is_valid = False
     try:
-        graphmlFile = open('./media/' + graphml_file, "r")
-        graphml = graphmlFile.read()
-        graphmlFile.close()
-        workflow = Neo4jWorkflow(url=bolt_url,
-                                 user=neo_user,
-                                 pswd=neo_pass,
-                                 importDir=import_dir,
-                                 importHostDir=import_host_dir
-                                 )
-        gid = workflow.import_workflow(graphml=graphml, graphId=template_uuid)
+        delete_workflow_by_uuid(template_uuid)
+    except WorkflowError as e:
+        print(e)
+        pass
+    graphmlFile = open('./media/' + graphml_file, "r")
+    graphml = graphmlFile.read()
+    graphmlFile.close()
+    workflow = Neo4jWorkflow(
+        url=bolt_url,
+        user=neo_user,
+        pswd=neo_pass,
+        importDir=import_dir,
+        importHostDir=import_host_dir
+    )
+    gid = workflow.import_workflow(graphml=graphml, graphId=template_uuid)
+    try:
         workflow.validate_workflow(graphId=gid)
-        workflow.delete_workflow(graphId=gid)
-    except WorkflowError as template_error:
-        return False, template_error
-    return True, None
+    except WorkflowError as e:
+        template_error = e
+        is_valid = False
+    workflow.delete_workflow(graphId=template_uuid)
+    if template_error is None:
+        create_workflow_from_template(graphml_file, template_uuid)
+        is_valid = True
+    return is_valid, template_error
 
 
 def templates(request):
@@ -193,16 +207,20 @@ def template_detail(request, uuid):
     f = open(template.graphml_definition.path)
     template_file = f.read()
     f.close()
+    template_error = None
+    workflow_graph = get_neo4j_workflow_by_uuid(str(uuid))
     if request.method == "POST":
-        template.is_valid, template_error = template_validate(template.graphml_definition.name, str(template.uuid))
-        template.save()
-    else:
-        template_error = None
+        if request.POST.get("validate-template"):
+            template.is_valid, template_error = template_validate(template.graphml_definition.name, str(template.uuid))
+            template.save()
+            if template.is_valid:
+                return redirect('template_detail', uuid=template.uuid)
     return render(request, 'template_detail.html', {
         'templates_page': 'active',
         'template': template,
         'template_file': template_file,
         'template_error': template_error,
+        'workflow_graph': workflow_graph,
     })
 
 
@@ -242,6 +260,7 @@ def template_delete(request, uuid):
     template = get_object_or_404(NSTemplate, uuid=uuid)
     used_by = template_in_use(uuid)
     if request.method == "POST":
+        delete_workflow_by_uuid(str(uuid))
         template.graphml_definition.delete()
         template.delete()
         return template_list(request)
