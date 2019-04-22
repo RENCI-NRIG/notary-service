@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>iframe Window</title>
+    <style>
+        body {
+            background-color: #107B97;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Presidio mock: dp-dev-1.cyberimpact.us</h2>
+<p>Send Message:
+    <button id="message_button">Send to Notary Service</button>
+</p>
+<p>Receive Message:</p>
+<div id="results"></div>
+
+<script>
+    // addEventListener support for IE8
+    function bindEvent(element, eventName, eventHandler) {
+        if (element.addEventListener) {
+            element.addEventListener(eventName, eventHandler, false);
+        } else if (element.attachEvent) {
+            element.attachEvent('on' + eventName, eventHandler);
+        }
+    }
+
+    // Send a message to the parent
+    var sendMessage = function (msg) {
+        // Make sure you are sending a string, and to stringify JSON
+        window.parent.postMessage(msg, 'https://127.0.0.1:8443');
+        //window.parent.postMessage(msg, '*');
+    };
+
+    var results = document.getElementById('results'),
+        messageButton = document.getElementById('message_button');
+
+    // Listen to messages from parent window
+    bindEvent(window, 'message', function (e) {
+        results.innerHTML = e.data;
+        sendMessage('data received');
+    });
+
+    // Send random message data on every button click
+    bindEvent(messageButton, 'click', function (e) {
+        var random = Math.random();
+        sendMessage('from presidio: ' + '' + random);
+    });
+</script>
+</body>
+</html>

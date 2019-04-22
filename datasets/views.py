@@ -8,6 +8,7 @@ from projects.models import Project, MembershipDatasets
 from workflows.workflow_neo4j import create_workflow_from_template, delete_workflow_by_uuid, \
     get_neo4j_workflow_by_uuid
 from .forms import TemplateForm, DatasetForm
+from .jwt import encode_ns_jwt, decode_ns_jwt
 from .models import NSTemplate, Dataset, MembershipNSTemplate
 
 
@@ -53,6 +54,30 @@ def dataset_detail(request, uuid):
         'dataset_error': dataset_error,
         'templates': tpl_objs,
     })
+
+
+def dataset_access(request, uuid):
+    dataset = get_object_or_404(Dataset, uuid=uuid)
+    dataset_error = None
+    project_uuid = request.GET.get('project_uuid', '-1')
+    signed_jwt = None
+    jwt_claims = None
+    if request.method == "POST":
+        if request.POST.get("generate-jwt"):
+            signed_jwt = encode_ns_jwt(project_uuid, request.user)
+            jwt_claims = decode_ns_jwt(signed_jwt)
+    return render(request, 'dataset_access.html', {
+        'datasets_page': 'active',
+        'dataset': dataset,
+        'dataset_error': dataset_error,
+        'project_uuid': project_uuid,
+        'signed_jwt': signed_jwt,
+        'jwt_claims': jwt_claims,
+    })
+
+
+def iframe_mock(request):
+    return render(request, 'iframe_mock.html', {'home_page': 'active'})
 
 
 def dataset_new(request):
