@@ -46,11 +46,7 @@
                             {% if user.show_uuid %}
                                 {{ infra.uuid }}
                             {% else %}
-                                {% if infra.description|length > 36 %}
-                                    {{ infra.description|slice:":34" }}..
-                                {% else %}
-                                    {{ infra.description }}
-                                {% endif %}
+                                {{ infra.description|truncatechars:"57" }}
                             {% endif %}
                         </a></td>
                         <td>{{ infra.created_date|date:"m/d/Y g:i a" }}</td>

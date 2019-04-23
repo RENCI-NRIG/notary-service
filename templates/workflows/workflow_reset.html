@@ -44,11 +44,7 @@
                         {% if user.show_uuid %}
                             {{ project.project.uuid }}
                         {% else %}
-                            {% if project.project.description|length > 36 %}
-                                {{ project.project.description|slice:":34" }}..
-                            {% else %}
-                                {{ project.project.description }}
-                            {% endif %}
+                            {{ project.project.description|truncatechars:"57" }}
                         {% endif %}
                     </a>
                     <br>
@@ -59,11 +55,7 @@
                         {% if user.show_uuid %}
                             {{ workflow.dataset.uuid }}
                         {% else %}
-                            {% if workflow.dataset.description > 36 %}
-                                {{ workflow.dataset.description|slice:":34" }}..
-                            {% else %}
-                                {{ workflow.dataset.description }}
-                            {% endif %}
+                            {{ workflow.dataset.description|truncatechars:"57" }}
                         {% endif %}
                     </a>
                     <br>
@@ -75,11 +67,7 @@
                         {% if user.show_uuid %}
                             {{ workflow.template.uuid }}
                         {% else %}
-                            {% if workflow.template.description|length > 36 %}
-                                {{ workflow.template.description|slice:":34" }}..
-                            {% else %}
-                                {{ workflow.template.description }}
-                            {% endif %}
+                            {{ workflow.template.description|truncatechars:"57" }}
                         {% endif %}
                     </a>
                     <br>
@@ -91,11 +79,7 @@
                         {% if user.show_uuid %}
                             {{ workflow.uuid }}
                         {% else %}
-                            {% if workflow.description|length > 36 %}
-                                {{ workflow.description|slice:":34" }}..
-                            {% else %}
-                                {{ workflow.description }}
-                            {% endif %}
+                            {{ workflow.description|truncatechars:"57" }}
                         {% endif %}
                     </a>
                     <br><br>

@@ -176,11 +176,7 @@
                                 {% if user.show_uuid %}
                                     {{ infra.uuid }}
                                 {% else %}
-                                    {% if infra.description|length > 36 %}
-                                        {{ infra.description|slice:":34" }}..
-                                    {% else %}
-                                        {{ infra.description }}
-                                    {% endif %}
+                                    {{ infra.description|truncatechars:"57" }}
                                 {% endif %}
                             </a></td>
                             <td>
@@ -209,7 +205,15 @@
                         </tr>
                         {% for dataset in datasets %}
                             <tr>
-                            <td>{{ dataset.name }}</td>
+                            <td>
+                                <button
+                                        onclick="location.href = '{% url 'dataset_access' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
+                                        id="get-dataset-access"
+                                        style="color: deeppink;"
+                                >Get Access
+                                </button>
+                                {{ dataset.name }}
+                            </td>
                             <td align="center">{% if dataset.is_valid %}
                                 <i class="fa fa-fw fa-check" style="color: green;"></i>
                             {% else %}
@@ -221,13 +225,10 @@
                                 {% if user.show_uuid %}
                                     {{ dataset.uuid }}
                                 {% else %}
-                                    {% if dataset.description|length > 36 %}
-                                        {{ dataset.description|slice:":34" }}..
-                                    {% else %}
-                                        {{ dataset.description }}
-                                    {% endif %}
+                                    {{ dataset.description|truncatechars:"57" }}
                                 {% endif %}
-                            </a></td>
+                            </a>
+                            </td>
                         {% endfor %}
                     </table>
                     <br>
@@ -274,11 +275,7 @@
                                     {% if user.show_uuid %}
                                         {{ workflow.uuid }}
                                     {% else %}
-                                        {% if workflow.description|length > 36 %}
-                                            {{ workflow.description|slice:":34" }}..
-                                        {% else %}
-                                            {{ workflow.description }}
-                                        {% endif %}
+                                        {{ workflow.description|truncatechars:"57" }}
                                     {% endif %}
                                 </a></td>
                                 <td><b>D:</b> {{ workflow.dataset.name }}<br><b>T:</b> {{ workflow.template.name }}</td>

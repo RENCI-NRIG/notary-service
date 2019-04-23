@@ -50,11 +50,7 @@
                             {% if user.show_uuid %}
                                 {{ project.uuid }}
                             {% else %}
-                                {% if project.description|length > 36 %}
-                                    {{ project.description|slice:":34" }}..
-                                {% else %}
-                                    {{ project.description }}
-                                {% endif %}
+                                {{ project.description|truncatechars:"57" }}
                             {% endif %}
                         </a></td>
                         <td>{{ project.created_date|date:"m/d/Y g:i a" }}</td>
