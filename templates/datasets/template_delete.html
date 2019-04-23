@@ -38,11 +38,7 @@
                         {% if user.show_uuid %}
                             {{ ds.uuid }}
                         {% else %}
-                            {% if ds.description|length > 36 %}
-                                {{ ds.description|slice:":34" }}..
-                            {% else %}
-                                {{ ds.description }}
-                            {% endif %}
+                            {{ ds.description|truncatechars:"57" }}
                         {% endif %}
                     </a>)<br>
                     {% endfor %}

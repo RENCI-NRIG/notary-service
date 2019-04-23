@@ -11,10 +11,12 @@ server = Server(ldap_host, use_ssl=True, get_info=ALL)
 
 
 def get_ldap_attributes(user):
-    if user.eppn:
-        ldap_search_filter = '(eduPersonPrincipalName=' + user.eppn + ')'
-    else:
-        ldap_search_filter = '(mail=' + user.email + ')'
+    # if user.eppn:
+    #     ldap_search_filter = '(eduPersonPrincipalName=' + user.eppn + ')'
+    # else:
+    #     ldap_search_filter = '(mail=' + user.email + ')'
+    # COmanage LDAP appears inconsistent when including eduPersonPrincipalName (eppn), so using user.email only
+    ldap_search_filter = '(mail=' + user.email + ')'
     conn = Connection(server, ldap_user, ldap_password, auto_bind=True)
     profile_found = conn.search(ldap_search_base,
                                 ldap_search_filter,

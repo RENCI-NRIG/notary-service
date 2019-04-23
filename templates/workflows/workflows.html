@@ -48,11 +48,7 @@
                                 {% if user.show_uuid %}
                                     {{ workflow.uuid }}
                                 {% else %}
-                                    {% if workflow.description|length > 36 %}
-                                        {{ workflow.description|slice:":34" }}..
-                                    {% else %}
-                                        {{ workflow.description }}
-                                    {% endif %}
+                                    {{ workflow.description|truncatechars:"57" }}
                                 {% endif %}
                             </a></td>
                             <td><b>D:</b> {{ workflow.dataset.name }}<br><b>T:</b> {{ workflow.template.name }}</td>

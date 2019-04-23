@@ -6,6 +6,9 @@ from .models import Project, ComanagePIAdmin, ComanagePIMember, ComanageStaff
 
 
 class ProjectForm(forms.ModelForm):
+    name = forms.CharField(
+        widget=forms.TextInput(attrs={'size': 60})
+    )
     comanage_pi_admins = forms.ModelMultipleChoiceField(
         queryset=ComanagePIAdmin.objects.filter(cn__contains='-PI:admins', active=True).order_by('cn'),
         widget=forms.SelectMultiple(),
@@ -34,6 +37,9 @@ class ProjectForm(forms.ModelForm):
 
     class Meta:
         model = Project
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 6, 'cols': 60}),
+        }
         fields = (
             'name',
             'description',
