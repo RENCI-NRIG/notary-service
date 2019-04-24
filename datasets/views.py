@@ -60,6 +60,7 @@ def dataset_access(request, uuid):
     dataset = get_object_or_404(Dataset, uuid=uuid)
     dataset_error = None
     project_uuid = request.GET.get('project_uuid', '-1')
+    project_name = Project.objects.get(uuid=project_uuid).name
     signed_jwt = None
     jwt_claims = None
     if request.method == "POST":
@@ -71,6 +72,7 @@ def dataset_access(request, uuid):
         'dataset': dataset,
         'dataset_error': dataset_error,
         'project_uuid': project_uuid,
+        'project_name': project_name,
         'signed_jwt': signed_jwt,
         'jwt_claims': jwt_claims,
     })

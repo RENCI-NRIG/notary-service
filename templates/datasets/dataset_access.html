@@ -6,7 +6,7 @@
 {% block content %}
     {% if user.is_authenticated %}
         {% if not user.is_norole %}
-            <div class="container">
+            <div class="container" style="background-color: lightcyan">
                 <div class="post">
                     <h2>{{ dataset.name }}</h2>
                     <p>{{ dataset.description|linebreaksbr }}</p>
@@ -31,9 +31,9 @@
                             <td>{{ dataset.safe_identifier_as_scid }}</td>
                         </tr>
                         <tr>
-                            <td><b>Project ID:</b></td>
+                            <td><b>Project:</b></td>
                             <td>
-                                <a href="{% url 'project_detail' project_uuid %}">{{ project_uuid }}</a>
+                                <a href="{% url 'project_detail' project_uuid %}">{{ project_name }}</a>
                             </td>
                         </tr>
                     </table>
