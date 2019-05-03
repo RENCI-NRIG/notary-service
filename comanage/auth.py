@@ -1,13 +1,13 @@
 import unicodedata
+from builtins import any
 
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 
+from apache_kafka.producer import send_ns_message
+from users.models import Role, Affiliation
+from users.views import set_role_boolean
 from .ldapsearch import get_ldap_attributes
 from .models import IsMemberOf, MembershipIsMemberOf, LdapOther, MembershipLdapOther
-from apache_kafka.producer import send_ns_message
-from users.models import Role
-from users.views import set_role_boolean
-from builtins import any
 
 
 def generate_username(email):
@@ -121,7 +121,6 @@ class MyOIDCAB(OIDCAuthenticationBackend):
             user.is_superuser = False
         set_role_boolean(user)
 
-
     def create_user(self, claims):
         user = super(MyOIDCAB, self).create_user(claims)
         user.first_name = claims.get('given_name', '')
@@ -166,6 +165,7 @@ class MyOIDCAB(OIDCAuthenticationBackend):
         user.roles.add(int(getattr(Role, 'NO_ROLE')))
         user.is_norole = True
         user.save()
+        self.update_affiliation(user)
 
         return user
 
@@ -201,3 +201,11 @@ class MyOIDCAB(OIDCAuthenticationBackend):
         user.save()
 
         return user
+
+    def update_affiliation(self, user):
+        if not Affiliation.objects.filter(idp=user.idp).exists():
+            Affiliation.objects.create(
+                display_name=user.idp_name,
+                idp_name=user.idp_name,
+                idp=user.idp,
+            )
