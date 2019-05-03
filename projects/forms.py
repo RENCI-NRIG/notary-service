@@ -3,21 +3,47 @@ from django import forms
 from datasets.models import Dataset
 from infrastructure.models import Infrastructure
 from .models import Project, ComanagePIAdmin, ComanagePIMember, ComanageStaff
+from users.models import Affiliation
 
 
 class ProjectForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
+        # role_choices = ()
+        # for role in user.roles.filter(notaryserviceuser=user):
+        #     role_choices += ((role.id, role.get_id_display()),)
+        # print(role_choices)
+        super(ProjectForm, self).__init__(*args, **kwargs)
+        self.fields['affiliation'] = forms.ModelMultipleChoiceField(
+            queryset=Affiliation.objects.order_by('display_name'),
+            widget=forms.SelectMultiple,
+            label='Project Affiliations',
+            initial=Affiliation.objects.get(idp_name=user.idp_name),
+        )
+    #     self.fields['role'] = forms.ChoiceField(
+    #         choices=sorted(role_choices, key=itemgetter(1)),
+    #         widget=forms.Select,
+    #         label='User role',
+    #         required=False
+    #     )
+    #
+    # def __init__(self, *args, **kwargs):
+    #     self.user = kwargs.pop('user', None)
+    #     super(ProjectForm, self).__init__(*args, **kwargs)
+
     name = forms.CharField(
         widget=forms.TextInput(attrs={'size': 60})
     )
     comanage_pi_admins = forms.ModelMultipleChoiceField(
         queryset=ComanagePIAdmin.objects.filter(cn__contains='-PI:admins', active=True).order_by('cn'),
         widget=forms.SelectMultiple(),
-        label='Project PI Admins'
+        label='Project PI Admins',
     )
     comanage_pi_members = forms.ModelMultipleChoiceField(
         queryset=ComanagePIMember.objects.filter(cn__contains='-PI:members:active', active=True).order_by('cn'),
         widget=forms.SelectMultiple(),
-        label='Project PI Members'
+        label='Project PI Members',
     )
     comanage_staff = forms.ModelMultipleChoiceField(
         queryset=ComanageStaff.objects.filter(cn__contains='-STAFF:members:active', active=True).order_by('cn'),
@@ -43,6 +69,7 @@ class ProjectForm(forms.ModelForm):
         fields = (
             'name',
             'description',
+            'affiliation',
             'comanage_pi_admins',
             'comanage_pi_members',
             'comanage_staff',

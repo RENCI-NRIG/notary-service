@@ -32,7 +32,7 @@
                         </div>
                     {% endif %}
                     <p>{{ project.description|linebreaksbr }}</p>
-                    <h3>PI Affiliations</h3>
+                    <h3>Affiliations</h3>
                     <ul>
                         {% for affiliation in project.affiliation %}
                             <li>{{ affiliation }}</li>
@@ -58,7 +58,13 @@
                             <td align="center"><b>email</b></td>
                         </tr>
                         {% for group, name, employee_number, eppn, email in project_pi_admins %}
-                            <tr>
+                            <tr
+                                    {% if email == user.email %}
+                                        style="color: darkgreen"
+                                    {% else %}
+                                        style="color: darkgray"
+                                    {% endif %}
+                            >
                                 <td>{{ group|slice:"7:" }}</td>
                                 <td>{{ name }}</td>
                                 <td>{{ employee_number }}</td>
@@ -78,7 +84,13 @@
                             <td align="center"><b>email</b></td>
                         </tr>
                         {% for group, name, employee_number, eppn, email in project_pi_members %}
-                            <tr>
+                            <tr
+                                    {% if email == user.email %}
+                                        style="color: darkgreen"
+                                    {% else %}
+                                        style="color: darkgray"
+                                    {% endif %}
+                            >
                                 <td>{{ group|slice:"7:" }}</td>
                                 <td>{{ name }}</td>
                                 <td>{{ employee_number }}</td>
@@ -98,7 +110,13 @@
                             <td align="center"><b>email</b></td>
                         </tr>
                         {% for group, name, employee_number, eppn, email in project_staff %}
-                            <tr>
+                            <tr
+                                    {% if email == user.email %}
+                                        style="color: darkgreen"
+                                    {% else %}
+                                        style="color: darkgray"
+                                    {% endif %}
+                            >
                                 <td>{{ group|slice:"7:" }}</td>
                                 <td>{{ name }}</td>
                                 <td>{{ employee_number }}</td>
@@ -118,7 +136,13 @@
                             <td align="center"><b>email</b></td>
                         </tr>
                         {% for group, name, employee_number, eppn, email in project_inp %}
-                            <tr>
+                            <tr
+                                    {% if email == user.email %}
+                                        style="color: darkgreen"
+                                    {% else %}
+                                        style="color: darkgray"
+                                    {% endif %}
+                            >
                                 <td>{{ group|slice:"7:" }}</td>
                                 <td>{{ name }}</td>
                                 <td>{{ employee_number }}</td>
@@ -138,7 +162,13 @@
                             <td align="center"><b>email</b></td>
                         </tr>
                         {% for group, name, employee_number, eppn, email in project_ig %}
-                            <tr>
+                            <tr
+                                    {% if email == user.email %}
+                                        style="color: darkgreen"
+                                    {% else %}
+                                        style="color: darkgray"
+                                    {% endif %}
+                            >
                                 <td>{{ group|slice:"7:" }}</td>
                                 <td>{{ name }}</td>
                                 <td>{{ employee_number }}</td>

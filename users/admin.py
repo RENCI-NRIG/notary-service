@@ -1,7 +1,9 @@
 from django.contrib import admin
+from django.contrib.admin import ModelAdmin
 from django.contrib.auth.admin import UserAdmin
 
-from .forms import UserCreationForm, UserChangeForm
+from users.models import Affiliation
+from .forms import UserCreationForm, UserChangeForm, AffiliationChangeForm, AffiliationCreationForm
 from .models import NotaryServiceUser
 
 
@@ -13,3 +15,13 @@ class NotaryServiceUserAdmin(UserAdmin):
 
 
 admin.site.register(NotaryServiceUser, NotaryServiceUserAdmin)
+
+
+class AffiliationAdmin(ModelAdmin):
+    add_form = AffiliationCreationForm
+    form = AffiliationChangeForm
+    model = Affiliation
+    list_display = ['display_name', 'idp_name', 'idp', 'uuid']
+
+
+admin.site.register(Affiliation, AffiliationAdmin)

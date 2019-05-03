@@ -259,12 +259,12 @@ def project_new(request):
     update_comanage_group()
     update_comanage_personnel()
     if request.method == "POST":
-        form = ProjectForm(request.POST)
+        form = ProjectForm(request.POST, user=request.user)
         if form.is_valid():
             project = form.save(commit=False)
             project.affiliation = []
             project.idp = []
-            project.affiliation.append(str(request.user.idp_name))
+            # project.affiliation.append(str(request.user.idp_name))
             project.idp.append(str(request.user.idp))
             project.created_by = request.user
             project.modified_by = request.user
@@ -349,7 +349,7 @@ def project_new(request):
 
             return redirect('project_detail', uuid=project.uuid)
     else:
-        form = ProjectForm()
+        form = ProjectForm(user=request.user)
     return render(request, 'project_new.html', {'projects_page': 'active', 'form': form})
 
 
