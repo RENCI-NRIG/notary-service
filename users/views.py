@@ -4,7 +4,7 @@ from apache_kafka.models import Message
 from apache_kafka.views import index_page_messages, check_for_new_messages
 from comanage.models import IsMemberOf, LdapOther, NotaryServiceUser
 from .forms import UserPreferences
-from .models import Role
+from .models import Role, Affiliation
 
 
 def index(request):
@@ -59,6 +59,7 @@ def set_role_boolean(user):
 def profile(request):
     if request.user.is_authenticated:
         user = get_object_or_404(NotaryServiceUser, id=request.user.id)
+        ns_affiliation = Affiliation.objects.get(uuid=user.ns_affiliation).display_name
         ismemberof = IsMemberOf.objects.filter(
             membershipismemberof__user_id=request.user.id).order_by('value')
         ldapother = LdapOther.objects.filter(
@@ -86,6 +87,7 @@ def profile(request):
         ).order_by('-created_date')[:5]
         return render(request, 'profile.html',
                       {'profile_page': 'active',
+                       'ns_affiliation': ns_affiliation,
                        'isMemberOf': ismemberof,
                        'LDAPOther': ldapother,
                        'form': form,

@@ -7,15 +7,24 @@ class TemplateForm(forms.ModelForm):
     name = forms.CharField(
         widget=forms.TextInput(attrs={'size': 60})
     )
+    type = forms.CharField(
+        widget=forms.Select(
+            choices=(
+                ('research_approval', 'Research Approval'),
+                ('infrastructure_approval', 'Infrastructure Approval'),
+            )
+        )
+    )
 
     class Meta:
         model = NSTemplate
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 6, 'cols': 60}),
+            'description': forms.Textarea(attrs={'rows': 6, 'cols': 60})
         }
         fields = (
             'name',
             'description',
+            'type',
             'graphml_definition',
         )
 

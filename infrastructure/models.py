@@ -12,7 +12,7 @@ class Infrastructure(models.Model):
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
     description = models.TextField()
     affiliation = models.CharField(max_length=255)
-    idp = models.CharField(max_length=255)
+    # idp = models.CharField(max_length=255)
     is_valid = models.BooleanField(default=False)
     created_by = models.ForeignKey(User, related_name='infrastructure_created_by', on_delete=models.CASCADE)
     created_date = models.DateTimeField(default=timezone.now)

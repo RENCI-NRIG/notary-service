@@ -33,6 +33,22 @@ class Role(models.Model):
         return self.get_id_display()
 
 
+class Affiliation(models.Model):
+    """
+    Affiliation of the user based on Identity Provider or Admin manual entry
+    """
+    uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
+    display_name = models.CharField(max_length=255)
+    idp = models.CharField(max_length=255)
+    idp_name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.display_name
+
+    def __len__(self):
+        return len(self.display_name)
+
+
 class NotaryServiceUser(AbstractUser):
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
     given_name = models.CharField(max_length=255)
@@ -48,6 +64,7 @@ class NotaryServiceUser(AbstractUser):
     eptid = models.CharField(max_length=255)
     acr = models.CharField(max_length=255)
     affiliation = models.CharField(max_length=255)
+    ns_affiliation = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     show_uuid = models.BooleanField(default=False)
     roles = models.ManyToManyField(Role)
@@ -64,15 +81,3 @@ class NotaryServiceUser(AbstractUser):
     def __str__(self):
         return self.email
 
-
-class Affiliation(models.Model):
-    """
-    Affiliation of the user based on Identity Provider or Admin manual entry
-    """
-    uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
-    display_name = models.CharField(max_length=255)
-    idp = models.CharField(max_length=255)
-    idp_name = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.display_name

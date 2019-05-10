@@ -8,13 +8,14 @@ User = get_user_model()
 
 
 def user_nstemplates_directory_path(instance, filename):
-    # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
-    return 'nstemplates/user_{0}/{1}'.format(instance.created_by.id, filename)
+    # file will be uploaded to MEDIA_ROOT/nstemplates/user_<uuid>/<filename>
+    return 'nstemplates/user_{0}/{1}'.format(instance.created_by.uuid, filename)
 
 
 class NSTemplate(models.Model):
     name = models.CharField(max_length=255)
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
+    type = models.CharField(max_length=255, default='research_approval')
     graphml_definition = models.FileField(upload_to=user_nstemplates_directory_path)
     description = models.TextField()
     is_valid = models.BooleanField(default=False)

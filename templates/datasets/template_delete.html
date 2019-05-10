@@ -14,6 +14,9 @@
                            title="Cancel deletion" class="fa fa-fw fa-ban" style="color: green"></a>
                     </h2>
                     <p>{{ template.description|linebreaksbr }}</p>
+                    <b>Type:</b>
+                    {{ template.type }}
+                    <br>
                     <b>File:</b>
                     <a href="{{ template.graphml_definition.url }}">{{ template.graphml_definition | getfilename }}</a>
                 </div>

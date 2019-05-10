@@ -1,9 +1,19 @@
 from django import forms
 
 from .models import Infrastructure
+from users.models import Affiliation
 
 
 class InfrastructureForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
+        super(InfrastructureForm, self).__init__(*args, **kwargs)
+        self.fields['affiliation'] = forms.ModelChoiceField(
+            queryset=Affiliation.objects.all().order_by('display_name'),
+            label='Organizational Affiliation',
+            empty_label=None,
+        )
+
     name = forms.CharField(
         widget=forms.TextInput(attrs={'size': 60})
     )
