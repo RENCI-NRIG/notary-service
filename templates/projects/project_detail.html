@@ -34,7 +34,7 @@
                     <p>{{ project.description|linebreaksbr }}</p>
                     <h3>Affiliations</h3>
                     <ul>
-                        {% for affiliation in project.affiliation %}
+                        {% for affiliation in affiliations %}
                             <li>{{ affiliation }}</li>
                         {% endfor %}
                     </ul>
@@ -211,7 +211,7 @@
                             </a></td>
                             <td>
                                 {{ infra.affiliation }}
-                                {% if infra.affiliation in project.affiliation %}
+                                {% if infra.affiliation in project.affiliations %}
                                     (<i class="fa fa-fw fa-check" style="color: green;"></i>)
                                 {% else %}
                                     (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)

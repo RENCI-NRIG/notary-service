@@ -8,6 +8,7 @@ from django.utils import timezone
 from datasets.models import Dataset, NSTemplate
 from infrastructure.models import Infrastructure
 from workflows.models import WorkflowNeo4j
+from users.models import Affiliation
 
 User = get_user_model()
 
@@ -92,8 +93,9 @@ class Project(models.Model):
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
     description = models.TextField()
     is_valid = models.BooleanField(default=False)
-    affiliation = ArrayField(models.CharField(max_length=255))
-    idp = ArrayField(models.CharField(max_length=255))
+    # affiliations = ArrayField(models.CharField(max_length=255))
+    affiliations = models.ManyToManyField(Affiliation, through="MembershipAffiliations")
+    # idp = ArrayField(models.CharField(max_length=255))
     infrastructure = models.ManyToManyField(Infrastructure, through="MembershipInfrastructure")
     comanage_pi_admins = models.ManyToManyField(ComanagePIAdmin, through="MembershipComanagePIAdmin")
     comanage_pi_members = models.ManyToManyField(ComanagePIMember, through="MembershipComanagePIMember")
@@ -117,6 +119,14 @@ class Project(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class MembershipAffiliations(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    affiliation = models.ForeignKey(Affiliation, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'Membership Affiliation'
 
 
 class MembershipDatasets(models.Model):

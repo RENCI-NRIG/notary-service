@@ -9,10 +9,11 @@ from workflows.models import WorkflowNeo4j
 from workflows.workflow_neo4j import delete_workflow_by_uuid
 from .forms import ProjectForm
 from .models import Project, ComanageStaff, ComanagePIAdmin, ComanagePIMember, ComanageInfrastructureProvider, \
-    ComanageInstitutionalGovernance, MembershipComanageStaff, MembershipComanagePIAdmin, \
+    MembershipAffiliations, ComanageInstitutionalGovernance, MembershipComanageStaff, MembershipComanagePIAdmin, \
     MembershipComanagePersonnel, MembershipComanagePIMember, MembershipDatasets, MembershipWorkflow, \
     MembershipInfrastructure, MembershipComanageInfrastructureProvider, MembershipComanageInstitutionalGovernance
 from .projects import update_comanage_group, personnel_by_comanage_group, update_comanage_personnel
+from users.models import Affiliation
 
 
 def projects(request):
@@ -62,7 +63,7 @@ def project_detail(request, uuid):
                                 comanage_pi_members=None,
                                 comanage_staff=ComanageStaff.objects.get(id=group_pk)
                             )
-
+    affiliations = list(o.display_name for o in Affiliation.objects.filter(id__in=project.affiliations))
     comanage_pi_admins = ComanagePIAdmin.objects.filter(
         cn__contains='-PI:admins',
         project=project
@@ -203,6 +204,7 @@ def project_detail(request, uuid):
     return render(request, 'project_detail.html', {
         'projects_page': 'active',
         'project': project,
+        'affiliations': affiliations,
         'comanage_pi_admins': comanage_pi_admins,
         'comanage_pi_members': comanage_pi_members,
         'comanage_staff': comanage_staff,
@@ -262,14 +264,17 @@ def project_new(request):
         form = ProjectForm(request.POST, user=request.user)
         if form.is_valid():
             project = form.save(commit=False)
-            project.affiliation = []
-            project.idp = []
-            # project.affiliation.append(str(request.user.idp_name))
-            project.idp.append(str(request.user.idp))
             project.created_by = request.user
             project.modified_by = request.user
             project.modified_date = timezone.now()
             project.save()
+            # project affiliations
+            for affiliiation_pk in form.data.getlist('affiliations'):
+                if not MembershipAffiliations(project=project.id, affiliation=affiliiation_pk).exists():
+                    MembershipAffiliations.objects.create(
+                        project=project,
+                        affiliation=Affiliation.objects.get(id=affiliiation_pk),
+                    )
             # project pi admins
             for group_pk in form.data.getlist('comanage_pi_admins'):
                 if not MembershipComanagePIAdmin.objects.filter(project=project.id, comanage_group=group_pk).exists():
@@ -357,15 +362,26 @@ def project_edit(request, uuid):
     project = get_object_or_404(Project, uuid=uuid)
     update_comanage_group()
     if request.method == "POST":
-        form = ProjectForm(request.POST, instance=project)
+        form = ProjectForm(request.POST, instance=project, user=request.user)
         if form.is_valid():
             project = form.save(commit=False)
-            if request.user.idp not in project.idp:
-                project.affiliation.append(str(request.user.idp_name))
-                project.idp.append(str(request.user.idp))
             project.modified_by = request.user
             project.modified_date = timezone.now()
             project.save()
+            # project affiliations
+            current_affiliations = MembershipAffiliations.objects.filter(project=project.id)
+            for affiliation in current_affiliations:
+                if str(affiliation.affiliation.id) not in form.data.getlist('affiliations'):
+                    MembershipAffiliations.objects.filter(
+                        project=project.id,
+                        affiliation=affiliation.affiliation.id,
+                    ).delete()
+            for affiliiation_pk in form.data.getlist('affiliations'):
+                if not MembershipAffiliations(project=project.id, affiliation=affiliiation_pk).exists():
+                    MembershipAffiliations.objects.create(
+                        project=project,
+                        affiliation=Affiliation.objects.get(id=affiliiation_pk),
+                    )
             # project pi admins
             current_groups = MembershipComanagePIAdmin.objects.filter(project=project.id)
             for group in current_groups:
@@ -479,7 +495,7 @@ def project_edit(request, uuid):
 
             return redirect('project_detail', uuid=project.uuid)
     else:
-        form = ProjectForm(instance=project)
+        form = ProjectForm(instance=project, user=request.user)
     return render(request, 'project_edit.html', {'projects_page': 'active', 'form': form, 'project_uuid': uuid})
 
 

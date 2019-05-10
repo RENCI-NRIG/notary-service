@@ -165,7 +165,11 @@ class MyOIDCAB(OIDCAuthenticationBackend):
         user.roles.add(int(getattr(Role, 'NO_ROLE')))
         user.is_norole = True
         user.save()
+
+        # set ns_affiliation
         self.update_affiliation(user)
+        user.ns_affiliation = str(Affiliation.objects.get(idp=user.idp, idp_name=user.idp_name).uuid)
+        user.save()
 
         return user
 
@@ -198,6 +202,11 @@ class MyOIDCAB(OIDCAuthenticationBackend):
 
         # set roles
         self.set_user_roles(user)
+        user.save()
+
+        # set ns_affiliation
+        self.update_affiliation(user)
+        user.ns_affiliation = str(Affiliation.objects.get(idp=user.idp, idp_name=user.idp_name).uuid)
         user.save()
 
         return user

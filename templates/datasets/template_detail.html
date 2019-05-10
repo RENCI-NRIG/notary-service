@@ -52,7 +52,9 @@
                             </div>
                         {% endif %}
                         <p>{{ template.description|linebreaksbr }}</p>
-
+                        <b>Type:</b>
+                        {{ template.type }}
+                    <br>
                         <b>File:</b>
                         {% if user.is_dp or user.is_nsadmin %}
                             <a href="{{ template.graphml_definition.url }}">{{ template.graphml_definition | getfilename }}</a>

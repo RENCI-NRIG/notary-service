@@ -10,27 +10,13 @@ class ProjectForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
-        # role_choices = ()
-        # for role in user.roles.filter(notaryserviceuser=user):
-        #     role_choices += ((role.id, role.get_id_display()),)
-        # print(role_choices)
         super(ProjectForm, self).__init__(*args, **kwargs)
-        self.fields['affiliation'] = forms.ModelMultipleChoiceField(
+        self.fields['affiliations'] = forms.ModelMultipleChoiceField(
             queryset=Affiliation.objects.order_by('display_name'),
             widget=forms.SelectMultiple,
             label='Project Affiliations',
             initial=Affiliation.objects.get(idp_name=user.idp_name),
         )
-    #     self.fields['role'] = forms.ChoiceField(
-    #         choices=sorted(role_choices, key=itemgetter(1)),
-    #         widget=forms.Select,
-    #         label='User role',
-    #         required=False
-    #     )
-    #
-    # def __init__(self, *args, **kwargs):
-    #     self.user = kwargs.pop('user', None)
-    #     super(ProjectForm, self).__init__(*args, **kwargs)
 
     name = forms.CharField(
         widget=forms.TextInput(attrs={'size': 60})
@@ -69,7 +55,7 @@ class ProjectForm(forms.ModelForm):
         fields = (
             'name',
             'description',
-            'affiliation',
+            'affiliations',
             'comanage_pi_admins',
             'comanage_pi_members',
             'comanage_staff',
