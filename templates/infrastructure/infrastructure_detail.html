@@ -32,7 +32,7 @@
                         </div>
                     {% endif %}
                     <p>{{ infrastructure.description|linebreaksbr }}</p>
-                    <b>Affiliation:</b> {{ affiliation }}
+                    <b>Affiliation:</b> {{ infrastructure.affiliation | affiliation_uuid_to_name }}
                 </div>
                 <br>
                 <table width="100%" style="font-size: small">

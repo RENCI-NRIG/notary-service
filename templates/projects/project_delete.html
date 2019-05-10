@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static user_tags %}
 
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
@@ -14,13 +14,13 @@
                            title="Cancel" class="fa fa-fw fa-ban" style="color: green;"></a>
                     </h2>
                     <p>{{ project.description|linebreaksbr }}</p>
-                    <h3>PI Affiliations</h3>
+                    <h3>Affiliations</h3>
                     <ul>
-                        {% for affiliation in project.affiliation %}
-                            <li>{{ affiliation }}</li>
+                        {% for affiliation in affiliations %}
+                            <li>{{ affiliation | affiliation_uuid_to_name }}</li>
                         {% endfor %}
                     </ul>
-                    <h3>Permissions</h3>
+                    <h3>Personnel</h3>
                     <b>Project PI Admiins</b>
                     <ul>
                         {% for group in comanage_pi_admins %}
@@ -51,7 +51,7 @@
                                     Description
                                 {% endif %}
                             </b></td>
-                            <td align="center"><b>Affiliation (== PI Affiliation)</b></td>
+                            <td align="center"><b>Affiliation</b></td>
                         </tr>
                         {% for infra in infrastructure %}
                             <tr>
@@ -71,12 +71,7 @@
                                 {% endif %}
                             </a></td>
                             <td>
-                                {{ infra.affiliation }}
-                                {% if infra.affiliation in project.affiliation %}
-                                    (<i class="fa fa-fw fa-check" style="color: green;"></i>)
-                                {% else %}
-                                    (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
-                                {% endif %}
+                                {{ infra.affiliation | affiliation_uuid_to_name }}
                             </td>
                         {% endfor %}
                     </table>

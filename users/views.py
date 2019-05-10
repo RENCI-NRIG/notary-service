@@ -59,7 +59,6 @@ def set_role_boolean(user):
 def profile(request):
     if request.user.is_authenticated:
         user = get_object_or_404(NotaryServiceUser, id=request.user.id)
-        ns_affiliation = Affiliation.objects.get(uuid=user.ns_affiliation).display_name
         ismemberof = IsMemberOf.objects.filter(
             membershipismemberof__user_id=request.user.id).order_by('value')
         ldapother = LdapOther.objects.filter(
@@ -87,7 +86,6 @@ def profile(request):
         ).order_by('-created_date')[:5]
         return render(request, 'profile.html',
                       {'profile_page': 'active',
-                       'ns_affiliation': ns_affiliation,
                        'isMemberOf': ismemberof,
                        'LDAPOther': ldapother,
                        'form': form,

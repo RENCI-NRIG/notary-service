@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static user_tags %}
 
 {% block title %}ImPACT - Notary Service{% endblock %}
 
@@ -14,7 +14,7 @@
                 </tr>
                 <tr>
                     <td><b>Email: </b>{{ user.email }}</td>
-                    <td><b>Affiliation: </b>{{ ns_affiliation }}</td>
+                    <td><b>Affiliation: </b>{{ user.ns_affiliation | affiliation_uuid_to_name }}</td>
                 </tr>
                 <tr>
                     <td><b>Identity provider: </b>{{ user.idp }}</td>
