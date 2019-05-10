@@ -63,7 +63,12 @@ def project_detail(request, uuid):
                                 comanage_pi_members=None,
                                 comanage_staff=ComanageStaff.objects.get(id=group_pk)
                             )
-    affiliations = list(o.display_name for o in Affiliation.objects.filter(id__in=project.affiliations))
+    # affiliations = list(str(o) for o in Affiliation.objects.filter(id__in=project.affiliations))
+    affiliations = MembershipAffiliations.objects.values_list('affiliation__display_name', flat=True).filter(
+        project__uuid=project.uuid,
+    )
+    # aff_list = MembershipWorkflow.objects.values_list('workflow__uuid').filter(project__uuid=project.uuid)
+    # wf_objs = WorkflowNeo4j.objects.filter(uuid__in=wf_list).order_by('name')
     comanage_pi_admins = ComanagePIAdmin.objects.filter(
         cn__contains='-PI:admins',
         project=project
@@ -270,7 +275,10 @@ def project_new(request):
             project.save()
             # project affiliations
             for affiliiation_pk in form.data.getlist('affiliations'):
-                if not MembershipAffiliations(project=project.id, affiliation=affiliiation_pk).exists():
+                if not MembershipAffiliations.objects.filter(
+                        project=project.id,
+                        affiliation=affiliiation_pk
+                ).exists():
                     MembershipAffiliations.objects.create(
                         project=project,
                         affiliation=Affiliation.objects.get(id=affiliiation_pk),
@@ -297,8 +305,10 @@ def project_new(request):
                             )
             # project pi members
             for group_pk in form.data.getlist('comanage_pi_members'):
-                if not MembershipComanagePIMember.objects.filter(project=project.id,
-                                                                comanage_group=group_pk).exists():
+                if not MembershipComanagePIMember.objects.filter(
+                        project=project.id,
+                        comanage_group=group_pk
+                ).exists():
                     MembershipComanagePIMember.objects.create(
                         project=project,
                         comanage_group=ComanagePIMember.objects.get(id=group_pk)
@@ -377,7 +387,10 @@ def project_edit(request, uuid):
                         affiliation=affiliation.affiliation.id,
                     ).delete()
             for affiliiation_pk in form.data.getlist('affiliations'):
-                if not MembershipAffiliations(project=project.id, affiliation=affiliiation_pk).exists():
+                if not MembershipAffiliations.objects.filter(
+                        project=project.id,
+                        affiliation=affiliiation_pk
+                ).exists():
                     MembershipAffiliations.objects.create(
                         project=project,
                         affiliation=Affiliation.objects.get(id=affiliiation_pk),
@@ -386,8 +399,9 @@ def project_edit(request, uuid):
             current_groups = MembershipComanagePIAdmin.objects.filter(project=project.id)
             for group in current_groups:
                 if str(group.comanage_group.id) not in form.data.getlist('comanage_pi_admins'):
-                    MembershipComanagePersonnel.objects.filter(project=project.id,
-                                                               comanage_pi_admins=group.comanage_group.id).delete()
+                    MembershipComanagePersonnel.objects.filter(
+                        project=project.id,
+                        comanage_pi_admins=group.comanage_group.id).delete()
                     group.delete()
             for group_pk in form.data.getlist('comanage_pi_admins'):
                 if not MembershipComanagePIAdmin.objects.filter(project=project.id, comanage_group=group_pk).exists():
