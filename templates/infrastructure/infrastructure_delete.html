@@ -14,7 +14,7 @@
                            title="Cancel deletion" class="fa fa-fw fa-ban" style="color: green"></a>
                     </h2>
                     <p>{{ infrastructure.description|linebreaksbr }}</p>
-                    <b>Affiliation:</b> {{ affiliation }}
+                    <b>Affiliation:</b> {{ infrastructure.affiliation | affiliation_uuid_to_name }}
                     <br>
                 </div>
                 <br>

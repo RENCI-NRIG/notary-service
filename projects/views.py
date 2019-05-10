@@ -63,12 +63,9 @@ def project_detail(request, uuid):
                                 comanage_pi_members=None,
                                 comanage_staff=ComanageStaff.objects.get(id=group_pk)
                             )
-    # affiliations = list(str(o) for o in Affiliation.objects.filter(id__in=project.affiliations))
-    affiliations = MembershipAffiliations.objects.values_list('affiliation__display_name', flat=True).filter(
+    affiliations = MembershipAffiliations.objects.values_list('affiliation__uuid', flat=True).filter(
         project__uuid=project.uuid,
     )
-    # aff_list = MembershipWorkflow.objects.values_list('workflow__uuid').filter(project__uuid=project.uuid)
-    # wf_objs = WorkflowNeo4j.objects.filter(uuid__in=wf_list).order_by('name')
     comanage_pi_admins = ComanagePIAdmin.objects.filter(
         cn__contains='-PI:admins',
         project=project
@@ -524,6 +521,9 @@ def project_delete(request, uuid):
     wf_objs = WorkflowNeo4j.objects.filter(uuid__in=wf_list).order_by('name')
     infra_list = MembershipInfrastructure.objects.values_list('infrastructure__uuid').filter(project__uuid=project.uuid)
     infra_objs = Infrastructure.objects.filter(uuid__in=infra_list).order_by('name')
+    affiliations = MembershipAffiliations.objects.values_list('affiliation__uuid', flat=True).filter(
+        project__uuid=project.uuid,
+    )
     if request.method == "POST":
         pr_wf_list = MembershipWorkflow.objects.values_list('workflow__uuid').filter(
             project=project)
@@ -539,6 +539,7 @@ def project_delete(request, uuid):
     return render(request, 'project_delete.html', {
         'projects_page': 'active',
         'project': project,
+        'affiliations': affiliations,
         'comanage_pi_admins': comanage_pi_admins,
         'comanage_pi_members': comanage_pi_members,
         'comanage_staff': comanage_staff,

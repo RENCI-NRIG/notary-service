@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static user_tags%}
 
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
@@ -35,7 +35,7 @@
                     <h3>Affiliations</h3>
                     <ul>
                         {% for affiliation in affiliations %}
-                            <li>{{ affiliation }}</li>
+                            <li>{{ affiliation | affiliation_uuid_to_name }}</li>
                         {% endfor %}
                     </ul>
                     <form method="POST" class="post-form">
@@ -190,7 +190,7 @@
                                     Description
                                 {% endif %}
                             </b></td>
-                            <td align="center"><b>Affiliation (== PI Affiliation)</b></td>
+                            <td align="center"><b>Affiliation</b></td>
                         </tr>
                         {% for infra in infrastructure %}
                             <tr>
@@ -210,12 +210,7 @@
                                 {% endif %}
                             </a></td>
                             <td>
-                                {{ infra.affiliation }}
-                                {% if infra.affiliation in project.affiliations %}
-                                    (<i class="fa fa-fw fa-check" style="color: green;"></i>)
-                                {% else %}
-                                    (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
-                                {% endif %}
+                                {{ infra.affiliation | affiliation_uuid_to_name }}
                             </td>
                         {% endfor %}
                     </table>

@@ -1,6 +1,6 @@
 from django import template
 
-from users.models import Role
+from users.models import Role, Affiliation
 
 register = template.Library()
 
@@ -8,6 +8,11 @@ register = template.Library()
 @register.filter
 def rolename(value):
     return str(Role.objects.get(id=value))
+
+
+@register.filter
+def affiliation_uuid_to_name(uuid):
+    return str(Affiliation.objects.get(uuid=uuid).display_name)
 
 
 @register.simple_tag(takes_context=True)
