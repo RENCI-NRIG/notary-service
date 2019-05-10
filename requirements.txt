@@ -10,9 +10,9 @@ mozilla-django-oidc==1.2.2
 ns-jwt==0.1.0
 psycopg2-binary==2.8.2
 PyJWT==1.7.1
-pytest-cov==2.6.1
+pytest-cov==2.7.1
 pytest-django==3.4.8
-pytest==4.4.1
+pytest==4.4.2
 python-dateutil==2.8.0
 python-dotenv==0.10.1
 pytz==2019.1
