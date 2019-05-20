@@ -4,8 +4,6 @@ services:
   database:
     image: postgres:11
     container_name: database
-    ports:
-      - ${POSTGRES_PORT:-5432}:5432
     networks:
       - backend
     volumes:
@@ -27,8 +25,6 @@ services:
       - database
       - neo4j
       - kafka
-    ports:
-      - 8000:8000
     networks:
       - frontend
       - backend
@@ -60,12 +56,7 @@ services:
     image: rencinrig/neo4j-apoc:latest
     container_name: neo4j
     user: ${NEO4J_UID:-1000}:${NEO4J_GID:-1000}
-    ports:
-      - 7474:7474  # for HTTP
-      - 7473:7473  # for HTTPS
-      - 7687:7687  # for Bolt
     networks:
-      - frontend
       - backend
     volumes:
       - ${NEO4J_DATA_PATH_HOST:-$(pwd)/neo4j/data}:${NEO4J_DATA_PATH_DOCKER:-/data}
@@ -79,8 +70,6 @@ services:
   zookeeper:
     image: wurstmeister/zookeeper:latest
     container_name: zookeeper
-    ports:
-      - 2181:2181
     networks:
       - backend
 
@@ -89,8 +78,6 @@ services:
     container_name: kafka
     depends_on:
       - zookeeper
-    ports:
-      - 9092:9092
     networks:
       - backend
     environment:
