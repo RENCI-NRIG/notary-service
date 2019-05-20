@@ -7,14 +7,13 @@ upstream django {
 
 server {
     listen 80;
-    server_name FQDN_OR_IP;
-    return 301 https://FQDN_OR_IP$request_uri;
+    return 301 https://$host$request_uri;
 }
 
 server {
     listen   443 ssl default_server;
     # the domain name it will serve for
-    server_name FQDN_OR_IP; # substitute your machine's IP address or FQDN
+    server_name $host:8443; # substitute your machine's IP address or FQDN and port
 
     # If they come here using HTTP, bounce them to the correct scheme
     error_page 497 https://$server_name$request_uri;
