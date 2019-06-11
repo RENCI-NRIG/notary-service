@@ -87,6 +87,7 @@ services:
   kafka:
     image: wurstmeister/kafka:2.12-2.1.1
     container_name: kafka
+    restart: on-failure
     depends_on:
       - zookeeper
     ports:

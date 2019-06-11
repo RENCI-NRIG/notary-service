@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static user_tags%}
+{% load static user_tags project_tags %}
 
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
@@ -20,7 +20,8 @@
                         {% if not project.is_valid %}
                             <form method="POST" class="post-form">
                                 {% csrf_token %}
-                                <input type="submit" name="validate" value="Validate Now" style="color: darkgreen">
+                                <input type="submit" name="validate" value="Validate Workflow(s)"
+                                       style="color: darkgreen">
                             </form>
                         {% endif %}
                     {% endif %}
@@ -48,40 +49,36 @@
                             {% endif %}
                         </h3>
                     </form>
-                    <b>Project PI Admins</b>
-                    <table width="100%" border="1px solid black" cellpadding="5px">
-                        <tr>
-                            <td align="center"><b>Group</b></td>
-                            <td align="center"><b>Name</b></td>
-                            <td align="center"><b>COmanage ID</b></td>
-                            <td align="center"><b>eppn</b></td>
-                            <td align="center"><b>email</b></td>
-                        </tr>
-                        {% for group, name, employee_number, eppn, email in project_pi_admins %}
-                            <tr
-                                    {% if email == user.email %}
-                                        style="color: darkgreen"
-                                    {% else %}
-                                        style="color: darkgray"
-                                    {% endif %}
-                            >
-                                <td>{{ group|slice:"7:" }}</td>
-                                <td>{{ name }}</td>
-                                <td>{{ employee_number }}</td>
-                                <td>{{ eppn }}</td>
-                                <td>{{ email }}</td>
+                    {% if user.is_piadmin or user.is_nsadmin %}
+                        <b>Project PI Admins</b>
+                        <table width="100%" border="1px solid black" cellpadding="5px">
+                            <tr>
+                                <td align="center"><b>Name</b></td>
+                                <td align="center"><b>COmanage Group</b></td>
+                                <td align="center"><b>Email</b></td>
                             </tr>
-                        {% endfor %}
-                    </table>
-                    <br>
-                    <b>Project PI Members</b>
+                            {% for group, name, employee_number, eppn, email in project_pi_admins %}
+                                <tr
+                                        {% if email == user.email %}
+                                            style="color: darkgreen"
+                                        {% else %}
+                                            style="color: darkgray"
+                                        {% endif %}
+                                >
+                                    <td>{{ name }}</td>
+                                    <td>{{ group|slice:"7:" }}</td>
+                                    <td>{{ email }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                        <br>
+                    {% endif %}
+                    <b>Project PIs</b>
                     <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
-                            <td align="center"><b>Group</b></td>
                             <td align="center"><b>Name</b></td>
-                            <td align="center"><b>COmanage ID</b></td>
-                            <td align="center"><b>eppn</b></td>
-                            <td align="center"><b>email</b></td>
+                            <td align="center"><b>COmanage Group</b></td>
+                            <td align="center"><b>Email</b></td>
                         </tr>
                         {% for group, name, employee_number, eppn, email in project_pi_members %}
                             <tr
@@ -91,10 +88,8 @@
                                         style="color: darkgray"
                                     {% endif %}
                             >
-                                <td>{{ group|slice:"7:" }}</td>
                                 <td>{{ name }}</td>
-                                <td>{{ employee_number }}</td>
-                                <td>{{ eppn }}</td>
+                                <td>{{ group|slice:"7:" }}</td>
                                 <td>{{ email }}</td>
                             </tr>
                         {% endfor %}
@@ -103,11 +98,9 @@
                     <b>Project Members</b>
                     <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
-                            <td align="center"><b>Group</b></td>
                             <td align="center"><b>Name</b></td>
-                            <td align="center"><b>COmanage ID</b></td>
-                            <td align="center"><b>eppn</b></td>
-                            <td align="center"><b>email</b></td>
+                            <td align="center"><b>COmanage Group</b></td>
+                            <td align="center"><b>Email</b></td>
                         </tr>
                         {% for group, name, employee_number, eppn, email in project_staff %}
                             <tr
@@ -117,10 +110,8 @@
                                         style="color: darkgray"
                                     {% endif %}
                             >
-                                <td>{{ group|slice:"7:" }}</td>
                                 <td>{{ name }}</td>
-                                <td>{{ employee_number }}</td>
-                                <td>{{ eppn }}</td>
+                                <td>{{ group|slice:"7:" }}</td>
                                 <td>{{ email }}</td>
                             </tr>
                         {% endfor %}
@@ -129,11 +120,9 @@
                     <b>Infrastructure Providers</b>
                     <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
-                            <td align="center"><b>Group</b></td>
                             <td align="center"><b>Name</b></td>
-                            <td align="center"><b>COmanage ID</b></td>
-                            <td align="center"><b>eppn</b></td>
-                            <td align="center"><b>email</b></td>
+                            <td align="center"><b>COmanage Group</b></td>
+                            <td align="center"><b>Email</b></td>
                         </tr>
                         {% for group, name, employee_number, eppn, email in project_inp %}
                             <tr
@@ -143,10 +132,8 @@
                                         style="color: darkgray"
                                     {% endif %}
                             >
-                                <td>{{ group|slice:"7:" }}</td>
                                 <td>{{ name }}</td>
-                                <td>{{ employee_number }}</td>
-                                <td>{{ eppn }}</td>
+                                <td>{{ group|slice:"7:" }}</td>
                                 <td>{{ email }}</td>
                             </tr>
                         {% endfor %}
@@ -155,11 +142,9 @@
                     <b>Institutional Governance</b>
                     <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
-                            <td align="center"><b>Group</b></td>
                             <td align="center"><b>Name</b></td>
-                            <td align="center"><b>COmanage ID</b></td>
-                            <td align="center"><b>eppn</b></td>
-                            <td align="center"><b>email</b></td>
+                            <td align="center"><b>COmanage Group</b></td>
+                            <td align="center"><b>Email</b></td>
                         </tr>
                         {% for group, name, employee_number, eppn, email in project_ig %}
                             <tr
@@ -169,10 +154,30 @@
                                         style="color: darkgray"
                                     {% endif %}
                             >
-                                <td>{{ group|slice:"7:" }}</td>
                                 <td>{{ name }}</td>
-                                <td>{{ employee_number }}</td>
-                                <td>{{ eppn }}</td>
+                                <td>{{ group|slice:"7:" }}</td>
+                                <td>{{ email }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                    <br>
+                    <b>Data Providers</b>
+                    <table width="100%" border="1px solid black" cellpadding="5px">
+                        <tr>
+                            <td align="center"><b>Name</b></td>
+                            <td align="center"><b>COmanage Group</b></td>
+                            <td align="center"><b>Email</b></td>
+                        </tr>
+                        {% for group, name, employee_number, eppn, email in project_ig %}
+                            <tr
+                                    {% if email == user.email %}
+                                        style="color: darkgreen"
+                                    {% else %}
+                                        style="color: darkgray"
+                                    {% endif %}
+                            >
+                                <td>{{ name }}</td>
+                                <td>{{ group|slice:"7:" }}</td>
                                 <td>{{ email }}</td>
                             </tr>
                         {% endfor %}
@@ -262,10 +267,10 @@
                         <form method="POST" class="post-form">
                             {% csrf_token %}
                             {% if project.is_valid %}
-                                <input type="submit" name="generate_workflow" value="Generate Workflow(s)"
+                                <input type="submit" name="generate_workflow" value="Generate My Workflow(s)"
                                        style="color: darkgreen">
                             {% else %}
-                                <input type="submit" name="generate_workflow" value="Generate Workflow(s)"
+                                <input type="submit" name="generate_workflow" value="Generate My Workflow(s)"
                                        style="color: grey"
                                        disabled>
                             {% endif %}
@@ -275,7 +280,7 @@
                     <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
                             <td align="center"><b>Name</b></td>
-                            <td align="center"><b>Loaded</b></td>
+                            <td align="center"><b>Affiliation</b></td>
                             <td align="center"><b>
                                 {% if user.show_uuid %}
                                     UUID
@@ -283,17 +288,18 @@
                                     Description
                                 {% endif %}
                             </b></td>
-                            <td align="center"><b>Provenance</b></td>
+                            <td align="center"><b>Roles</b></td>
                         </tr>
                         {% for workflow in workflows %}
                             <tr>
                                 <td>{{ workflow.name }}</td>
-                                <td align="center">{% if workflow.loaded_in_neo4j %}
-                                    <i class="fa fa-fw fa-check" style="color: green;"></i>
-                                {% else %}
-                                    <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
-                                {% endif %}
-                                </td>
+                                <td>{{ workflow.affiliation }}</td>
+                                {#                                <td align="center">{% if workflow.affiliation %}#}
+                                {#                                    <i class="fa fa-fw fa-check" style="color: green;"></i>#}
+                                {#                                {% else %}#}
+                                {#                                    <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>#}
+                                {#                                {% endif %}#}
+                                {#                                </td>#}
                                 <td style="font-family: Courier"><a
                                         href="{% url 'workflow_detail' uuid=workflow.uuid %}"
                                         title="Workflow Details">
@@ -303,7 +309,7 @@
                                         {{ workflow.description|truncatechars:"57" }}
                                     {% endif %}
                                 </a></td>
-                                <td><b>D:</b> {{ workflow.dataset.name }}<br><b>T:</b> {{ workflow.template.name }}</td>
+                                <td>{{ workflow.uuid|workflow_rolenames }}</td>
                             </tr>
                         {% endfor %}
                     </table>

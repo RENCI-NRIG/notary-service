@@ -1,14 +1,13 @@
 import uuid
 
 from django.contrib.auth import get_user_model
-from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.utils import timezone
 
 from datasets.models import Dataset, NSTemplate
 from infrastructure.models import Infrastructure
-from workflows.models import WorkflowNeo4j
 from users.models import Affiliation
+from workflows.models import WorkflowNeo4j
 
 User = get_user_model()
 
@@ -108,7 +107,7 @@ class Project(models.Model):
     )
     comanage_personnel = models.ManyToManyField(ComanagePersonnel, through="MembershipComanagePersonnel")
     datasets = models.ManyToManyField(Dataset, through="MembershipDatasets")
-    workflows = models.ManyToManyField(WorkflowNeo4j, through="MembershipWorkflow")
+    workflows = models.ManyToManyField(WorkflowNeo4j, through="MembershipProjectWorkflow")
     created_by = models.ForeignKey(User, related_name='project_created_by', on_delete=models.CASCADE)
     created_date = models.DateTimeField(default=timezone.now)
     modified_by = models.ForeignKey(User, related_name='project_modified_by', on_delete=models.CASCADE)
@@ -177,15 +176,16 @@ class MembershipComanageInstitutionalGovernance(models.Model):
         verbose_name = 'Membership COmanage Institutional Governance'
 
 
-class MembershipWorkflow(models.Model):
+class MembershipProjectWorkflow(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    affiliation = models.ForeignKey(Affiliation, on_delete=models.CASCADE)
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
     template = models.ForeignKey(NSTemplate, on_delete=models.CASCADE)
     workflow = models.ForeignKey(WorkflowNeo4j, on_delete=models.CASCADE)
     is_generated = models.BooleanField(default=False)
 
     class Meta:
-        verbose_name = 'Membership Workflow'
+        verbose_name = 'Membership Project Workflow'
 
 
 class MembershipComanagePersonnel(models.Model):

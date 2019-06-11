@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:java="http://www.yworks.com/xml/yfiles-common/1.0/java" xmlns:sys="http://www.yworks.com/xml/yfiles-common/markup/primitives/2.0" xmlns:x="http://www.yworks.com/xml/yfiles-common/markup/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:y="http://www.yworks.com/xml/graphml" xmlns:yed="http://www.yworks.com/xml/yed/3" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://www.yworks.com/xml/schema/graphml/1.1/ygraphml.xsd">
+  <!--Created by yEd 3.19-->
+  <key attr.name="Description" attr.type="string" for="graph" id="d0">
+    <default xml:space="preserve"><![CDATA[None]]></default>
+  </key>
+  <key attr.name="Type" attr.type="string" for="graph" id="d1">
+    <default xml:space="preserve"><![CDATA[ResearchApproval]]></default>
+  </key>
+  <key for="port" id="d2" yfiles.type="portgraphics"/>
+  <key for="port" id="d3" yfiles.type="portgeometry"/>
+  <key for="port" id="d4" yfiles.type="portuserdata"/>
+  <key attr.name="ID" attr.type="string" for="node" id="d5">
+    <default xml:space="preserve"><![CDATA[None]]></default>
+  </key>
+  <key attr.name="Type" attr.type="string" for="node" id="d6">
+    <default xml:space="preserve"><![CDATA[AssertionItem]]></default>
+  </key>
+  <key attr.name="DescriptionURL" attr.type="string" for="node" id="d7">
+    <default xml:space="preserve"><![CDATA[None]]></default>
+  </key>
+  <key attr.name="Role" attr.type="string" for="node" id="d8">
+    <default xml:space="preserve"><![CDATA[PI]]></default>
+  </key>
+  <key attr.name="GraphID" attr.type="string" for="node" id="d9">
+    <default xml:space="preserve"><![CDATA[None]]></default>
+  </key>
+  <key attr.name="SAFETemplate" attr.type="string" for="node" id="d10">
+    <default xml:space="preserve"><![CDATA[None]]></default>
+  </key>
+  <key attr.name="SAFEParameters" attr.type="string" for="node" id="d11">
+    <default xml:space="preserve"><![CDATA[None]]></default>
+  </key>
+  <key attr.name="SAFEType" attr.type="string" for="node" id="d12">
+    <default xml:space="preserve"><![CDATA[None]]></default>
+  </key>
+  <key attr.name="url" attr.type="string" for="node" id="d13"/>
+  <key attr.name="description" attr.type="string" for="node" id="d14"/>
+  <key for="node" id="d15" yfiles.type="nodegraphics"/>
+  <key for="graphml" id="d16" yfiles.type="resources"/>
+  <key attr.name="Type" attr.type="string" for="edge" id="d17">
+    <default xml:space="preserve"><![CDATA[isPrerequisiteFor]]></default>
+  </key>
+  <key attr.name="ParameterValue" attr.type="string" for="edge" id="d18">
+    <default xml:space="preserve"><![CDATA[None]]></default>
+  </key>
+  <key attr.name="url" attr.type="string" for="edge" id="d19"/>
+  <key attr.name="description" attr.type="string" for="edge" id="d20"/>
+  <key for="edge" id="d21" yfiles.type="edgegraphics"/>
+  <graph edgedefault="directed" id="G">
+    <data key="d0" xml:space="preserve"/>
+    <node id="n0">
+      <data key="d5" xml:space="preserve"><![CDATA[Start]]></data>
+      <data key="d6" xml:space="preserve"><![CDATA[Start]]></data>
+      <data key="d8" xml:space="preserve"><![CDATA[None]]></data>
+      <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
+      <data key="d13" xml:space="preserve"/>
+      <data key="d15">
+        <y:ShapeNode>
+          <y:Geometry height="74.0" width="76.0" x="262.0" y="0.0"/>
+          <y:Fill color="#FFCC00" transparent="false"/>
+          <y:BorderStyle color="#000000" raised="false" type="line" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="30.9765625" x="22.51171875" xml:space="preserve" y="27.93359375">Start<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:Shape type="ellipse"/>
+        </y:ShapeNode>
+      </data>
+    </node>
+    <node id="n1">
+      <data key="d5" xml:space="preserve"><![CDATA[Stop]]></data>
+      <data key="d6" xml:space="preserve"><![CDATA[Stop]]></data>
+      <data key="d8" xml:space="preserve"><![CDATA[None]]></data>
+      <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
+      <data key="d13" xml:space="preserve"/>
+      <data key="d15">
+        <y:ShapeNode>
+          <y:Geometry height="74.0" width="76.0" x="248.25" y="482.801986049843"/>
+          <y:Fill color="#FFCC00" transparent="false"/>
+          <y:BorderStyle color="#000000" raised="false" type="line" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="29.875" x="23.0625" xml:space="preserve" y="27.93359375">Stop<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:Shape type="ellipse"/>
+        </y:ShapeNode>
+      </data>
+    </node>
+    <node id="n2">
+      <data key="d5" xml:space="preserve"><![CDATA[ServerOrWorkstation]]></data>
+      <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Infrastructure-Approval]]></data>
+      <data key="d10" xml:space="preserve"><![CDATA[http://call.safe.server/ServerOrWorkstationAssertion/%SoW]]></data>
+      <data key="d11" xml:space="preserve"><![CDATA[{ fieldname: "SoW", type: "SingleSelection", values: [ { "Server": "Server"}, {"Workstation": "Workstation"} ] }]]></data>
+      <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
+      <data key="d13" xml:space="preserve"/>
+      <data key="d14" xml:space="preserve"><![CDATA[Is this a server or a workstation]]></data>
+      <data key="d15">
+        <y:ShapeNode>
+          <y:Geometry height="43.80198604984298" width="150.0" x="225.0" y="128.0"/>
+          <y:Fill color="#FFCC00" transparent="false"/>
+          <y:BorderStyle color="#000000" raised="false" type="line" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="123.666015625" x="13.1669921875" xml:space="preserve" y="12.83458677492149">ServerOrWorkstation<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:Shape type="rectangle"/>
+        </y:ShapeNode>
+      </data>
+    </node>
+    <node id="n3">
+      <data key="d5" xml:space="preserve"><![CDATA[WorkstationSecurityProtocols]]></data>
+      <data key="d8" xml:space="preserve"><![CDATA[INP]]></data>
+      <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Infrastructure-Approval]]></data>
+      <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
+      <data key="d13" xml:space="preserve"/>
+      <data key="d14" xml:space="preserve"><![CDATA[List workstation security protocols]]></data>
+      <data key="d15">
+        <y:ShapeNode>
+          <y:Geometry height="43.0" width="205.0" x="183.75" y="419.801986049843"/>
+          <y:Fill color="#99CCFF" transparent="false"/>
+          <y:BorderStyle color="#000000" raised="false" type="line" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="173.32421875" x="15.837890625" xml:space="preserve" y="12.43359375">WorkstationSecurityProtocols<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:Shape type="roundrectangle"/>
+        </y:ShapeNode>
+      </data>
+    </node>
+    <node id="n4">
+      <data key="d5" xml:space="preserve"><![CDATA[ServerSecurityProtocols]]></data>
+      <data key="d8" xml:space="preserve"><![CDATA[INP]]></data>
+      <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Infrastructure-Approval]]></data>
+      <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
+      <data key="d13" xml:space="preserve"/>
+      <data key="d14" xml:space="preserve"><![CDATA[List server security protocols]]></data>
+      <data key="d15">
+        <y:ShapeNode>
+          <y:Geometry height="43.0" width="205.0" x="0.0" y="288.801986049843"/>
+          <y:Fill color="#99CCFF" transparent="false"/>
+          <y:BorderStyle color="#000000" raised="false" type="line" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="139.62109375" x="32.689453125" xml:space="preserve" y="12.43359375">ServerSecurityProtocols<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:Shape type="roundrectangle"/>
+        </y:ShapeNode>
+      </data>
+    </node>
+    <node id="n5">
+      <data key="d5" xml:space="preserve"><![CDATA[ServerUsedInOtherProjects]]></data>
+      <data key="d8" xml:space="preserve"><![CDATA[INP]]></data>
+      <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Infrastructure-Approval]]></data>
+      <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
+      <data key="d13" xml:space="preserve"/>
+      <data key="d14" xml:space="preserve"><![CDATA[Is the server used in other projects?]]></data>
+      <data key="d15">
+        <y:ShapeNode>
+          <y:Geometry height="43.0" width="205.0" x="0.0" y="225.80198604984298"/>
+          <y:Fill color="#99CCFF" transparent="false"/>
+          <y:BorderStyle color="#000000" raised="false" type="line" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="158.294921875" x="23.3525390625" xml:space="preserve" y="12.43359375">ServerUsedInOtherProjects<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:Shape type="roundrectangle"/>
+        </y:ShapeNode>
+      </data>
+    </node>
+    <node id="n6">
+      <data key="d5" xml:space="preserve"><![CDATA[ServerTrainingPledge]]></data>
+      <data key="d8" xml:space="preserve"><![CDATA[STAFF,PI]]></data>
+      <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
+      <data key="d12" xml:space="preserve"><![CDATA[template-user-set]]></data>
+      <data key="d13" xml:space="preserve"/>
+      <data key="d14" xml:space="preserve"><![CDATA[Server training received]]></data>
+      <data key="d15">
+        <y:ShapeNode>
+          <y:Geometry height="43.0" width="205.0" x="0.0" y="351.801986049843"/>
+          <y:Fill color="#FF99CC" transparent="false"/>
+          <y:BorderStyle color="#000000" raised="false" type="line" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="126.8125" x="39.09375" xml:space="preserve" y="12.43359375">ServerTrainingPledge<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:Shape type="roundrectangle"/>
+        </y:ShapeNode>
+      </data>
+    </node>
+    <node id="n7">
+      <data key="d5" xml:space="preserve"><![CDATA[WorkstationTrainingPledge]]></data>
+      <data key="d8" xml:space="preserve"><![CDATA[STAFF,PI]]></data>
+      <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
+      <data key="d12" xml:space="preserve"><![CDATA[template-user-set]]></data>
+      <data key="d13" xml:space="preserve"/>
+      <data key="d14" xml:space="preserve"><![CDATA[Workstation training received]]></data>
+      <data key="d15">
+        <y:ShapeNode>
+          <y:Geometry height="43.0" width="205.0" x="235.0" y="225.80198604984298"/>
+          <y:Fill color="#FF99CC" transparent="false"/>
+          <y:BorderStyle color="#000000" raised="false" type="line" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="160.515625" x="22.2421875" xml:space="preserve" y="12.43359375">WorkstationTrainingPledge<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+          <y:Shape type="roundrectangle"/>
+        </y:ShapeNode>
+      </data>
+    </node>
+    <edge id="e0" source="n5" target="n4">
+      <data key="d21">
+        <y:PolyLineEdge>
+          <y:Path sx="0.0" sy="21.5" tx="0.0" ty="-21.5"/>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e1" source="n2" target="n5">
+      <data key="d18" xml:space="preserve"><![CDATA[Server]]></data>
+      <data key="d19" xml:space="preserve"/>
+      <data key="d21">
+        <y:PolyLineEdge>
+          <y:Path sx="-37.5" sy="21.90099302492149" tx="0.0" ty="-21.5">
+            <y:Point x="262.5" y="181.80198604984298"/>
+            <y:Point x="102.5" y="181.80198604984298"/>
+          </y:Path>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" horizontalTextPosition="center" iconTextGap="4" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="4.0" x="-162.0" y="29.999999355507043">
+            <y:LabelModel>
+              <y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/>
+            </y:LabelModel>
+            <y:ModelParameter>
+              <y:SmartEdgeLabelModelParameter angle="6.283185307179586" distance="10.0" distanceToCenter="false" position="center" ratio="0.5945945945945946" segment="-1"/>
+            </y:ModelParameter>
+            <y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
+          </y:EdgeLabel>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e2" source="n0" target="n2">
+      <data key="d19" xml:space="preserve"/>
+      <data key="d21">
+        <y:PolyLineEdge>
+          <y:Path sx="0.0" sy="37.0" tx="0.0" ty="-21.90099302492149"/>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" horizontalTextPosition="center" iconTextGap="4" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="4.0" x="-2.0" y="30.0">
+            <y:LabelModel>
+              <y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/>
+            </y:LabelModel>
+            <y:ModelParameter>
+              <y:SmartEdgeLabelModelParameter angle="6.283185307179586" distance="10.0" distanceToCenter="false" position="center" ratio="0.625" segment="-1"/>
+            </y:ModelParameter>
+            <y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
+          </y:EdgeLabel>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e3" source="n3" target="n1">
+      <data key="d21">
+        <y:PolyLineEdge>
+          <y:Path sx="0.0" sy="21.5" tx="0.0" ty="-37.0"/>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e4" source="n4" target="n6">
+      <data key="d21">
+        <y:PolyLineEdge>
+          <y:Path sx="0.0" sy="21.5" tx="0.0" ty="-21.5"/>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e5" source="n6" target="n3">
+      <data key="d21">
+        <y:PolyLineEdge>
+          <y:Path sx="0.0" sy="21.5" tx="-51.25" ty="-21.5">
+            <y:Point x="102.5" y="404.801986049843"/>
+            <y:Point x="235.0" y="404.801986049843"/>
+          </y:Path>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e6" source="n2" target="n7">
+      <data key="d21">
+        <y:PolyLineEdge>
+          <y:Path sx="37.5" sy="21.90099302492149" tx="0.0" ty="-21.5"/>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e7" source="n7" target="n3">
+      <data key="d21">
+        <y:PolyLineEdge>
+          <y:Path sx="0.0" sy="21.5" tx="51.25" ty="-21.5"/>
+          <y:LineStyle color="#000000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+  </graph>
+  <data key="d16">
+    <y:Resources/>
+  </data>
+</graphml>

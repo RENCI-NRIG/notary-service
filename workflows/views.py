@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect, render_to_resp
 from django.utils import timezone
 from .context_processors import export_neo4j_vars
 from .models import WorkflowNeo4j
-from projects.models import MembershipWorkflow
+from projects.models import MembershipProjectWorkflow
 from workflows import workflow_neo4j as wf
 from json import dumps
 
@@ -24,7 +24,7 @@ def workflow_list(request):
 
 def workflow_detail(request, uuid):
     workflow = get_object_or_404(WorkflowNeo4j, uuid=uuid)
-    project = MembershipWorkflow.objects.get(workflow__uuid=workflow.uuid)
+    project = MembershipProjectWorkflow.objects.get(workflow__uuid=workflow.uuid)
     workflow_graph = wf.get_neo4j_workflow_by_uuid(str(uuid))
     return render(request, 'workflow_detail.html', {
         'projects_page': 'active',
@@ -36,7 +36,7 @@ def workflow_detail(request, uuid):
 
 def workflow_delete(request, uuid):
     workflow = get_object_or_404(WorkflowNeo4j, uuid=uuid)
-    project = MembershipWorkflow.objects.get(workflow__uuid=workflow.uuid)
+    project = MembershipProjectWorkflow.objects.get(workflow__uuid=workflow.uuid)
     workflow_graph = wf.get_neo4j_workflow_by_uuid(str(uuid))
     if request.method == "POST":
         if request.POST.get("workflow_delete"):
@@ -55,7 +55,7 @@ def workflow_delete(request, uuid):
 
 def workflow_reset(request, uuid):
     workflow = get_object_or_404(WorkflowNeo4j, uuid=uuid)
-    project = MembershipWorkflow.objects.get(workflow__uuid=workflow.uuid)
+    project = MembershipProjectWorkflow.objects.get(workflow__uuid=workflow.uuid)
     workflow_graph = wf.get_neo4j_workflow_by_uuid(str(uuid))
     if request.method == "POST":
         if request.POST.get("workflow_reset"):
