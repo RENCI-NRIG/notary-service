@@ -17,12 +17,14 @@ class NSTemplate(models.Model):
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
     type = models.CharField(max_length=255, default='research_approval')
     graphml_definition = models.FileField(upload_to=user_nstemplates_directory_path)
+    safe_identifier_as_scid = models.CharField(max_length=255)
     description = models.TextField()
     is_valid = models.BooleanField(default=False)
     created_by = models.ForeignKey(User, related_name='nstemplate_created_by', on_delete=models.CASCADE)
     created_date = models.DateTimeField(default=timezone.now)
     modified_by = models.ForeignKey(User, related_name='nstemplate_modified_by', on_delete=models.CASCADE)
     modified_date = models.DateTimeField(blank=True, null=True)
+    owner = models.ForeignKey(User, related_name='nstemplate_owner', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'NS Template Description'
@@ -44,6 +46,7 @@ class Dataset(models.Model):
     created_date = models.DateTimeField(default=timezone.now)
     modified_by = models.ForeignKey(User, related_name='dataset_modified_by', on_delete=models.CASCADE)
     modified_date = models.DateTimeField(blank=True, null=True)
+    owner = models.ForeignKey(User, related_name='dataset_owner', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'NS Dataset Description'

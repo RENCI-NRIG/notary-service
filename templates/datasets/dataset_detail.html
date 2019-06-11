@@ -34,6 +34,10 @@
                     <p>{{ dataset.description|linebreaksbr }}</p>
                     <table width="100%">
                         <tr>
+                            <td width="50%"><b>Owner:</b></td>
+                            <td>{{ dataset.owner }}</td>
+                        </tr>
+                        <tr>
                             <td><b>DOI or Metadata URL:</b></td>
                             <td>
                                 <a href="{{ dataset.dataset_identifier_as_doi_or_meta }}" target="_blank">
