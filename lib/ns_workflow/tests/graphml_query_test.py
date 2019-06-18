@@ -131,6 +131,18 @@ class TestGraphQuery(unittest.TestCase):
         with self.assertRaises(WorkflowQueryError):
             self.neo4j.create_child_node(self.gid, "BobsPledge", "InvalidChild")
 
+    def test_create_child_for_principal(self):
+        self.log.info("Testing adding a child node for principal")
+
+        childNode = self.neo4j.create_child_node_for_principal(self.gid, "NoCopiesPledge", "Bob")
+        d1 = self.neo4j.get_node_properties(self.gid, childNode)
+        self.log.info(d1)
+        d2 = self.neo4j.get_node_properties(self.gid, "NoCopiesPledge")
+        self.log.info(d2)
+        self.assertTrue(d1["ID"] == "NoCopiesPledge-Bob")
+        self.assertTrue(d1["principal"] == "Bob")
+        self.assertTrue(len(d1) == len(d2) + 1)
+
     #@unittest.skip("Skip")
     def test_node_exists(self):
         self.log.info("Testing node existst")
