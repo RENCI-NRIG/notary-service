@@ -6,7 +6,7 @@ NS tokens carry the following claims:
 
 | name | description | type |
 | --- | --- | --- |
-|user-set | SAFE Token that points to user-specific set of assertions, also linked to one or more common sets of assertions (from multiple workflows linked to the project) | String, Private |
+|data-set | SAFE Token that points to the dataset. Presidio is able to synthesize a token with linked assertions based on data-set, project-id and user id | String, Private |
 | project-id | CoManage/NS name of the project, universally unique and distinct. | String, Private |
 | ns-token | SAFE Token of the NS generated from its public key | String, Private |
 | ns-name | Human-readable NS name | String, Private |
