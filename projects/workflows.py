@@ -3,10 +3,11 @@ import os
 from neo4j import GraphDatabase, basic_auth
 
 from datasets.models import Dataset, NSTemplate, MembershipNSTemplate
-from users.models import Role, Affiliation
+from users.models import Role, Affiliation, NotaryServiceUser
 from workflows.models import WorkflowNeo4j
 from workflows.workflow_neo4j import create_workflow_from_template, delete_workflow_by_uuid
-from .models import MembershipProjectWorkflow, Project
+from .models import MembershipProjectWorkflow, Project, MembershipComanagePersonnel, ProjectWorkflowUserCompletionByRole
+from ns_workflow import Neo4jWorkflow
 
 bolt_url = os.getenv('NEO4J_BOLT_URL')
 neo_user = os.getenv('NEO4J_USER')
@@ -139,11 +140,11 @@ def set_neo4j_workflow_roles(workflow_uuid):
                     if role == 'None':
                         pass
                     elif role == 'PI':
-                        if not wf_obj.roles.filter(id=int(getattr(Role, 'PI_ADMIN'))).exists():
-                            wf_obj.roles.add(int(getattr(Role, 'PI_ADMIN')))
-                            print("Adding role " + str(Role.objects.get(id=int(getattr(Role, 'PI_ADMIN')))))
+                        # if not wf_obj.roles.filter(id=int(getattr(Role, 'PI_ADMIN'))).exists():
+                        #     wf_obj.roles.add(int(getattr(Role, 'PI_ADMIN')))
                         if not wf_obj.roles.filter(id=int(getattr(Role, 'PI_MEMBER'))).exists():
                             wf_obj.roles.add(int(getattr(Role, 'PI_MEMBER')))
+                            print("Adding role " + str(Role.objects.get(id=int(getattr(Role, 'PI_MEMBER')))))
                     else:
                         if not wf_obj.roles.filter(id=int(getattr(Role, role))).exists():
                             wf_obj.roles.add(int(getattr(Role, role)))
@@ -151,10 +152,138 @@ def set_neo4j_workflow_roles(workflow_uuid):
     wf_obj.save()
 
 
-def generate_neo4j_user_workflows(project_obj, user_obj):
-    print('Hello')
-    # get roles from project and match to user
+def generate_neo4j_user_workflow_status(project_obj, user_obj):
+    n = Neo4jWorkflow(
+        url=bolt_url,
+        user=neo_user,
+        pswd=neo_pass,
+        importHostDir=import_host_dir,
+        importDir=import_dir,
+    )
     # get workflows from project and match to user by affiliation
+    project_workflows = WorkflowNeo4j.objects.values_list('uuid',flat=True).filter(
+        uuid__in=MembershipProjectWorkflow.objects.values_list('workflow__uuid').filter(
+            project=project_obj
+        ),
+        affiliation=Affiliation.objects.get(
+            uuid=user_obj.ns_affiliation
+        ).id
+    ).distinct()
+    # get user roles
+    user_roles = NotaryServiceUser.objects.values_list('roles__id', flat=True).filter(
+        uuid=user_obj.uuid
+    ).order_by('roles__id')
     # for each workflow, for each role, generate appropriate child nodes
+    for workflow in project_workflows:
+        workflow_roles = WorkflowNeo4j.objects.values_list('roles__id', flat=True).filter(
+            uuid=workflow
+        ).order_by('roles__id')
+        print('Workflow: ' + str(workflow) + ' - ' + str(WorkflowNeo4j.objects.get(uuid=workflow).name))
+        for role in user_roles:
+            print('- Checking Role: ' + str(Role.objects.get(id=role)))
+            if role in workflow_roles and validate_active_user_role_for_project(project_obj.id, user_obj.id, role):
+                num_nodes = n.count_nodes(
+                    graphId=str(workflow),
+                    nodeRole=convert_comanage_role_id_to_neo4j_node_role(role_id=role),
+                )
+                print('  - Assign ' + str(num_nodes) + ' nodes to '
+                      + user_obj.name + ' as ' + str(Role.objects.get(id=role)))
+                is_complete = n.is_workflow_complete(
+                    principalId=str(user_obj.uuid),
+                    role=role,
+                    graphId=str(workflow),
+                )
+                print('    is complete? ' + str(is_complete))
+                # create project/person/workflow/role relationship if it does not exist
+                if not ProjectWorkflowUserCompletionByRole.objects.filter(
+                    project=project_obj,
+                    person=user_obj,
+                    workflow=WorkflowNeo4j.objects.get(uuid=workflow),
+                    role=Role.objects.get(id=role),
+                ).exists():
+                    ProjectWorkflowUserCompletionByRole.objects.create(
+                        project=project_obj,
+                        person=user_obj,
+                        workflow=WorkflowNeo4j.objects.get(uuid=workflow),
+                        role=Role.objects.get(id=role),
+                        is_complete=False
+                    )
+                else:
+                    reln_obj = ProjectWorkflowUserCompletionByRole.objects.get(
+                        project=project_obj,
+                        person=user_obj,
+                        workflow=WorkflowNeo4j.objects.get(uuid=workflow),
+                        role=Role.objects.get(id=role),
+                    )
+                    reln_obj.is_complete = is_complete
+                    reln_obj.save()
+
     # update user workflow table for generation and completeness
-    pass
+
+
+def convert_comanage_role_id_to_neo4j_node_role(role_id):
+    """
+    converts role_id to string based on Role model (from users)
+    :param role_id:
+    :return:
+    """
+    index = int(role_id) - 1
+    ROLE_CHOICES = [
+        'NSADMIN',
+        'STAFF',
+        'DP',
+        'INP',
+        'IG',
+        'PI',
+        'PI',
+        'NO_ROLE'
+    ]
+    return str(ROLE_CHOICES[index])
+
+
+def validate_active_user_role_for_project(project_obj, user_obj, role_id):
+    """
+    checks for nodes to assign to user based on their role within the project
+    :param project_obj:
+    :param user_obj:
+    :param role_id:
+    :return:
+    """
+    role = convert_comanage_role_id_to_neo4j_node_role(role_id)
+    if role == 'STAFF':
+        if MembershipComanagePersonnel.objects.filter(
+            project=project_obj,
+            person=user_obj,
+            comanage_staff_id__isnull=False,
+        ):
+            return True
+    elif role == 'DP':
+        if MembershipComanagePersonnel.objects.filter(
+            project=project_obj,
+            person=user_obj,
+            comanage_dp_id__isnull=False,
+        ):
+            return True
+    elif role == 'INP':
+        if MembershipComanagePersonnel.objects.filter(
+            project=project_obj,
+            person=user_obj,
+            comanage_inp_id__isnull=False,
+        ):
+            return True
+    elif role == 'IG':
+        if MembershipComanagePersonnel.objects.filter(
+            project=project_obj,
+            person=user_obj,
+            comanage_ig_id__isnull=False,
+        ):
+            return True
+    elif role == 'PI':
+        if MembershipComanagePersonnel.objects.filter(
+            project=project_obj,
+            person=user_obj,
+            comanage_pi_members_id__isnull=False,
+        ):
+            return True
+
+    return False

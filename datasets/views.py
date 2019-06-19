@@ -72,7 +72,11 @@ def dataset_access(request, uuid):
     jwt_claims = None
     if request.method == "POST":
         if request.POST.get("generate-jwt"):
-            signed_jwt = encode_ns_jwt(project_uuid, request.user)
+            signed_jwt = encode_ns_jwt(
+                project_uuid=project_uuid,
+                dataset_scid=dataset.safe_identifier_as_scid,
+                user=request.user
+            )
             jwt_claims = decode_ns_jwt(signed_jwt)
     return render(request, 'dataset_access.html', {
         'datasets_page': 'active',

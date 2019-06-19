@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from datasets.models import Dataset, NSTemplate
 from infrastructure.models import Infrastructure
-from users.models import Affiliation
+from users.models import Affiliation, NotaryServiceUser, Role
 from workflows.models import WorkflowNeo4j
 
 User = get_user_model()
@@ -92,9 +92,7 @@ class Project(models.Model):
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
     description = models.TextField()
     is_valid = models.BooleanField(default=False)
-    # affiliations = ArrayField(models.CharField(max_length=255))
     affiliations = models.ManyToManyField(Affiliation, through="MembershipAffiliations")
-    # idp = ArrayField(models.CharField(max_length=255))
     infrastructure = models.ManyToManyField(Infrastructure, through="MembershipInfrastructure")
     comanage_pi_admins = models.ManyToManyField(ComanagePIAdmin, through="MembershipComanagePIAdmin")
     comanage_pi_members = models.ManyToManyField(ComanagePIMember, through="MembershipComanagePIMember")
@@ -195,10 +193,11 @@ class MembershipComanagePersonnel(models.Model):
     comanage_staff = models.ForeignKey(ComanageStaff, on_delete=models.CASCADE, null=True)
     comanage_inp = models.ForeignKey(ComanageInfrastructureProvider, on_delete=models.CASCADE, null=True)
     comanage_ig = models.ForeignKey(ComanageInstitutionalGovernance, on_delete=models.CASCADE, null=True)
+    comanage_dp = models.ForeignKey(MembershipDatasets, on_delete=models.CASCADE, null=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 
     class Meta:
-        verbose_name = 'Membership COmanage Person'
+        verbose_name = 'Membership COmanage Personnel'
 
 
 class MembershipInfrastructure(models.Model):
@@ -207,3 +206,14 @@ class MembershipInfrastructure(models.Model):
 
     class Meta:
         verbose_name = 'Membership Infrastructure'
+
+
+class ProjectWorkflowUserCompletionByRole(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    workflow = models.ForeignKey(WorkflowNeo4j, on_delete=models.CASCADE)
+    person = models.ForeignKey(NotaryServiceUser, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    is_complete = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Project Workflow User Completion by Role'

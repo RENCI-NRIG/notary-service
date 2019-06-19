@@ -2,17 +2,18 @@ import os
 from datetime import timedelta
 
 from ns_jwt import NSJWT
+from safe.post_assertions import mock_get_id_from_pub
 
 
-def encode_ns_jwt(project_uuid, user):
+def encode_ns_jwt(project_uuid, dataset_scid, user):
     private_key_path = os.getenv('NS_PRESIDIO_JWT_PRIVATE_KEY_PATH', '')
     if not private_key_path:
         private_key_path = os.path.dirname(os.path.dirname(__file__)) + '/ssl/ssl_dev.key'
     with open(private_key_path) as f:
         private_key = f.read()
-    user_set = "USER_WORKFLOW_COMPLETION_SAFE_TOKEN"
+    user_set = dataset_scid
     project_id = project_uuid
-    ns_token = "SAFE_HASH"
+    ns_token = mock_get_id_from_pub('ssl/ssl_dev.pubkey')
     ns_name = os.getenv('NS_NAME', 'localhost')
     iss = os.getenv('NS_NAME', 'localhost')
     sub = user.cert_subject_dn

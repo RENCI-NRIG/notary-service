@@ -5,8 +5,9 @@ SAFE post assertions
 # mock SAFE calls
 
 import base64
-import binascii
 import hashlib
+
+from Crypto.PublicKey import RSA
 
 
 def mock_get_id_from_pub(public_key):
@@ -17,12 +18,12 @@ def mock_get_id_from_pub(public_key):
     :return:
     """
     with open(public_key, 'r') as pubkey:
-        data = pubkey.read()
-    data = bytes(data, 'ascii')
-    digest = hashlib.sha256(binascii.a2b_base64(data)).digest()
-    encoded = base64.b64encode(digest).rstrip(b'=')
-    return encoded.decode('utf-8')
+        r = RSA.import_key(pubkey.read(), passphrase='')
+    s = hashlib.sha256()
+    s.update(r.exportKey(format='DER'))
+    encoded = base64.urlsafe_b64encode(s.digest())
 
+    return encoded.decode('utf-8')
 
 # end mock SAFE calls
 

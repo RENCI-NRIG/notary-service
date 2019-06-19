@@ -263,22 +263,21 @@
                     </table>
                     <br>
                     <h3>Workflows</h3>
-                    {% if user.is_piadmin or user.is_nsadmin %}
-                        <form method="POST" class="post-form">
-                            {% csrf_token %}
-                            {% if project.is_valid %}
-                                <input type="submit" name="generate_workflow" value="Generate My Workflow(s)"
-                                       style="color: darkgreen">
-                            {% else %}
-                                <input type="submit" name="generate_workflow" value="Generate My Workflow(s)"
-                                       style="color: grey"
-                                       disabled>
-                            {% endif %}
-                        </form>
-                        <br>
-                    {% endif %}
+                    <form method="POST" class="post-form">
+                        {% csrf_token %}
+                        {% if project.is_valid %}
+                            <input type="submit" name="generate_workflow" value="Generate/Refresh my workflow status"
+                                   style="color: darkgreen">
+                        {% else %}
+                            <input type="submit" name="generate_workflow" value="Generate/Refresh my workflow status"
+                                   style="color: grey"
+                                   disabled>
+                        {% endif %}
+                    </form>
+                    <br>
                     <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
+                            <td align="center"><b>Completed</b></td>
                             <td align="center"><b>Name</b></td>
                             <td align="center"><b>Affiliation</b></td>
                             <td align="center"><b>
@@ -292,14 +291,22 @@
                         </tr>
                         {% for workflow in workflows %}
                             <tr>
+                                <td align="center">
+                                    {% if request|workflow_status_is_completed:workflow.uuid == 'True' %}
+                                        <i class="fa fa-fw fa-check" style="color: green;"></i>
+                                    {% elif request|workflow_status_is_completed:workflow.uuid == 'False' %}
+                                        <button
+                                                onclick="location.href = '{% url 'workflow_detail' uuid=workflow.uuid %}';"
+                                                id="project-workflow"
+                                                style="color: deeppink;"
+                                        >Needs Input
+                                        </button>
+                                    {% else %}
+                                        <b style="color: firebrick">Unknown or No Role</b>
+                                    {% endif %}
+                                </td>
                                 <td>{{ workflow.name }}</td>
                                 <td>{{ workflow.affiliation }}</td>
-                                {#                                <td align="center">{% if workflow.affiliation %}#}
-                                {#                                    <i class="fa fa-fw fa-check" style="color: green;"></i>#}
-                                {#                                {% else %}#}
-                                {#                                    <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>#}
-                                {#                                {% endif %}#}
-                                {#                                </td>#}
                                 <td style="font-family: Courier"><a
                                         href="{% url 'workflow_detail' uuid=workflow.uuid %}"
                                         title="Workflow Details">
