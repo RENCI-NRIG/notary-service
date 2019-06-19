@@ -267,6 +267,32 @@ class Neo4jWorkflow(AbstractWorkflow):
                 raise WorkflowQueryError(graphId, nodeId, "Unable to create child node, node not found")
             pass
 
+    def create_child_node_for_principal(self, graphId: str, nodeId: str, principalId: str) -> str:
+        """ create a child node copying/inheriting properties of the parent, add principal property
+        that carries principalId to the child. Name of child node is a concatenation of parent node
+        id and principal id"""
+        assert graphId is not None
+        assert nodeId is not None
+        assert principalId is not None
+
+        # don't create children of child nodes
+        if self.is_child_node(graphId, nodeId):
+            raise WorkflowQueryError(graphId, nodeId, "Unable to create a child of child node")
+
+        childNode = f"{nodeId}-{principalId}"
+
+        # using merge guarantees duplicates won't be created. copying properties ON CREATE
+        # guarantees they will not be overwritten on existing node, however parent properties
+        # are immutable anyway
+        query = """MATCH (n {GraphID: $graphId, ID: $nodeId}) MERGE (m {GraphID:$graphId, ID:$childNode})
+            -[:isChildOf]-> (n) ON CREATE SET m=n, m.ID=$childNode, m.SAFEType="user-set", m.principal=$principalId RETURN m"""
+        with self.driver.session() as session:
+            val = session.run(query, graphId=graphId, nodeId=nodeId, childNode=childNode, principalId=principalId)
+            if val is None or len(val.value()) == 0:
+                raise WorkflowQueryError(graphId, nodeId, "Unable to create child node, node not found")
+            pass
+        return childNode
+
     def node_exists(self, graphId: str, nodeId: str) -> bool:
         """ check if a node exists """
         assert graphId is not None

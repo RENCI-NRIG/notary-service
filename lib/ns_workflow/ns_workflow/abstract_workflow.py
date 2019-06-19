@@ -76,6 +76,11 @@ class AbstractWorkflow(ABC):
         pass
 
     @abstractmethod
+    def create_child_node_for_principal(self, graphId: str, nodeId: str, principalId: str) -> str:
+        """ create a child node copying/inheriting properties of the parent """
+        pass
+
+    @abstractmethod
     def get_children(self, graphId: str, nodeId: str) -> List[str]:
         """ get a list of children nodes for this node """
         pass
@@ -211,10 +216,8 @@ class AbstractWorkflow(ABC):
                     if fanInComplete:
                         incompleteNodeSet.add(nodeId)
                 elif props["SAFEType"] == 'template-user-set':
-                    # construct a name of child node
-                    childNodeId = f"{nodeId}-{principalId}"
-                    logger is not None and logger.info(f"  Node is a template-user-set, creating child {childNodeId}")
-                    self.create_child_node(graphId, nodeId, childNodeId)
+                    logger is not None and logger.info(f"  Node {nodeId} has type template-user-set, creating child for principal {principalId}")
+                    childNodeId = self.create_child_node_for_principal(graphId, nodeId, principalId)
                     childProps = self.get_node_properties(graphId, childNodeId)
                     if self.COMPLETED_FIELD in childProps and \
                         childProps[self.COMPLETED_FIELD] == self.COMPLETED_VALUE:
