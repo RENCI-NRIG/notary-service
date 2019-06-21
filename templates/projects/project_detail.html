@@ -120,21 +120,21 @@
                     <b>Infrastructure Providers</b>
                     <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
-                            <td align="center"><b>Name</b></td>
-                            <td align="center"><b>COmanage Group</b></td>
+                            <td align="center"><b>Infrastructure</b></td>
+                            <td align="center"><b>Owner</b></td>
                             <td align="center"><b>Email</b></td>
                         </tr>
-                        {% for group, name, employee_number, eppn, email in project_inp %}
+                        {% for infra in infrastructure %}
                             <tr
-                                    {% if email == user.email %}
+                                    {% if infra.owner == user %}
                                         style="color: darkgreen"
                                     {% else %}
                                         style="color: darkgray"
                                     {% endif %}
                             >
-                                <td>{{ name }}</td>
-                                <td>{{ group|slice:"7:" }}</td>
-                                <td>{{ email }}</td>
+                                <td>{{ infra.name }}</td>
+                                <td>{{ infra.owner.name }}</td>
+                                <td>{{ infra.owner }}</td>
                             </tr>
                         {% endfor %}
                     </table>
@@ -142,21 +142,15 @@
                     <b>Institutional Governance</b>
                     <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
+                            <td align="center"><b>Affiliation</b></td>
                             <td align="center"><b>Name</b></td>
-                            <td align="center"><b>COmanage Group</b></td>
                             <td align="center"><b>Email</b></td>
                         </tr>
-                        {% for group, name, employee_number, eppn, email in project_ig %}
-                            <tr
-                                    {% if email == user.email %}
-                                        style="color: darkgreen"
-                                    {% else %}
-                                        style="color: darkgray"
-                                    {% endif %}
-                            >
-                                <td>{{ name }}</td>
-                                <td>{{ group|slice:"7:" }}</td>
-                                <td>{{ email }}</td>
+                        {% for dataset in datasets %}
+                            <tr>
+                                <td>{{ dataset.owner.affiliation }}</td>
+                                <td>{{ dataset.owner.name }}</td>
+                                <td>{{ dataset.owner }}</td>
                             </tr>
                         {% endfor %}
                     </table>
@@ -164,21 +158,21 @@
                     <b>Data Providers</b>
                     <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
-                            <td align="center"><b>Name</b></td>
-                            <td align="center"><b>COmanage Group</b></td>
+                            <td align="center"><b>Dataset</b></td>
+                            <td align="center"><b>Owner</b></td>
                             <td align="center"><b>Email</b></td>
                         </tr>
-                        {% for group, name, employee_number, eppn, email in project_ig %}
+                        {% for dataset in datasets %}
                             <tr
-                                    {% if email == user.email %}
+                                    {% if dataset.owner == user %}
                                         style="color: darkgreen"
                                     {% else %}
                                         style="color: darkgray"
                                     {% endif %}
                             >
-                                <td>{{ name }}</td>
-                                <td>{{ group|slice:"7:" }}</td>
-                                <td>{{ email }}</td>
+                                <td>{{ dataset.name }}</td>
+                                <td>{{ dataset.owner.name }}</td>
+                                <td>{{ dataset.owner }}</td>
                             </tr>
                         {% endfor %}
                     </table>

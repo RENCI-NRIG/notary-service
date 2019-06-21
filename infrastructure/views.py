@@ -58,6 +58,7 @@ def infrastructure_new(request):
         )
         if form.is_valid():
             infra = form.save(commit=False)
+            infra.owner = request.user
             infra.created_by = request.user
             infra.modified_by = request.user
             infra.modified_date = timezone.now()

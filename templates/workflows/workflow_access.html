@@ -40,6 +40,7 @@
                     <form method="POST" class="post-form">
                         {% csrf_token %}
                         {% for assertion in assertions %}
+{#                            {{ assertion }}<br><br>#}
                             {% if assertion.Type == 'AssertionItem' %}
                                 {% if assertion.SAFEParameters %}
                                     {% if assertion.SAFEParameters != 'None' %}
@@ -57,6 +58,12 @@
                                                    value="{{ assertion.label }}"
                                                    style="color: darkgreen">
                                         {% endwith %}
+                                    {% else %}
+                                        <input type="checkbox" name="checkbox_{{ assertion.ID }}"/>
+                                        : {{ assertion.description }}<br>
+                                        <input type="submit" name="assert_{{ assertion.ID }}"
+                                               value="{{ assertion.label }}"
+                                               style="color: darkgreen">
                                     {% endif %}
                                 {% else %}
                                     <input type="checkbox" name="checkbox_{{ assertion.ID }}"/>
@@ -67,8 +74,12 @@
                                 {% endif %}
                                 <br>
                             {% else %}
+                                {% if assertion == 'IS_COMPLETE' %}
+                                    <h3 style="color: darkgreen;">Workflow is complete!</h3>
+                                    {% else %}
                                 <h3 style="color: firebrick;">Assertions by other roles required before
                                     proceeding...</h3>
+                                    {% endif %}
                             {% endif %}
                             <br>
                         {% endfor %}

@@ -8,7 +8,8 @@ from users.models import Affiliation, NotaryServiceUser
 from users.models import Role
 from workflows.models import WorkflowNeo4j
 from workflows.workflow_neo4j import create_workflow_from_template, delete_workflow_by_uuid
-from .models import MembershipProjectWorkflow, Project, MembershipComanagePersonnel, ProjectWorkflowUserCompletionByRole
+from .models import MembershipProjectWorkflow, Project, MembershipComanagePersonnel, \
+    ProjectWorkflowUserCompletionByRole, MembershipInfrastructure
 
 bolt_url = os.getenv('NEO4J_BOLT_URL')
 neo_user = os.getenv('NEO4J_USER')
@@ -182,7 +183,7 @@ def generate_neo4j_user_workflow_status(project_obj, user_obj):
         print('Workflow: ' + str(workflow) + ' - ' + str(WorkflowNeo4j.objects.get(uuid=workflow).name))
         for role in user_roles:
             print('- Checking Role: ' + str(Role.objects.get(id=role)))
-            if role in workflow_roles and validate_active_user_role_for_project(project_obj.id, user_obj.id, role):
+            if role in workflow_roles and validate_active_user_role_for_project(project_obj.id, user_obj.id, role, workflow):
                 num_nodes = n.count_nodes(
                     graphId=str(workflow),
                     nodeRole=convert_comanage_role_id_to_neo4j_node_role(role_id=role),
@@ -242,7 +243,7 @@ def convert_comanage_role_id_to_neo4j_node_role(role_id):
     return str(ROLE_CHOICES[index])
 
 
-def validate_active_user_role_for_project(project_obj, user_obj, role_id):
+def validate_active_user_role_for_project(project_obj, user_obj, role_id, workflow_uuid):
     """
     checks for nodes to assign to user based on their role within the project
     :param project_obj:
@@ -259,25 +260,20 @@ def validate_active_user_role_for_project(project_obj, user_obj, role_id):
         ):
             return True
     elif role == 'DP':
-        if MembershipComanagePersonnel.objects.filter(
-                project=project_obj,
-                person=user_obj,
-                comanage_dp_id__isnull=False,
-        ):
+        if user_obj == MembershipProjectWorkflow.objects.get(
+            workflow__uuid=workflow_uuid
+        ).dataset.owner.id:
             return True
     elif role == 'INP':
-        if MembershipComanagePersonnel.objects.filter(
-                project=project_obj,
-                person=user_obj,
-                comanage_inp_id__isnull=False,
-        ):
+        infra_owner_list = MembershipInfrastructure.objects.values_list('infrastructure__owner', flat=True).filter(
+            project=project_obj
+        )
+        if user_obj in infra_owner_list:
             return True
     elif role == 'IG':
-        if MembershipComanagePersonnel.objects.filter(
-                project=project_obj,
-                person=user_obj,
-                comanage_ig_id__isnull=False,
-        ):
+        if user_obj == MembershipProjectWorkflow.objects.get(
+                workflow__uuid=workflow_uuid
+        ).dataset.owner.id:
             return True
     elif role == 'PI':
         if MembershipComanagePersonnel.objects.filter(
@@ -305,8 +301,9 @@ def take_user_through_workflow(user, workflow):
         role=role,
         graphId=workflow,
     )
+    print('IS_COMPLETE: ' + str(role) + ' ' + str(is_complete))
     if is_complete:
-        assertions.append("'is_complete': 'True'")
+        assertions.append("IS_COMPLETE")
         return assertions
 
     next_set = set()
