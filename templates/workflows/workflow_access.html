@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static dataset_tags replace_tags project_tags %}
+
+{% block head %}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type="text/css">
+        .node {
+        }
+
+        .link {
+            stroke: #999;
+            stroke-opacity: .6;
+            stroke-width: 1px;
+        }
+    </style>
+    <script src="/static/js/d3.js" type="text/javascript"></script>
+    <script src="/static/js/d3-selection-multi.js"></script>
+{% endblock %}
+
+{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        {% if not user.is_norole %}
+            <div class="container">
+                <div class="post">
+                    <h2>{{ workflow.name }}
+                        {% if user.is_piadmin or user.is_nsadmin %}
+                            <a href="{% url 'workflow_reset' uuid=workflow.uuid %}"
+                               title="Reset workflow" class="fa fa-fw fa-refresh" style="color: green;"></a>
+                            <a href="{% url 'workflow_delete' uuid=workflow.uuid %}"
+                               title="Delete workflow" class="fa fa-fw fa-trash" style="color: #B22222;"></a>
+                        {% endif %}
+                    </h2>
+                    <h3>Workflow Assertions</h3>
+                    Make assertion by checking the related box and pressing the submit button following each statement
+                    <br><br>
+                    <form method="POST" class="post-form">
+                        {% csrf_token %}
+                        {% for assertion in assertions %}
+                            {% if assertion.Type == 'AssertionItem' %}
+                                {% if assertion.SAFEParameters %}
+                                    {% if assertion.SAFEParameters != 'None' %}
+                                        {% with single_select=assertion.SAFEParameters|workflow_json_safe_parameters %}
+                                            {{ assertion.description }} (Select only one)<br>
+                                            {% for option in single_select.values %}
+                                                {% with kv_option=option|workflow_safe_parameters_key_value %}
+                                                    <input type="radio"
+                                                           value="{{ kv_option.key }}"
+                                                           name="single_select_{{ assertion.ID }}"/>
+                                                    : {{ kv_option.value }}<br>
+                                                {% endwith %}
+                                            {% endfor %}
+                                            <input type="submit" name="assert_{{ assertion.ID }}"
+                                                   value="{{ assertion.label }}"
+                                                   style="color: darkgreen">
+                                        {% endwith %}
+                                    {% endif %}
+                                {% else %}
+                                    <input type="checkbox" name="checkbox_{{ assertion.ID }}"/>
+                                    : {{ assertion.description }}<br>
+                                    <input type="submit" name="assert_{{ assertion.ID }}"
+                                           value="{{ assertion.label }}"
+                                           style="color: darkgreen">
+                                {% endif %}
+                                <br>
+                            {% else %}
+                                <h3 style="color: firebrick;">Assertions by other roles required before
+                                    proceeding...</h3>
+                            {% endif %}
+                            <br>
+                        {% endfor %}
+                    </form>
+                    <h3>Workflow Graph</h3>
+                </div>
+                <table width="100%">
+                    <tr>
+                        <td width="20%"></td>
+                        <td width="20%"></td>
+                        <td width="20%"></td>
+                        <td width="20%"></td>
+                        <td width="20%"></td>
+                    </tr>
+                    <tr>
+                        <td align="left">
+                            <i class="fa fa-circle" aria-hidden="true" style="color: darkgreen;"></i>
+                            Start Node
+                        </td>
+                        <td align="left">
+                            <i class="fa fa-circle" aria-hidden="true" style="color: firebrick;"></i>
+                            Stop Node
+                        </td>
+                        <td align="left">
+                            <i class="fa fa-circle" aria-hidden="true" style="color: goldenrod;"></i>
+                            User Set Node
+                        </td>
+                        <td align="left">
+                            <i class="fa fa-circle" aria-hidden="true" style="color: lightblue;"></i>
+                            Common Set Node
+                        </td>
+                        <td align="left">
+                            <i class="fa fa-circle" aria-hidden="true" style="color: lightgrey;"></i>
+                            Not on user path
+                        </td>
+                    </tr>
+                </table>
+                <div style="border:1px solid #434343;width:100%;height:600px;overflow:scroll;">
+                    <script type="text/javascript">
+                        sub_graph = {{ workflow_graph | safe }};
+                    </script>
+                    {% include "workflow_graph_path.html" %}
+                </div>
+                <br>
+                <table width="100%" style="font-size: small">
+
+                    <tr>
+                        <td width="60%">
+                            <b>Created By:</b> {{ workflow.created_by }}
+                        </td>
+                        <td>
+                            <b>Modified By:</b> {{ workflow.modified_by }}
+                        </td>
+                    <tr>
+                        <td>
+                            <b>Created Date:</b> {{ workflow.created_date|date:"m/d/Y g:i a" }}
+                        </td>
+                        <td>
+                            <b>Modified Date:</b> {{ workflow.modified_date|date:"m/d/Y g:i a" }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <b>Loaded in Neo4j:</b> {{ workflow.loaded_in_neo4j }}
+                            {% if workflow.loaded_in_neo4j %}
+                                (<i class="fa fa-fw fa-check" style="color: green;"></i>)
+                            {% else %}
+                                (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="container">
+            <p>You are not currently logged in or not authorized to view this page</p>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,13 +1,14 @@
 import os
 
 from neo4j import GraphDatabase, basic_auth
+from ns_workflow import Neo4jWorkflow
 
 from datasets.models import Dataset, NSTemplate, MembershipNSTemplate
-from users.models import Role, Affiliation, NotaryServiceUser
+from users.models import Affiliation, NotaryServiceUser
+from users.models import Role
 from workflows.models import WorkflowNeo4j
 from workflows.workflow_neo4j import create_workflow_from_template, delete_workflow_by_uuid
 from .models import MembershipProjectWorkflow, Project, MembershipComanagePersonnel, ProjectWorkflowUserCompletionByRole
-from ns_workflow import Neo4jWorkflow
 
 bolt_url = os.getenv('NEO4J_BOLT_URL')
 neo_user = os.getenv('NEO4J_USER')
@@ -161,7 +162,7 @@ def generate_neo4j_user_workflow_status(project_obj, user_obj):
         importDir=import_dir,
     )
     # get workflows from project and match to user by affiliation
-    project_workflows = WorkflowNeo4j.objects.values_list('uuid',flat=True).filter(
+    project_workflows = WorkflowNeo4j.objects.values_list('uuid', flat=True).filter(
         uuid__in=MembershipProjectWorkflow.objects.values_list('workflow__uuid').filter(
             project=project_obj
         ),
@@ -196,10 +197,10 @@ def generate_neo4j_user_workflow_status(project_obj, user_obj):
                 print('    is complete? ' + str(is_complete))
                 # create project/person/workflow/role relationship if it does not exist
                 if not ProjectWorkflowUserCompletionByRole.objects.filter(
-                    project=project_obj,
-                    person=user_obj,
-                    workflow=WorkflowNeo4j.objects.get(uuid=workflow),
-                    role=Role.objects.get(id=role),
+                        project=project_obj,
+                        person=user_obj,
+                        workflow=WorkflowNeo4j.objects.get(uuid=workflow),
+                        role=Role.objects.get(id=role),
                 ).exists():
                     ProjectWorkflowUserCompletionByRole.objects.create(
                         project=project_obj,
@@ -252,38 +253,110 @@ def validate_active_user_role_for_project(project_obj, user_obj, role_id):
     role = convert_comanage_role_id_to_neo4j_node_role(role_id)
     if role == 'STAFF':
         if MembershipComanagePersonnel.objects.filter(
-            project=project_obj,
-            person=user_obj,
-            comanage_staff_id__isnull=False,
+                project=project_obj,
+                person=user_obj,
+                comanage_staff_id__isnull=False,
         ):
             return True
     elif role == 'DP':
         if MembershipComanagePersonnel.objects.filter(
-            project=project_obj,
-            person=user_obj,
-            comanage_dp_id__isnull=False,
+                project=project_obj,
+                person=user_obj,
+                comanage_dp_id__isnull=False,
         ):
             return True
     elif role == 'INP':
         if MembershipComanagePersonnel.objects.filter(
-            project=project_obj,
-            person=user_obj,
-            comanage_inp_id__isnull=False,
+                project=project_obj,
+                person=user_obj,
+                comanage_inp_id__isnull=False,
         ):
             return True
     elif role == 'IG':
         if MembershipComanagePersonnel.objects.filter(
-            project=project_obj,
-            person=user_obj,
-            comanage_ig_id__isnull=False,
+                project=project_obj,
+                person=user_obj,
+                comanage_ig_id__isnull=False,
         ):
             return True
     elif role == 'PI':
         if MembershipComanagePersonnel.objects.filter(
-            project=project_obj,
-            person=user_obj,
-            comanage_pi_members_id__isnull=False,
+                project=project_obj,
+                person=user_obj,
+                comanage_pi_members_id__isnull=False,
         ):
             return True
 
     return False
+
+
+def take_user_through_workflow(user, workflow):
+    role = convert_comanage_role_id_to_neo4j_node_role(user.role)
+    assertions = []
+    n = Neo4jWorkflow(
+        url=bolt_url,
+        user=neo_user,
+        pswd=neo_pass,
+        importHostDir=import_host_dir,
+        importDir=import_dir,
+    )
+    is_complete = n.is_workflow_complete(
+        principalId=str(user.uuid),
+        role=role,
+        graphId=workflow,
+    )
+    if is_complete:
+        assertions.append("'is_complete': 'True'")
+        return assertions
+
+    next_set = set()
+    n.find_reachable_not_completed_nodes(
+        principalId=str(user.uuid),
+        role=role,
+        graphId=workflow,
+        nodeId="Start",
+        incompleteNodeSet=next_set,
+    )
+    if len(next_set) == 0:
+        assertions.append('Waiting on another user to complete their assertion(s) first...')
+        return assertions
+    for node in next_set:
+        props = n.get_node_properties(graphId=workflow, nodeId=node)
+        assertions.append(props)
+    return assertions
+
+
+def workflow_update_node_property(graph_id, node_id, prop_name, prop_value):
+    n = Neo4jWorkflow(
+        url=bolt_url,
+        user=neo_user,
+        pswd=neo_pass,
+        importHostDir=import_host_dir,
+        importDir=import_dir
+    )
+    n.update_node_property(
+        graphId=graph_id,
+        nodeId=node_id,
+        propName=prop_name,
+        propVal=prop_value
+    )
+
+
+def workflow_save_safe_token_and_complete(graph_id, node_id):
+    n = Neo4jWorkflow(
+        url=bolt_url,
+        user=neo_user,
+        pswd=neo_pass,
+        importHostDir=import_host_dir,
+        importDir=import_dir
+    )
+    assertion_scid = workflow_safe_assertion()
+    n.save_safe_token_and_complete(
+        graphId=graph_id,
+        nodeId=node_id,
+        token=assertion_scid
+    )
+
+
+def workflow_safe_assertion():
+    return 'MOCK_ASSERTION_SCID'

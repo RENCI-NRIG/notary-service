@@ -11,7 +11,7 @@ def encode_ns_jwt(project_uuid, dataset_scid, user):
         private_key_path = os.path.dirname(os.path.dirname(__file__)) + '/ssl/ssl_dev.key'
     with open(private_key_path) as f:
         private_key = f.read()
-    user_set = dataset_scid
+    data_set = dataset_scid
     project_id = project_uuid
     ns_token = mock_get_id_from_pub('ssl/ssl_dev.pubkey')
     ns_name = os.getenv('NS_NAME', 'localhost')
@@ -21,7 +21,7 @@ def encode_ns_jwt(project_uuid, dataset_scid, user):
     tok = NSJWT()
     tok.setClaims(
         projectId=project_id,
-        userSet=user_set,
+        dataSet=data_set,
         nsToken=ns_token,
         iss=iss,
         nsName=ns_name,
