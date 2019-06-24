@@ -32,6 +32,10 @@
     "msg": "Branches of conditional nodes must have distinct values"
   },
   {
+    "rule": "MATCH(n {GraphID: $graphId}) -[r:isPrerequisiteFor]-> (m {GraphID: $graphId}) with n, count(DISTINCT r.ParameterValue) AS pc, count(r) AS c, collect(r.ParameterValue) as pv WHERE pc > 1 RETURN NOT \"None\" IN pv",
+    "msg": "Branches of conditional nodes must not have None values associated with them"
+  },
+  {
     "rule": "MATCH (n {GraphID: $graphId}), (m {GraphID: $graphId}) WHERE n.ID=m.ID AND NOT id(n)=id(m) RETURN count(n) = 0",
     "msg": "All node IDs must be distinct."
   },
