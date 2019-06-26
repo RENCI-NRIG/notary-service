@@ -318,6 +318,7 @@
     </node>
     <node id="n16">
       <data key="d5" xml:space="preserve"><![CDATA[ServerOrWorkstation]]></data>
+      <data key="d6" xml:space="preserve"><![CDATA[ConditionalAssertionItem]]></data>
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Infrastructure-Approval]]></data>
       <data key="d10" xml:space="preserve"><![CDATA[http://call.safe.server/ServerOrWorkstationAssertion/%SoW]]></data>
       <data key="d11" xml:space="preserve"><![CDATA[{ fieldname: "SoW", type: "SingleSelection", values: [ { "Server": "Server"}, {"Workstation": "Workstation"} ] }]]></data>

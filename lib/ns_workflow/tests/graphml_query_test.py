@@ -2,7 +2,7 @@ import logging
 import os
 import unittest
 
-from ns_workflow import Neo4jWorkflow, WorkflowError, WorkflowQueryError
+from ns_workflow import Neo4jWorkflow, WorkflowError, WorkflowQueryError, AbstractWorkflow
 
 global testdir
 testdir = os.path.dirname(os.path.dirname(__file__)) + '/tests/'
@@ -69,7 +69,7 @@ class TestGraphQuery(unittest.TestCase):
         d = self.neo4j.find_adjacent_nodes(self.gid, "Start")
         self.assertEqual(len(d), 6, "Start node adjacent to six nodes")
         self.log.info(d)
-        d = self.neo4j.find_adjacent_nodes(self.gid, "Start", "PI")
+        d = self.neo4j.find_adjacent_nodes(self.gid, "Start", AbstractWorkflow.ROLE_PI)
         self.assertEqual(len(d), 6, "Start node has six PI adjacent nodes")
         self.log.info(d)
 
@@ -77,10 +77,10 @@ class TestGraphQuery(unittest.TestCase):
     def test_query_reachable(self):
         self.log.info("Testing reachability for nodes")
 
-        d = self.neo4j.find_reachable_nodes(self.gid, "Start", "IG")
+        d = self.neo4j.find_reachable_nodes(self.gid, "Start", AbstractWorkflow.ROLE_IG)
         self.assertEqual(len(d), 1, "1 IG node reachable from start")
 
-        d = self.neo4j.find_reachable_nodes(self.gid, "RestrictAccessPledge", "PI")
+        d = self.neo4j.find_reachable_nodes(self.gid, "RestrictAccessPledge", AbstractWorkflow.ROLE_PI)
         self.log.info(f"PI nodes reachable from RestrictAccessPledge are {d}")
         self.assertEqual(len(d), 1, "1 PI nodes are reachable from RestrictAccessPledge")
 
@@ -88,10 +88,11 @@ class TestGraphQuery(unittest.TestCase):
     def test_update_property(self):
         self.log.info("Testing update property")
 
-        d = self.neo4j.update_node_property(self.gid, "NoCopiesPledge", "NewProperty", "NewValue")
-        self.log.debug(d)
+        self.neo4j.update_node_property(self.gid, "NoCopiesPledge", "NewProperty", "NewValue")
         d = self.neo4j.get_node_properties(self.gid, "NoCopiesPledge")
         self.assertTrue(d["NewProperty"] == "NewValue")
+        with self.assertRaises(WorkflowQueryError):
+            self.neo4j.update_node_property(self.gid, "BogusNode", "NewProperty", "NewValue")
 
     def test_update_properties(self):
         self.log.info("Testing setting multiple properties")
@@ -109,7 +110,7 @@ class TestGraphQuery(unittest.TestCase):
 
     def test_save_safe_token_and_complete(self):
         self.log.info("Testing saving token and marking node complete")
-        self.neo4j.save_safe_token_and_complete(self.gid, "NoCopiesPledge", "ABCDEFG")
+        self.neo4j.save_safe_token_and_complete(self.gid, "NoCopiesPledge", "ABCDEFG", "Bob")
         self.neo4j.get_node_properties(self.gid, "NoCopiesPledge")
         d = self.neo4j.get_node_properties(self.gid, "NoCopiesPledge")
         self.log.info(d)
@@ -176,6 +177,39 @@ class TestGraphQuery(unittest.TestCase):
         d = self.neo4j.is_child_node(self.gid, "BobsPledge")
         self.assertTrue(d)
 
+    def test_is_conditional_node(self):
+        self.log.info("Testing is_conditional_node")
+
+        b = self.neo4j.is_conditional_node(self.gid, "ServerOrWorkstation")
+        self.assertTrue(b)
+        b = self.neo4j.is_conditional_node(self.gid, "ServerUsedInOtherProjects")
+        self.assertFalse(b)
+
+    def test_list_conditional_options(self):
+        self.log.info("Testing get conditional options")
+
+        b = self.neo4j.list_conditional_options(self.gid, "ServerOrWorkstation")
+        self.log.info(f"Conditional options: {b}")
+        self.assertTrue('Workstation' in b and 'Server' in b)
+
+    def test_make_conditional_selection_and_disable_branches(self):
+        self.log.info("Testing marking a conditional selection and disabling branches")
+
+        an = self.neo4j.find_adjacent_nodes(self.gid, "ServerOrWorkstation")
+        self.log.info(f"Initially adjacent are {an}")
+        self.assertTrue(len(an) == 2)
+        self.assertTrue(self.neo4j.is_reachable_from_start(self.gid, "ServerUsedInOtherProjects"))
+        self.assertTrue(self.neo4j.is_reachable_from_start(self.gid, "WorkstationSecurityProtocols"))
+        self.neo4j.make_conditional_selection_and_disable_branches(self.gid, "ServerOrWorkstation", "Workstation")
+        an = self.neo4j.find_adjacent_nodes(self.gid, "ServerOrWorkstation")
+        self.log.info(f"After selection adjacent are {an}")
+        self.assertTrue(len(an) == 1)
+        self.assertFalse(self.neo4j.is_reachable_from_start(self.gid, "ServerUsedInOtherProjects"))
+        self.assertTrue(self.neo4j.is_reachable_from_start(self.gid, "WorkstationSecurityProtocols"))
+
+        with self.assertRaises(WorkflowQueryError):
+            self.neo4j.make_conditional_selection_and_disable_branches(self.gid, "ServerOrWorkstation", "BogusValue")
+
     def test_find_fan_out_parent(self):
         self.log.info("Testing finding common completed parent")
 
@@ -220,21 +254,21 @@ class TestGraphQuery(unittest.TestCase):
         # test unconditional fan-out
         d = self.neo4j.check_fan_in_complete(self.gid, "PrintEnvironment")
         self.assertFalse(d)
-        self.neo4j.save_safe_token_and_complete(self.gid, "TemporaryFilesPeriodicRemovalPledge", "ABCD")
-        self.neo4j.save_safe_token_and_complete(self.gid, "CodeBackupSelectionPledge", "ABCD")
-        self.neo4j.save_safe_token_and_complete(self.gid, "NoCopiesPledge", "ABCD")
+        self.neo4j.save_safe_token_and_complete(self.gid, "TemporaryFilesPeriodicRemovalPledge", "ABCD", "Bob")
+        self.neo4j.save_safe_token_and_complete(self.gid, "CodeBackupSelectionPledge", "ABCD", "Bob")
+        self.neo4j.save_safe_token_and_complete(self.gid, "NoCopiesPledge", "ABCD", "Bob")
         d = self.neo4j.check_fan_in_complete(self.gid, "PrintEnvironment")
         self.assertTrue(d)
 
-        self.neo4j.save_safe_token_and_complete(self.gid, "PrintEnvironment", "ABCD")
+        self.neo4j.save_safe_token_and_complete(self.gid, "PrintEnvironment", "ABCD", "Bob")
         d = self.neo4j.check_fan_in_complete(self.gid, "HardcopyDiscardPledge")
         self.assertFalse(d)
 
-        self.neo4j.save_safe_token_and_complete(self.gid, "SplitPledge1", "ABCDEFG")
+        self.neo4j.save_safe_token_and_complete(self.gid, "SplitPledge1", "ABCDEFG", "Bob")
         d = self.neo4j.check_fan_in_complete(self.gid, "HardcopyDiscardPledge")
         self.assertFalse(d)
 
-        self.neo4j.save_safe_token_and_complete(self.gid, "SplitPledge2", "ABCDEFG")
+        self.neo4j.save_safe_token_and_complete(self.gid, "SplitPledge2", "ABCDEFG", "Bob")
         d = self.neo4j.check_fan_in_complete(self.gid, "HardcopyDiscardPledge")
         self.assertTrue(d)
 
@@ -246,14 +280,14 @@ class TestGraphQuery(unittest.TestCase):
         self.assertFalse(d)
 
         # test conditional fan-out false and true
-        self.neo4j.save_safe_token_and_complete(self.gid, "ServerOrWorkstation", "ABCDEFG")
-        self.neo4j.update_node_property(self.gid, "ServerOrWorkstation", "ParameterValue", "Server")
+        self.neo4j.save_safe_token_and_complete(self.gid, "ServerOrWorkstation", "ABCDEFG", "Bob")
+        self.neo4j.update_node_property(self.gid, "ServerOrWorkstation", AbstractWorkflow.PARAMETER_VALUE_FIELD, "Server")
         d = self.neo4j.check_fan_in_complete(self.gid, "WorkstationSecurityProtocols")
         self.log.info(f"Fan-in of WorkstationSecurityProtocols completed is now {d}")
         self.assertTrue(d)
 
-    def test_recursive_traversal(self):
-        self.log.info("Testing recursive traversal (with validation)")
+    def test_recursive_traversal_server(self):
+        self.log.info("Testing recursive traversal (with validation; server branch)")
 
         # localLog = self.log
         localLog = None
@@ -265,7 +299,7 @@ class TestGraphQuery(unittest.TestCase):
             self.assertTrue(False)
 
         nextSet = set()
-        self.neo4j.find_reachable_not_completed_nodes("Bob", "PI",
+        self.neo4j.find_reachable_not_completed_nodes("Bob", AbstractWorkflow.ROLE_PI,
             self.gid, "Start", nextSet, localLog)
         self.log.info(f"List of PI nodes {nextSet}")
         self.assertTrue("IRBSubmitted" in nextSet and
@@ -277,11 +311,12 @@ class TestGraphQuery(unittest.TestCase):
         self.assertTrue(len(nextSet) == 6)
 
         # make selection on ServerOrWorkstation and mark completed
-        self.neo4j.update_node_property(self.gid, "ServerOrWorkstation", "ParameterValue", "Server")
-        self.neo4j.save_safe_token_and_complete(self.gid, "ServerOrWorkstation", "ABCDEFGH")
+        #self.neo4j.update_node_property(self.gid, "ServerOrWorkstation", AbstractWorkflow.PARAMETER_VALUE_FIELD, "Server")
+        self.neo4j.make_conditional_selection_and_disable_branches(self.gid, "ServerOrWorkstation", "Server")
+        self.neo4j.save_complete(self.gid, "ServerOrWorkstation", "Bob")
         # traverse angain for PI
         nextSet = set()
-        self.neo4j.find_reachable_not_completed_nodes("Bob", "PI",
+        self.neo4j.find_reachable_not_completed_nodes("Bob", AbstractWorkflow.ROLE_PI,
             self.gid, "Start", nextSet, localLog)
         self.log.info(f"New list of PI nodes {nextSet}")
         self.assertTrue("IRBSubmitted" in nextSet and
@@ -293,7 +328,7 @@ class TestGraphQuery(unittest.TestCase):
 
         # traverse for INP
         nextSet = set()
-        self.neo4j.find_reachable_not_completed_nodes("Alice", "INP",
+        self.neo4j.find_reachable_not_completed_nodes("Alice", AbstractWorkflow.ROLE_INP,
             self.gid, "Start", nextSet, localLog)
         self.log.info(f"List of INP nodes {nextSet}")
         self.assertTrue("ServerUsedInOtherProjects" in nextSet)
@@ -301,18 +336,18 @@ class TestGraphQuery(unittest.TestCase):
 
         # traverse for STAFF (template-user-set)
         # mark TemporaryFilesPeriodicRemovalPledge done
-        self.neo4j.save_safe_token_and_complete(self.gid, "TemporaryFilesPeriodicRemovalPledge", "ABCDEFG")
+        self.neo4j.save_safe_token_and_complete(self.gid, "TemporaryFilesPeriodicRemovalPledge", "ABCDEFG", "Janice")
         nextSet = set()
-        self.neo4j.find_reachable_not_completed_nodes("Janice", "STAFF",
+        self.neo4j.find_reachable_not_completed_nodes("Janice", AbstractWorkflow.ROLE_STAFF,
             self.gid, "Start", nextSet, localLog)
         self.log.info(f"List of STAFF nodes {nextSet}")
         self.assertTrue("RestrictAccessPledge-Janice" in nextSet)
         self.assertTrue(len(nextSet) == 1)
 
         # mark restricted access done, try again
-        self.neo4j.save_safe_token_and_complete(self.gid, "RestrictAccessPledge-Janice", "ABCDEFGH")
+        self.neo4j.save_safe_token_and_complete(self.gid, "RestrictAccessPledge-Janice", "ABCDEFGH", "Janice")
         nextSet = set()
-        self.neo4j.find_reachable_not_completed_nodes("Janice", "STAFF",
+        self.neo4j.find_reachable_not_completed_nodes("Janice", AbstractWorkflow.ROLE_STAFF,
             self.gid, "Start", nextSet, localLog)
         self.log.info(f"List of STAFF nodes {nextSet}")
         self.assertTrue("NoIdentificationPledge-Janice" in nextSet)
@@ -320,32 +355,32 @@ class TestGraphQuery(unittest.TestCase):
 
         # try different staff
         nextSet = set()
-        self.neo4j.find_reachable_not_completed_nodes("Meredith", "STAFF",
+        self.neo4j.find_reachable_not_completed_nodes("Meredith", AbstractWorkflow.ROLE_STAFF,
             self.gid, "Start", nextSet, localLog)
         self.log.info(f"List of STAFF nodes {nextSet}")
         self.assertTrue("RestrictAccessPledge-Meredith" in nextSet)
         self.assertTrue(len(nextSet) == 1)
 
         # mark no identification done
-        self.neo4j.save_safe_token_and_complete(self.gid, "NoIdentificationPledge-Janice", "ABCDEFGH")
+        self.neo4j.save_safe_token_and_complete(self.gid, "NoIdentificationPledge-Janice", "ABCDEFGH", "Janice")
         nextSet = set()
-        self.neo4j.find_reachable_not_completed_nodes("Janice", "STAFF",
+        self.neo4j.find_reachable_not_completed_nodes("Janice", AbstractWorkflow.ROLE_STAFF,
             self.gid, "Start", nextSet, localLog)
         self.log.info(f"List of STAFF nodes {nextSet}")
         self.assertTrue("BreachReportingPledge-Janice" in nextSet)
         self.assertTrue(len(nextSet) == 1)
 
         # mark no breach reporting and check STAFF (should be nothing left)
-        self.neo4j.save_safe_token_and_complete(self.gid, "BreachReportingPledge-Janice", "ABCDEFGH")
+        self.neo4j.save_safe_token_and_complete(self.gid, "BreachReportingPledge-Janice", "ABCDEFGH", "Janice")
         nextSet = set()
-        self.neo4j.find_reachable_not_completed_nodes("Janice", "STAFF",
+        self.neo4j.find_reachable_not_completed_nodes("Janice", AbstractWorkflow.ROLE_STAFF,
             self.gid, "Start", nextSet, localLog)
         self.log.info(f"List of STAFF nodes {nextSet}")
         self.assertTrue(len(nextSet) == 0)
 
         # now check PI again
         nextSet = set()
-        self.neo4j.find_reachable_not_completed_nodes("Bob", "PI",
+        self.neo4j.find_reachable_not_completed_nodes("Bob", AbstractWorkflow.ROLE_PI,
             self.gid, "Start", nextSet, localLog)
         self.log.info(f"List of PI nodes {nextSet}")
         self.assertTrue("IRBSubmitted" in nextSet and
@@ -356,15 +391,15 @@ class TestGraphQuery(unittest.TestCase):
         self.assertTrue(len(nextSet) == 5)
 
         # mark PI's template-user-set nodes completed
-        self.neo4j.save_safe_token_and_complete(self.gid, "RestrictAccessPledge-Bob", "ABCDEFGH")
-        self.neo4j.find_reachable_not_completed_nodes("Bob", "PI",
+        self.neo4j.save_safe_token_and_complete(self.gid, "RestrictAccessPledge-Bob", "ABCDEFGH", "Bob")
+        self.neo4j.find_reachable_not_completed_nodes("Bob", AbstractWorkflow.ROLE_PI,
             self.gid, "Start", nextSet, localLog)
-        self.neo4j.save_safe_token_and_complete(self.gid, "NoIdentificationPledge-Bob", "ABCDEFGH")
-        self.neo4j.find_reachable_not_completed_nodes("Bob", "PI",
+        self.neo4j.save_safe_token_and_complete(self.gid, "NoIdentificationPledge-Bob", "ABCDEFGH", "Bob")
+        self.neo4j.find_reachable_not_completed_nodes("Bob", AbstractWorkflow.ROLE_PI,
             self.gid, "Start", nextSet, localLog)
-        self.neo4j.save_safe_token_and_complete(self.gid, "BreachReportingPledge-Bob", "ABCDEFGH")
+        self.neo4j.save_safe_token_and_complete(self.gid, "BreachReportingPledge-Bob", "ABCDEFGH", "Bob")
         nextSet = set()
-        self.neo4j.find_reachable_not_completed_nodes("Bob", "PI",
+        self.neo4j.find_reachable_not_completed_nodes("Bob", AbstractWorkflow.ROLE_PI,
             self.gid, "Start", nextSet, localLog)
         self.log.info(f"List of PI nodes {nextSet}")
         self.assertTrue("IRBSubmitted" in nextSet and
@@ -374,19 +409,19 @@ class TestGraphQuery(unittest.TestCase):
         self.assertTrue(len(nextSet) == 4)
 
         # test split user-set nodes
-        self.neo4j.save_safe_token_and_complete(self.gid, "NoBackupPledge", "ABCDEFGH")
+        self.neo4j.save_safe_token_and_complete(self.gid, "NoBackupPledge", "ABCDEFGH", "Bob")
         # CodedBackupSelectionPledge should be among the next
         nextSet = set()
-        self.neo4j.find_reachable_not_completed_nodes("Bob", "PI",
+        self.neo4j.find_reachable_not_completed_nodes("Bob", AbstractWorkflow.ROLE_PI,
             self.gid, "Start", nextSet, localLog)
         self.log.info(f"List of PI nodes {nextSet}")
         self.assertFalse("CodedBackupSelectionPledge" in nextSet)
 
         # mark more done
-        self.neo4j.save_safe_token_and_complete(self.gid, "CodeBackupSelectionPledge", "ABCDEFGH")
-        self.neo4j.save_safe_token_and_complete(self.gid, "NoCopiesPledge", "ABCDEFGH")
+        self.neo4j.save_safe_token_and_complete(self.gid, "CodeBackupSelectionPledge", "ABCDEFGH", "Bob")
+        self.neo4j.save_safe_token_and_complete(self.gid, "NoCopiesPledge", "ABCDEFGH", "Bob")
         nextSet = set()
-        self.neo4j.find_reachable_not_completed_nodes("Bob", "PI",
+        self.neo4j.find_reachable_not_completed_nodes("Bob", AbstractWorkflow.ROLE_PI,
             self.gid, "Start", nextSet, localLog)
         self.log.info(f"List of PI nodes {nextSet}")
         self.assertTrue("IRBSubmitted" in nextSet and
@@ -395,25 +430,25 @@ class TestGraphQuery(unittest.TestCase):
         self.assertTrue(len(nextSet) == 3)
 
         # try conditional fan out
-        self.neo4j.save_safe_token_and_complete(self.gid, "ServerUsedInOtherProjects", "ABCDEFG")
-        self.neo4j.save_safe_token_and_complete(self.gid, "ServerSecurityProtocols", "ABCDEFG")
+        self.neo4j.save_safe_token_and_complete(self.gid, "ServerUsedInOtherProjects", "ABCDEFG", "Alice")
+        self.neo4j.save_safe_token_and_complete(self.gid, "ServerSecurityProtocols", "ABCDEFG", "Alice")
         nextSet = set()
-        self.neo4j.find_reachable_not_completed_nodes("Alice", "INP",
+        self.neo4j.find_reachable_not_completed_nodes("Alice", AbstractWorkflow.ROLE_INP,
             self.gid, "Start", nextSet, localLog)
         self.log.info(f"List of INP nodes {nextSet}")
         self.assertTrue("WorkstationSecurityProtocols" in nextSet)
         self.assertTrue(len(nextSet) == 1)
 
         # reach stop for INP
-        self.neo4j.save_safe_token_and_complete(self.gid, "WorkstationSecurityProtocols", "ABCDEFG")
+        self.neo4j.save_safe_token_and_complete(self.gid, "WorkstationSecurityProtocols", "ABCDEFG", "Alice")
         nextSet = set()
-        self.neo4j.find_reachable_not_completed_nodes("Alice", "INP",
+        self.neo4j.find_reachable_not_completed_nodes("Alice", AbstractWorkflow.ROLE_INP,
             self.gid, "Start", nextSet, localLog)
         self.log.info(f"List of INP nodes {nextSet}")
         self.assertTrue(len(nextSet) == 0)
 
         # test for completeness
-        d = self.neo4j.is_workflow_complete("Bob", "PI", self.gid)
+        d = self.neo4j.is_workflow_complete("Bob", AbstractWorkflow.ROLE_PI, self.gid)
         self.assertFalse(d)
 
         # get a list of incomplete common-set nodes
@@ -424,7 +459,7 @@ class TestGraphQuery(unittest.TestCase):
         # mark all common-set nodes listed done
         self.log.info("Marking common-set nodes {d} completed")
         for cs in d:
-            self.neo4j.save_safe_token_and_complete(self.gid, cs, "ABCDEFGHJ")
+            self.neo4j.save_safe_token_and_complete(self.gid, cs, "ABCDEFGHJ", "Bob")
 
         # get a list again
         d = self.neo4j.list_not_completed_common_set(self.gid)
@@ -433,7 +468,7 @@ class TestGraphQuery(unittest.TestCase):
 
         # traverse graph for Bob, see what is left
         nextSet = set()
-        self.neo4j.find_reachable_not_completed_nodes("Bob", "PI",
+        self.neo4j.find_reachable_not_completed_nodes("Bob", AbstractWorkflow.ROLE_PI,
             self.gid, "Start", nextSet, localLog)
         self.log.info(f"List of Bob the PI nodes {nextSet}")
         self.assertTrue(len(nextSet) == 1)
@@ -441,11 +476,11 @@ class TestGraphQuery(unittest.TestCase):
         # mark the userSet nodes done
         self.log.info(f"Marking user-set nodes {nextSet} completed")
         for us in nextSet:
-            self.neo4j.save_safe_token_and_complete(self.gid, us, "ABCDEFGHJ")
+            self.neo4j.save_safe_token_and_complete(self.gid, us, "ABCDEFGHJ", "Bob")
 
         # traverse graph for Bob, see what is left
         nextSet = set()
-        self.neo4j.find_reachable_not_completed_nodes("Bob", "PI",
+        self.neo4j.find_reachable_not_completed_nodes("Bob", AbstractWorkflow.ROLE_PI,
             self.gid, "Start", nextSet, localLog)
         self.log.info(f"List of Bob the PI nodes {nextSet}")
 
@@ -454,8 +489,162 @@ class TestGraphQuery(unittest.TestCase):
 
         self.log.info("Testing if workflow is complete")
 
-        self.assertTrue(self.neo4j.is_workflow_complete("Bob", "PI", self.gid))
+        self.assertTrue(self.neo4j.is_workflow_complete("Bob", AbstractWorkflow.ROLE_PI, self.gid))
 
+    def test_recursive_traversal_workstation(self):
+        self.log.info("Testing recursive traversal (with validation; workstation branch) ")
+
+        #localLog = self.log
+        localLog = None
+
+        try:
+            self.neo4j.validate_workflow(self.gid)
+        except WorkflowError as wexc:
+            self.log.error(wexc)
+            self.assertTrue(False)
+
+        nextSet = set()
+        self.neo4j.find_reachable_not_completed_nodes("Bob", AbstractWorkflow.ROLE_PI,
+            self.gid, "Start", nextSet, localLog)
+        self.log.info(f"List of PI nodes {nextSet}")
+        self.assertTrue("IRBSubmitted" in nextSet and
+            "PaymentMade" in nextSet and
+            "ServerOrWorkstation" in nextSet and
+            "NoBackupPledge" in nextSet and
+            "TemporaryFilesPeriodicRemovalPledge" in nextSet and
+            "NoCopiesPledge" in nextSet)
+        self.assertTrue(len(nextSet) == 6)
+
+        # make selection on ServerOrWorkstation and mark completed
+        #self.neo4j.update_node_property(self.gid, "ServerOrWorkstation", AbstractWorkflow.PARAMETER_VALUE_FIELD,
+        #                                "Workstation")
+        self.neo4j.make_conditional_selection_and_disable_branches(self.gid, "ServerOrWorkstation", "Workstation")
+        self.neo4j.save_complete(self.gid, "ServerOrWorkstation", "Bob")
+        # traverse again for PI
+        nextSet = set()
+        self.neo4j.find_reachable_not_completed_nodes("Bob", AbstractWorkflow.ROLE_PI,
+            self.gid, "Start", nextSet, localLog)
+        self.log.info(f"New list of PI nodes {nextSet}")
+        self.assertTrue("IRBSubmitted" in nextSet and
+            "PaymentMade" in nextSet and
+            "NoBackupPledge" in nextSet and
+            "TemporaryFilesPeriodicRemovalPledge" in nextSet and
+            "NoCopiesPledge" in nextSet and
+            "WorkstationTrainingPledge-Bob" in nextSet)
+        self.assertTrue(len(nextSet) == 6)
+
+        # traverse for INP
+        nextSet = set()
+        self.neo4j.find_reachable_not_completed_nodes("Alice", AbstractWorkflow.ROLE_INP,
+            self.gid, "Start", nextSet, localLog)
+        self.log.info(f"List of INP nodes {nextSet}")
+        self.assertTrue("WorkstationSecurityProtocols" in nextSet)
+        self.assertTrue(len(nextSet) == 1)
+
+        # fill out network security protocols
+        self.neo4j.save_safe_token_and_complete(self.gid, "WorkstationSecurityProtocols", "ABCDEFGH", "Alice")
+
+        # reach stop for INP
+        nextSet = set()
+        self.neo4j.find_reachable_not_completed_nodes("Alice", AbstractWorkflow.ROLE_INP,
+                                                      self.gid, "Start", nextSet, localLog)
+        self.log.info(f"List of INP nodes {nextSet}")
+        self.assertTrue(len(nextSet) == 0)
+
+        # fill out PI nodes for Bob the PI
+        self.neo4j.save_complete(self.gid, "IRBSubmitted", "Bob")
+        self.neo4j.save_complete(self.gid, "TemporaryFilesPeriodicRemovalPledge", "Bob")
+        self.neo4j.save_complete(self.gid, "NoBackupPledge", "Bob")
+        self.neo4j.save_complete(self.gid, "NoCopiesPledge", "Bob")
+        self.neo4j.save_complete(self.gid, "PaymentMade", "Bob")
+
+        # check whas is next for PI
+        nextSet = set()
+        self.neo4j.find_reachable_not_completed_nodes("Bob", AbstractWorkflow.ROLE_PI,
+                                                      self.gid, "Start", nextSet, localLog)
+        self.log.info(f"List of PI nodes {nextSet}")
+        self.assertTrue(len(nextSet) == 3)
+
+        # fill out STAFF nodes for Bob the PI
+        nextSet = set()
+        self.neo4j.find_reachable_not_completed_nodes("Janice", AbstractWorkflow.ROLE_STAFF,
+                                                      self.gid, "Start", nextSet, localLog)
+        self.log.info(f"List of STAFF nodes {nextSet}")
+        self.assertTrue(len(nextSet) == 5)
+        self.log.info("Fill out those nodes for STAFF")
+        for sn in nextSet:
+            self.neo4j.save_complete(self.gid, sn, "Janice")
+
+        # fill out DP nodes
+        nextSet = set()
+        self.neo4j.find_reachable_not_completed_nodes("Mel", AbstractWorkflow.ROLE_DP,
+                                                      self.gid, "Start", nextSet, localLog)
+        self.log.info(f"List of DP nodes {nextSet}")
+        self.assertTrue(len(nextSet) == 1)
+        for sn in nextSet:
+            self.neo4j.save_complete(self.gid, sn, "Mel")
+
+        # fill out IG nodes
+        nextSet = set()
+        self.neo4j.find_reachable_not_completed_nodes("Malcolm", AbstractWorkflow.ROLE_IG,
+                                                      self.gid, "Start", nextSet, localLog)
+        self.log.info(f"List of IG nodes {nextSet}")
+        self.assertTrue(len(nextSet) == 1)
+        self.neo4j.save_complete(self.gid, "IRBReceived", "Malcolm")
+        self.neo4j.save_complete(self.gid, "IRBApproved", "Malcolm")
+        # should be done with IG now
+
+        # check what is next for PI and fill them out
+        nextSet = set()
+        self.neo4j.find_reachable_not_completed_nodes("Bob", AbstractWorkflow.ROLE_PI,
+                                                      self.gid, "Start", nextSet, localLog)
+        self.log.info(f"List of PI nodes {nextSet}")
+        self.assertTrue(len(nextSet) == 3)
+        self.log.info(f"Fill those nodes out")
+        for sn in nextSet:
+            self.neo4j.save_safe_token_and_complete(self.gid, sn, "ABCDEFG", "Bob")
+
+        # check what is next for PI and fill them out
+        nextSet = set()
+        self.neo4j.find_reachable_not_completed_nodes("Bob", AbstractWorkflow.ROLE_PI,
+                                                      self.gid, "Start", nextSet, localLog)
+        self.log.info(f"List of PI nodes {nextSet}")
+        self.assertTrue(len(nextSet) == 2)
+        self.log.info(f"Fill those nodes out")
+        for sn in nextSet:
+            self.neo4j.save_safe_token_and_complete(self.gid, sn, "ABCDEFG", "Bob")
+
+        # check what is next for PI and fill them out
+        nextSet = set()
+        self.neo4j.find_reachable_not_completed_nodes("Bob", AbstractWorkflow.ROLE_PI,
+                                                      self.gid, "Start", nextSet, localLog)
+        self.log.info(f"List of PI nodes {nextSet}")
+        self.assertTrue(len(nextSet) == 3)
+        self.log.info(f"Fill those nodes out")
+        for sn in nextSet:
+            self.neo4j.save_safe_token_and_complete(self.gid, sn, "ABCDEFG", "Bob")
+
+        # check what is next for PI and fill them out
+        nextSet = set()
+        self.neo4j.find_reachable_not_completed_nodes("Bob", AbstractWorkflow.ROLE_PI,
+                                                      self.gid, "Start", nextSet, localLog)
+        self.log.info(f"List of PI nodes {nextSet}")
+        self.assertTrue(len(nextSet) == 1)
+        self.log.info(f"Fill those nodes out")
+        for sn in nextSet:
+            self.neo4j.save_safe_token_and_complete(self.gid, sn, "ABCDEFG", "Bob")
+
+
+        # check what is next for PI and fill them out
+        nextSet = set()
+        self.neo4j.find_reachable_not_completed_nodes("Bob", AbstractWorkflow.ROLE_INP,
+                                                      self.gid, "Start", nextSet, localLog)
+        self.log.info(f"List of PI nodes {nextSet}")
+        self.assertTrue(len(nextSet) == 0)
+
+
+        # verify completeness for PI
+        self.assertTrue(self.neo4j.is_workflow_complete("Bob", AbstractWorkflow.ROLE_PI, self.gid, localLog))
 
 if __name__ == '__main__':
     unittest.main()

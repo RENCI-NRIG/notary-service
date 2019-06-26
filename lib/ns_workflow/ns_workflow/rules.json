@@ -28,11 +28,11 @@
     "msg": "All relationships must have ParameterValue properties"
   },
   {
-    "rule": "MATCH(n {GraphID: $graphId}) -[r:isPrerequisiteFor]-> (m {GraphID: $graphId}) with n, count(DISTINCT r.ParameterValue) AS pc, count(r) AS c WHERE pc > 1 AND c <> pc RETURN count(n) = 0",
+    "rule": "MATCH(n {GraphID: $graphId, Type: \"ConditionalAssertionItem\"}) -[r:isPrerequisiteFor]-> (m {GraphID: $graphId}) with n, count(DISTINCT r.ParameterValue) AS pc, count(r) AS c WHERE pc > 1 AND c <> pc RETURN count(n) = 0",
     "msg": "Branches of conditional nodes must have distinct values"
   },
   {
-    "rule": "MATCH(n {GraphID: $graphId}) -[r:isPrerequisiteFor]-> (m {GraphID: $graphId}) with n, count(DISTINCT r.ParameterValue) AS pc, count(r) AS c, collect(r.ParameterValue) as pv WHERE pc > 1 RETURN NOT \"None\" IN pv",
+    "rule": "MATCH(n {GraphID: $graphId, Type: \"ConditionalAssertionItem\"}) -[r:isPrerequisiteFor]-> (m {GraphID: $graphId}) with n, count(DISTINCT r.ParameterValue) AS pc, count(r) AS c, collect(r.ParameterValue) as pv WHERE pc > 1 RETURN NOT \"None\" IN pv",
     "msg": "Branches of conditional nodes must not have None values associated with them"
   },
   {
@@ -44,7 +44,7 @@
     "msg": "Node roles should be None, STAFF, DP, INP, IG, or PI."
   },
   {
-    "rule": "MATCH (n {GraphID: $graphId}) RETURN ALL(r IN collect(n) WHERE r.Type IN [\"Start\", \"Stop\", \"AssertionItem\"])",
+    "rule": "MATCH (n {GraphID: $graphId}) RETURN ALL(r IN collect(n) WHERE r.Type IN [\"Start\", \"Stop\", \"AssertionItem\", \"ConditionalAssertionItem\"])",
     "msg": "Node types must be Start, Stop and AssertionItem"
   },
   {
