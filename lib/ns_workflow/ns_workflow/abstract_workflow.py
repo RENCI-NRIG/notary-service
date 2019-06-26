@@ -1,12 +1,27 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Tuple, Any, Set
+from datetime import datetime, timezone
 import logging
 
 
 class AbstractWorkflow(ABC):
 
+    START = "Start"
+    STOP = "Stop"
+    ASSERTION_ITEM = "AssertionItem"
+    CONDITIONAL_ASSERTION_ITEM = "ConditionalAssertionItem"
+
     COMPLETED_FIELD = "completed"
     COMPLETED_VALUE = "True"
+    SAFE_TOKEN_FIELD = "SAFEToken"
+    PRINCIPAL_FIELD = "principal"
+    PARAMETER_VALUE_FIELD = "ParameterValue"
+    TS_FIELD = "ts"
+    ROLE_PI = "PI"
+    ROLE_STAFF = "STAFF"
+    ROLE_INP = "INP"
+    ROLE_IG = "IG"
+    ROLE_DP = "DP"
 
     @abstractmethod
     def import_workflow(self, graph: str, graphId: str = None) -> str:
@@ -51,13 +66,18 @@ class AbstractWorkflow(ABC):
 
     @abstractmethod
     def find_adjacent_conditional_node(self, graphId: str, nodeId: str, parameterValue: str, role: str = None) -> str:
-        """ return the id of the node which follows id the condition specified by
-        parameter value is satisfied """
+        """ return the id of the node which follows if the condition specified by
+        parameter value is satisfied. optionally match role """
         pass
 
     @abstractmethod
     def find_reachable_nodes(self, graphId: str, nodeId: str, role: str = None) -> List[str]:
         """ find reachable nodes, optionally for a given role """
+        pass
+
+    @abstractmethod
+    def is_reachable_from_start(self, graphId: str, nodeId: str) ->bool:
+        """ is this node reachable from start following isPrerequisiteFor relationships """
         pass
 
     @abstractmethod
@@ -105,15 +125,38 @@ class AbstractWorkflow(ABC):
         """ find immediate parent nodes, skipping template-user-set nodes """
         pass
 
-    def save_safe_token_and_complete(self, graphId: str, nodeId: str, token: str) -> None:
-        """ save the token and mark the node as done """
-        props = { "SAFEToken": token, self.COMPLETED_FIELD: self.COMPLETED_VALUE}
+    @abstractmethod
+    def list_conditional_options(self, graphId: str, nodeId: str) ->List[str]:
+        """ list all options available on this conditional node """
+        pass
+
+    @abstractmethod
+    def make_conditional_selection_and_disable_branches(self, graphId: str, nodeId: str, value: str) ->None:
+        """ make a selection on ConditionalAssertionItem node and change type of
+        all relationships to immediate neighbors that don't match the selected
+        value to isNotSelectedPrerequisiteFor while preserving other properties """
+        pass
+
+    def save_complete(self, graphId: str, nodeId: str, principalId: str) -> None:
+        """ mark node complete (without saving SAFE token) using RFC3339/ISO timestamp format """
+        props = {self.COMPLETED_FIELD: self.COMPLETED_VALUE,
+                 self.PRINCIPAL_FIELD: principalId,
+                 self.TS_FIELD: datetime.now(timezone.utc).isoformat()}
+
+        self.update_node_properties(graphId, nodeId, props)
+
+    def save_safe_token_and_complete(self, graphId: str, nodeId: str, token: str, principalId: str) -> None:
+        """ save the token and mark the node as done using RFC3339/ISO timestamp format """
+        props = { self.SAFE_TOKEN_FIELD: token,
+                  self.COMPLETED_FIELD: self.COMPLETED_VALUE,
+                  self.PRINCIPAL_FIELD: principalId,
+                  self.TS_FIELD: datetime.now(timezone.utc).isoformat()}
 
         self.update_node_properties(graphId, nodeId, props)
 
     def is_node_completed(self, graphId: str, nodeId: str) ->bool:
         props = self.get_node_properties(graphId, nodeId)
-        if nodeId == "Start":
+        if nodeId == self.START:
             return True
 
         if self.COMPLETED_FIELD in props and props[self.COMPLETED_FIELD] == self.COMPLETED_VALUE:
@@ -144,7 +187,7 @@ class AbstractWorkflow(ABC):
             parentsDone = True
             for parent in self.find_immediate_common_set_parent_nodes(graphId, nodeId):
                 parentProps = self.get_node_properties(graphId, parent)
-                if self.COMPLETED_FIELD not in parentProps  or \
+                if self.COMPLETED_FIELD not in parentProps or \
                     parentProps[self.COMPLETED_FIELD] != self.COMPLETED_VALUE:
                     parentsDone = False
                     break
@@ -163,21 +206,21 @@ class AbstractWorkflow(ABC):
         if props is None:
             raise WorkflowError(f"Node {nodeId} does not have any properties")
 
-        if props["Type"] == "Start":
+        if props["Type"] == self.START:
             for n in self.find_adjacent_nodes(graphId, nodeId):
                 # recursive call to all nodes from Start
                 self.find_reachable_not_completed_nodes(principalId, role, graphId, n, incompleteNodeSet, logger)
             return
-        elif props["Type"] == "Stop":
+        elif props["Type"] == self.STOP:
             return
-        elif props["Type"] == "AssertionItem":
+        elif props["Type"] == self.ASSERTION_ITEM or props["Type"] == self.CONDITIONAL_ASSERTION_ITEM:
             if self.COMPLETED_FIELD in props and props[self.COMPLETED_FIELD] == self.COMPLETED_VALUE:
                 logger is not None and logger.info(f"  Node is completed")
                 # node is completed, continue the traversal
                 if self.is_conditional_node(graphId, nodeId):
                     logger is not None and logger.info(f"    Node is conditional")
                     # if node is conditional, follow the branch based on ParameterValue
-                    newNodeId = self.find_adjacent_conditional_node(graphId, nodeId, props["ParameterValue"])
+                    newNodeId = self.find_adjacent_conditional_node(graphId, nodeId, props[self.PARAMETER_VALUE_FIELD])
                     if newNodeId is not None:
                         self.find_reachable_not_completed_nodes(principalId, role, graphId, newNodeId, incompleteNodeSet, logger)
                 else:
@@ -247,14 +290,23 @@ class AbstractWorkflow(ABC):
         # check if common-set is completed
         cs = self.list_not_completed_common_set(graphId)
 
-        logger is not None and logger.info(f"Common set is {cs}")
-        if cs is not None and len(cs) > 0:
-            return False
+        logger is not None and logger.info(f"Incomplete common set is {cs}")
+
+        # are any of these nodes reachable (i.e. there is an unconditional path,
+        # or 'unclaimed' conditional path, or 'claimed' conditional path that leads
+        # to it.
+
+        for csn in cs:
+            if self.is_reachable_from_start(graphId, csn):
+                return False
+
+        #if cs is not None and len(cs) > 0:
+        #    return False
 
         logger is not None and logger.info(f"Checking user-set now")
         # see if there are any reachable (only user-set would be left) nodes for id, role tuple
         userSet = set()
-        self.find_reachable_not_completed_nodes(principalId, role, graphId, "Start", userSet, None)
+        self.find_reachable_not_completed_nodes(principalId, role, graphId, self.START, userSet, None)
 
         logger is not None and logger.info(f"User set is {userSet}")
 

@@ -171,7 +171,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId).single()
             if val is None:
-                raise WorkflowQueryError(graphId, "Start", "Unable to find start node")
+                raise WorkflowQueryError(graphId, AbstractWorkflow.START, "Unable to find start node")
             return val.data()['properties(n)']
 
     def get_node_properties(self, graphId: str, nodeId: str) -> Dict[str, str]:
@@ -191,9 +191,9 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert graphId is not None
         assert nodeId is not None
         if role is not None:
-            query = "MATCH ({GraphID: $graphId, ID: $nodeId}) --> (n {GraphID: $graphId}) WHERE $role IN split(n.Role, ',') RETURN n.ID"
+            query = "MATCH ({GraphID: $graphId, ID: $nodeId}) -[:isPrerequisiteFor]-> (n {GraphID: $graphId}) WHERE $role IN split(n.Role, ',') RETURN n.ID"
         else:
-            query = "MATCH ({GraphID: $graphId, ID: $nodeId}) --> (n {GraphID: $graphId}) RETURN n.ID"
+            query = "MATCH ({GraphID: $graphId, ID: $nodeId}) -[:isPrerequisiteFor]-> (n {GraphID: $graphId}) RETURN n.ID"
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId, role=role)
             if val is None:
@@ -206,7 +206,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert graphId is not None
         assert nodeId is not None
         assert role is not None
-        query = """MATCH (s {GraphID: $graphId, ID: $nodeId}), (pi), p=(s) -[*]-> (pi)
+        query = """MATCH (s {GraphID: $graphId, ID: $nodeId}), (pi), p=(s) -[:isPrerequisiteFor*]-> (pi)
         WHERE $role IN split(pi.Role, ',') AND ALL(x in tail(reverse(tail(nodes(p)))) WHERE NOT $role IN split(x.Role, ',') ) WITH distinct(pi) AS dpi return dpi.ID"""
 
         with self.driver.session() as session:
@@ -223,7 +223,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         query = "MATCH (s {GraphID: $graphId, ID: $nodeId}) SET s+={ %s: $propVal} RETURN properties(s)" % propName
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId, propVal=propVal)
-            if val is None:
+            if val is None or len(val.value()) == 0:
                 raise WorkflowQueryError(graphId, nodeId, "Unable to set property")
             pass
 
@@ -242,7 +242,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         query = "MATCH (s {GraphID: $graphId, ID: $nodeId}) SET s+= { %s } RETURN properties(s)" % allProps
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId)
-            if val is None:
+            if val is None or len(val.value()) == 0:
                 raise WorkflowQueryError(graphId, nodeId, "Unable to set properties")
             pass
 
@@ -334,7 +334,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert graphId is not None
         assert nodeId is not None
 
-        query = "MATCH (n {GraphID:$graphId, ID: $nodeId}) -[r:isPrerequisiteFor]-> (m) WITH n, count(DISTINCT r.ParameterValue) AS pc, count(r) AS c RETURN c > 1 AND c = pc"
+        query = """MATCH (n {GraphID:$graphId, ID: $nodeId, Type: "ConditionalAssertionItem"}) RETURN count(n) > 0"""
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId)
             if val is None:
@@ -347,9 +347,12 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert parameterValue is not None
 
         if role is not None:
-            query = "MATCH (n {GraphID: $graphId, ID: $nodeId}) -[r:isPrerequisiteFor {ParameterValue: $parameterValue}]-> (m {GraphID: $graphId}) WHERE $role IN split(m.Role, ',') RETURN m.ID"
+            query = """MATCH (n {GraphID: $graphId, ID: $nodeId, Type: "ConditionalAssertionItem"}) 
+            -[r:isPrerequisiteFor {ParameterValue: $parameterValue}]-> (m {GraphID: $graphId}) 
+            WHERE $role IN split(m.Role, ',') RETURN m.ID"""
         else:
-            query = "MATCH (n {GraphID: $graphId, ID: $nodeId}) -[r:isPrerequisiteFor {ParameterValue: $parameterValue}]-> (m {GraphID: $graphId}) RETURN m.ID"
+            query = """MATCH (n {GraphID: $graphId, ID: $nodeId, Type: "ConditionalAssertionItem"}) 
+            -[r:isPrerequisiteFor {ParameterValue: $parameterValue}]-> (m {GraphID: $graphId}) RETURN m.ID"""
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId, role=role, parameterValue=parameterValue)
             if val is None:
@@ -400,12 +403,70 @@ class Neo4jWorkflow(AbstractWorkflow):
 
         assert graphId is not None
 
-        query = """MATCH (n {GraphID: $graphId, SAFEType: "common-set"}) WHERE NOT exists(n.completed) OR n.completed <> "True"  RETURN collect(n.ID) as id"""
+        query = """MATCH (n {GraphID: $graphId, SAFEType: "common-set"}) 
+        WHERE NOT exists(n.completed) OR n.completed <> "True"  RETURN collect(n.ID) as id"""
 
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId)
             if val is None:
                 raise WorkflowQueryError(graphId, None, "Unable to list incomplete common-set")
+            myVal = val.value()
+            if len(myVal) > 0:
+                return myVal[0]
+            else:
+                return None
+
+    def list_conditional_options(self, graphId: str, nodeId: str) ->List[str]:
+
+        assert graphId is not None
+        assert nodeId is not None
+
+        if not self.is_conditional_node(graphId, nodeId):
+            raise WorkflowQueryError(graphId, nodeId, "Is not a conditional node - unable to make selection")
+
+        query = """MATCH (n {GraphID: $graphId, ID: $nodeId}) -[r:isPrerequisiteFor]-> (m) 
+        RETURN r.ParameterValue"""
+        with self.driver.session() as session:
+            val = session.run(query, graphId=graphId, nodeId=nodeId)
+            if val is None:
+                raise WorkflowQueryError(graphId, nodeId, "Unable to retrieve list of options")
+            return val.value()
+
+    def make_conditional_selection_and_disable_branches(self, graphId: str, nodeId: str, value: str) ->None:
+
+        assert graphId is not None
+        assert nodeId is not None
+        assert value is not None
+
+        lval = self.list_conditional_options(graphId, nodeId)
+
+        if value not in lval:
+            raise WorkflowQueryError(graphId, nodeId, f"Unable to set value {value} - it is not one of the available options {lval}")
+
+        self.update_node_property(graphId, nodeId, AbstractWorkflow.PARAMETER_VALUE_FIELD, value)
+
+        query = """MATCH (n {GraphID: $graphId, ID: $nodeId}) -[r:isPrerequisiteFor]-> (m {GraphID: $graphId}) 
+        WHERE r.ParameterValue <> $value 
+        CREATE (n) -[r2:isNotSelectedPrerequisiteFor]-> (m) SET r2=r 
+        WITH r DELETE r"""
+        with self.driver.session() as session:
+            val = session.run(query, graphId=graphId, nodeId=nodeId, value=value)
+            if val is None:
+                raise WorkflowQueryError(graphId, nodeId, "Unable to relabel not selected conditional branches")
+            return val.value()
+
+    def is_reachable_from_start(self, graphId: str, nodeId: str) ->bool:
+
+        assert graphId is not None
+        assert nodeId is not None
+
+        query = """MATCH p=(n {GraphID: $graphId, ID: "Start"}) -[q:isPrerequisiteFor*1..]-> 
+        (m {GraphID: $graphId, ID: $nodeId}) RETURN count(p) > 0"""
+
+        with self.driver.session() as session:
+            val = session.run(query, graphId=graphId, nodeId=nodeId)
+            if val is None:
+                raise WorkflowQueryError(graphId, None, "Unable to determine reachability")
             myVal = val.value()
             if len(myVal) > 0:
                 return myVal[0]

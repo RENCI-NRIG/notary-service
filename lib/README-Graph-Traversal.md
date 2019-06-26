@@ -30,7 +30,7 @@ def find_reachable_not_completed_nodes(principalID, principalRole, node, incompl
         find_reachable_not_completed_nodes(principalID, principalRole, newNode, incompleteSet)
     'Stop':
       return
-    'AssertionItem':
+    'AssertionItem' or 'ConditionalAssertionItem':
       if node.completed: # continue traversal
         if node_conditional(node):
           # if node is conditional, follow one branch based on ParameterValue
@@ -111,7 +111,7 @@ process node from the list returned from find_reachable_not_completed_nodes:
 ```
 def process_node(principalID, principalRole, node):
 
-  if node.Type != 'AssertionItem':
+  if node.Type != 'AssertionItem' AND node.Type != 'ConditionalAssertionItem':
     error
   if node.SAFEType == 'template-user-set':
     error
@@ -134,12 +134,41 @@ def process_node(principalID, principalRole, node):
       node.ParameterTemplate,
       node.ParameterValue)
 ```
+make selection on conditional node:
+```
+def make_conditional_selection(node, selectionValue):
+  node.ParameterValue = selectionValue
+  
+  for every successor s not selected by selectionValue:
+    create link node->s with type isNotSelectedPrerequisiteFor with copied properties
+    remove original link node->s of type isPrerequisiteFor
+```
 Test workflow for completeness. Note that simply finding all incomplete common-set and user-set nodes
 is not correct, since some user-set nodes may be preceded by conditional common-set nodes.
+Now that marking conditional node complete includes disabling non-selected branches (by setting their
+type to isNotSelectedPrerequisiteFor), testing reachability of common-set nodes becomes trivial
+
 ```
 def is_workflow_complete(graphId, principalID, principalRole):
-  if all common-set nodes are completed and
+  if there are no reachable incomplete common-set nodes and
     find_reachable_not_completed_nodes(graphId, principalID, principalRole) returns empty:
     return True
   return False
 ```
+
+OLD Queries
+A (common-set) node N is reachable if any of the following is true
+1. There is a path between start node and N that doesn't traverse a conditional node
+
+MATCH p=(n {ID: "Start"}) -[*]-> (m {ID: $nodeId}) WITH p MATCH(m {Type: "ConditionalAssertionItem"}) WHERE NOT m IN nodes(p) RETURN count(p) >0
+
+2. There is a path between start node and N that traverses conditional nodes that either are
+incomplete, or if complete, the next neighbor of the conditional node following the selected branch
+is on the path
+
+Find paths through filled-in conditional assertion items
+
+match p=(n {ID: "Start"}) -[*]-> (o {Type: "ConditionalAssertionItem"}) -[q:isPrerequisiteFor]-> () -[*0..]-> (m {ID: "ServerTrainingPledge"}) WHERE o.ParameterValue IS NOT NULL AND o.ParameterValue = q.ParameterValue RETURN p
+
+match p=(n {ID: "Start"}) -[*]-> (o {Type: "ConditionalAssertionItem"}) -[q:isPrerequisiteFor]-> () -[*0..]-> (m {ID: "WorkstationSecurityProtocols"}) WHERE o.ParameterValue IS NULL OR o.ParameterValue IS NOT NULL AND o.ParameterValue = q.ParameterValue RETURN count(p)
+match p=(n {ID: "Start"}) -[*]-> (o) -[q:isPrerequisiteFor]-> () -[*0..]-> (m {ID: "WorkstationSecurityProtocols"}) WHERE o.Type = "ConditionalAssertionItem" AND (o.ParameterValue IS NULL OR (o.ParameterValue IS NOT NULL AND o.ParameterValue = q.ParameterValue)) RETURN p
