@@ -8,12 +8,12 @@ kafka-python==1.4.6
 ldap3==2.6
 mozilla-django-oidc==1.2.2
 ns-jwt==0.1.2
-psycopg2-binary==2.8.2
+psycopg2-binary==2.8.3
 pycryptodome==3.8.2
 PyJWT==1.7.1
 pytest-cov==2.7.1
 pytest-django==3.5.0
-pytest==4.6.2
+pytest==4.6.3
 python-dateutil==2.8.0
 python-dotenv==0.10.3
 pytz==2019.1

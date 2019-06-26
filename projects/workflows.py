@@ -9,7 +9,7 @@ from users.models import Role
 from workflows.models import WorkflowNeo4j
 from workflows.workflow_neo4j import create_workflow_from_template, delete_workflow_by_uuid
 from .models import MembershipProjectWorkflow, Project, MembershipComanagePersonnel, \
-    ProjectWorkflowUserCompletionByRole, MembershipInfrastructure
+    ProjectWorkflowUserCompletionByRole, MembershipInfrastructure, MembershipDatasets
 
 bolt_url = os.getenv('NEO4J_BOLT_URL')
 neo_user = os.getenv('NEO4J_USER')
@@ -163,14 +163,21 @@ def generate_neo4j_user_workflow_status(project_obj, user_obj):
         importDir=import_dir,
     )
     # get workflows from project and match to user by affiliation
-    project_workflows = WorkflowNeo4j.objects.values_list('uuid', flat=True).filter(
-        uuid__in=MembershipProjectWorkflow.objects.values_list('workflow__uuid').filter(
-            project=project_obj
-        ),
-        affiliation=Affiliation.objects.get(
-            uuid=user_obj.ns_affiliation
-        ).id
-    ).distinct()
+    if user_obj.is_dp or user_obj.is_inp:
+        project_workflows = WorkflowNeo4j.objects.values_list('uuid', flat=True).filter(
+            uuid__in=MembershipProjectWorkflow.objects.values_list('workflow__uuid').filter(
+                project=project_obj
+            )
+        ).distinct()
+    else:
+        project_workflows = WorkflowNeo4j.objects.values_list('uuid', flat=True).filter(
+            uuid__in=MembershipProjectWorkflow.objects.values_list('workflow__uuid').filter(
+                project=project_obj
+            ),
+            affiliation=Affiliation.objects.get(
+                uuid=user_obj.ns_affiliation
+            ).id
+        ).distinct()
     # get user roles
     user_roles = NotaryServiceUser.objects.values_list('roles__id', flat=True).filter(
         uuid=user_obj.uuid
@@ -260,20 +267,23 @@ def validate_active_user_role_for_project(project_obj, user_obj, role_id, workfl
         ):
             return True
     elif role == 'DP':
-        if user_obj == MembershipProjectWorkflow.objects.get(
-            workflow__uuid=workflow_uuid
-        ).dataset.owner.id:
+        if MembershipDatasets.objects.filter(
+            project=project_obj,
+            dataset__owner=user_obj
+        ).exists():
             return True
     elif role == 'INP':
-        infra_owner_list = MembershipInfrastructure.objects.values_list('infrastructure__owner', flat=True).filter(
-            project=project_obj
-        )
-        if user_obj in infra_owner_list:
+        if MembershipInfrastructure.objects.filter(
+            project=project_obj,
+            infrastructure__owner=user_obj
+        ).exists():
             return True
     elif role == 'IG':
-        if user_obj == MembershipProjectWorkflow.objects.get(
-                workflow__uuid=workflow_uuid
-        ).dataset.owner.id:
+        if MembershipComanagePersonnel.objects.filter(
+                project=project_obj,
+                person=user_obj,
+                affiliation_ig__isnull=False,
+        ):
             return True
     elif role == 'PI':
         if MembershipComanagePersonnel.objects.filter(

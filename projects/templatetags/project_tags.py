@@ -4,8 +4,8 @@ import os
 from django import template
 from ns_workflow import Neo4jWorkflow
 
-from projects.models import ProjectWorkflowUserCompletionByRole
-from users.models import Role
+from projects.models import ProjectWorkflowUserCompletionByRole, MembershipComanagePersonnel, Project
+from users.models import Role, Affiliation
 from workflows.models import WorkflowNeo4j
 
 bolt_url = os.getenv('NEO4J_BOLT_URL')
@@ -14,6 +14,26 @@ neo_pass = os.getenv('NEO4J_PASS')
 import_dir = os.getenv('NEO4J_IMPORTS_PATH_DOCKER')
 import_host_dir = os.getenv('NEO4J_IMPORTS_PATH_HOST')
 register = template.Library()
+
+
+@register.filter
+def project_ig_assignment(request, project_uuid):
+    """
+    return uuid of IG assigned to project
+    :param request:
+    :param project_uuid:
+    :return:
+    """
+    if not MembershipComanagePersonnel.objects.filter(
+        project=Project.objects.get(uuid=project_uuid),
+        affiliation_ig=Affiliation.objects.get(uuid=request.user.ns_affiliation),
+    ).exists():
+        return 'False'
+    else:
+        return MembershipComanagePersonnel.objects.get(
+            project=Project.objects.get(uuid=project_uuid),
+            affiliation_ig=Affiliation.objects.get(uuid=request.user.ns_affiliation),
+        ).person
 
 
 @register.filter
