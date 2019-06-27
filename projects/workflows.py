@@ -190,7 +190,8 @@ def generate_neo4j_user_workflow_status(project_obj, user_obj):
         print('Workflow: ' + str(workflow) + ' - ' + str(WorkflowNeo4j.objects.get(uuid=workflow).name))
         for role in user_roles:
             print('- Checking Role: ' + str(Role.objects.get(id=role)))
-            if role in workflow_roles and validate_active_user_role_for_project(project_obj.id, user_obj.id, role, workflow):
+            if role in workflow_roles and validate_active_user_role_for_project(project_obj.id, user_obj.id, role,
+                                                                                workflow):
                 num_nodes = n.count_nodes(
                     graphId=str(workflow),
                     nodeRole=convert_comanage_role_id_to_neo4j_node_role(role_id=role),
@@ -268,14 +269,14 @@ def validate_active_user_role_for_project(project_obj, user_obj, role_id, workfl
             return True
     elif role == 'DP':
         if MembershipDatasets.objects.filter(
-            project=project_obj,
-            dataset__owner=user_obj
+                project=project_obj,
+                dataset__owner=user_obj
         ).exists():
             return True
     elif role == 'INP':
         if MembershipInfrastructure.objects.filter(
-            project=project_obj,
-            infrastructure__owner=user_obj
+                project=project_obj,
+                infrastructure__owner=user_obj
         ).exists():
             return True
     elif role == 'IG':

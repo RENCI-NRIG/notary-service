@@ -40,7 +40,7 @@
                     <form method="POST" class="post-form">
                         {% csrf_token %}
                         {% for assertion in assertions %}
-{#                            {{ assertion }}<br><br>#}
+                            {#                            {{ assertion }}<br><br>#}
                             {% if assertion.Type == 'AssertionItem' %}
                                 {% if assertion.SAFEParameters %}
                                     {% if assertion.SAFEParameters != 'None' %}
@@ -76,10 +76,10 @@
                             {% else %}
                                 {% if assertion == 'IS_COMPLETE' %}
                                     <h3 style="color: darkgreen;">Workflow is complete!</h3>
-                                    {% else %}
-                                <h3 style="color: firebrick;">Assertions by other roles required before
-                                    proceeding...</h3>
-                                    {% endif %}
+                                {% else %}
+                                    <h3 style="color: firebrick;">Assertions by other roles required before
+                                        proceeding...</h3>
+                                {% endif %}
                             {% endif %}
                             <br>
                         {% endfor %}

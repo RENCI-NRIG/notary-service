@@ -2,8 +2,8 @@ from django import forms
 
 from datasets.models import Dataset
 from infrastructure.models import Infrastructure
-from .models import Project, ComanagePIAdmin, ComanagePIMember, ComanageStaff
 from users.models import Affiliation
+from .models import Project, ComanagePIAdmin, ComanagePIMember, ComanageStaff
 
 
 class ProjectForm(forms.ModelForm):

@@ -42,20 +42,20 @@
                         <tr>
                         {% if user.is_ig %}
                             <td>
-                            {% with assigned=request|project_ig_assignment:project.uuid %}
-                                {% if assigned == 'False' %}
-                                    <form method="POST" class="post-form">
-                                        {% csrf_token %}
-                                        <input type="submit"
-                                               name="ig-self-assign-project"
-                                               value="Self Assign Project"
-                                               style="color: deeppink">
-                                        <input hidden name="project_uuid" value="{{ project.uuid }}">
-                                    </form>
-                                {% else %}
-                                    {{ assigned.cn }}
-                                {% endif %}
-                            {% endwith %}
+                                {% with assigned=request|project_ig_assignment:project.uuid %}
+                                    {% if assigned == 'False' %}
+                                        <form method="POST" class="post-form">
+                                            {% csrf_token %}
+                                            <input type="submit"
+                                                   name="ig-self-assign-project"
+                                                   value="Self Assign Project"
+                                                   style="color: deeppink">
+                                            <input hidden name="project_uuid" value="{{ project.uuid }}">
+                                        </form>
+                                    {% else %}
+                                        {{ assigned.cn }}
+                                    {% endif %}
+                                {% endwith %}
                             </td>
                         {% endif %}
                         <td>{{ project.name }}</td>

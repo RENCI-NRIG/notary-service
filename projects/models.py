@@ -163,7 +163,6 @@ class MembershipComanagePersonnel(models.Model):
         verbose_name = 'Membership COmanage Personnel'
 
 
-
 class ProjectWorkflowUserCompletionByRole(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     workflow = models.ForeignKey(WorkflowNeo4j, on_delete=models.CASCADE)

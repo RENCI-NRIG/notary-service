@@ -9,9 +9,9 @@ from workflows import views as wf_views
 from workflows.models import WorkflowNeo4j
 from workflows.workflow_neo4j import delete_workflow_by_uuid
 from .forms import ProjectForm
-from .models import Project, ComanageStaff, ComanagePIAdmin, ComanagePIMember, MembershipDatasets, \
-    MembershipAffiliations, MembershipComanageStaff, MembershipComanagePIAdmin, MembershipInfrastructure, \
-    MembershipComanagePersonnel, MembershipComanagePIMember, MembershipDatasets, MembershipProjectWorkflow, \
+from .models import Project, ComanageStaff, ComanagePIAdmin, ComanagePIMember, MembershipAffiliations, \
+    MembershipComanageStaff, MembershipComanagePIAdmin, MembershipComanagePersonnel, MembershipComanagePIMember, \
+    MembershipDatasets, MembershipProjectWorkflow, \
     MembershipInfrastructure, ComanagePersonnel
 from .projects import update_comanage_group, personnel_by_comanage_group, update_comanage_personnel
 from .workflows import create_base_project_workflows, generate_neo4j_user_workflow_status
@@ -209,11 +209,11 @@ def project_list(request):
         if request.method == "POST":
             if request.POST.get("ig-self-assign-project"):
                 if not MembershipComanagePersonnel.objects.filter(
-                    project__uuid=request.POST.get("project_uuid"),
-                    person=ComanagePersonnel.objects.get(
-                        uid=request.user.sub,
-                    ),
-                    affiliation_ig=Affiliation.objects.get(uuid=request.user.ns_affiliation),
+                        project__uuid=request.POST.get("project_uuid"),
+                        person=ComanagePersonnel.objects.get(
+                            uid=request.user.sub,
+                        ),
+                        affiliation_ig=Affiliation.objects.get(uuid=request.user.ns_affiliation),
                 ).exists():
                     MembershipComanagePersonnel.objects.create(
                         person=ComanagePersonnel.objects.get(

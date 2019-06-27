@@ -25,8 +25,8 @@ def project_ig_assignment(request, project_uuid):
     :return:
     """
     if not MembershipComanagePersonnel.objects.filter(
-        project=Project.objects.get(uuid=project_uuid),
-        affiliation_ig=Affiliation.objects.get(uuid=request.user.ns_affiliation),
+            project=Project.objects.get(uuid=project_uuid),
+            affiliation_ig=Affiliation.objects.get(uuid=request.user.ns_affiliation),
     ).exists():
         return 'False'
     else:

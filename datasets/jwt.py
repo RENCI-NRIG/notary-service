@@ -2,6 +2,7 @@ import os
 from datetime import timedelta
 
 from ns_jwt import NSJWT
+
 from safe.post_assertions import mock_get_id_from_pub
 
 
