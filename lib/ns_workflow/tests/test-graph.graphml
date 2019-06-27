@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:java="http://www.yworks.com/xml/yfiles-common/1.0/java" xmlns:sys="http://www.yworks.com/xml/yfiles-common/markup/primitives/2.0" xmlns:x="http://www.yworks.com/xml/yfiles-common/markup/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:y="http://www.yworks.com/xml/graphml" xmlns:yed="http://www.yworks.com/xml/yed/3" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://www.yworks.com/xml/schema/graphml/1.1/ygraphml.xsd">
-  <!--Created by yEd 3.18.2-->
+  <!--Created by yEd 3.19-->
   <key attr.name="Description" attr.type="string" for="graph" id="d0">
     <default xml:space="preserve"><![CDATA[None]]></default>
   </key>
@@ -321,7 +321,7 @@
       <data key="d6" xml:space="preserve"><![CDATA[ConditionalAssertionItem]]></data>
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Infrastructure-Approval]]></data>
       <data key="d10" xml:space="preserve"><![CDATA[http://call.safe.server/ServerOrWorkstationAssertion/%SoW]]></data>
-      <data key="d11" xml:space="preserve"><![CDATA[{ fieldname: "SoW", type: "SingleSelection", values: [ { "Server": "Server"}, {"Workstation": "Workstation"} ] }]]></data>
+      <data key="d11" xml:space="preserve"><![CDATA[{ "fieldname": "SoW", "type": "SingleSelection", "values": [ { "Server": "Server"}, {"Workstation": "Workstation"} ] }]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
       <data key="d13" xml:space="preserve"/>
       <data key="d14" xml:space="preserve"><![CDATA[Is this a server or a workstation]]></data>
