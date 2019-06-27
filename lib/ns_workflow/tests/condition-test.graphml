@@ -394,7 +394,6 @@
     <edge id="e10" source="n2" target="n10">
       <data key="d18" xml:space="preserve"><![CDATA[No]]></data>
       <data key="d19" xml:space="preserve"/>
-      <data key="d20"/>
       <data key="d21">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="21.5" tx="0.0" ty="-21.5"/>
@@ -414,7 +413,6 @@
       </data>
     </edge>
     <edge id="e11" source="n10" target="n1">
-      <data key="d20"/>
       <data key="d21">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="21.5" tx="0.0" ty="-37.0"/>
