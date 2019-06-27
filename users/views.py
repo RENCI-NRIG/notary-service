@@ -4,7 +4,7 @@ from apache_kafka.models import Message
 from apache_kafka.views import index_page_messages, check_for_new_messages
 from comanage.models import IsMemberOf, LdapOther, NotaryServiceUser
 from .forms import UserPreferences
-from .models import Role
+from .models import Role, Affiliation
 
 
 def index(request):

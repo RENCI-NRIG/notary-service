@@ -24,7 +24,7 @@
                 <table width="100%" border="1px solid black" cellpadding="5px">
                     <tr>
                         <td align="center"><b>Name</b></td>
-                        <td align="center"><b>Loaded</b></td>
+                        <td align="center"><b>Affiliation</b></td>
                         <td align="center"><b>
                             {% if user.show_uuid %}
                                 UUID
@@ -37,12 +37,13 @@
                     {% for workflow in workflows %}
                         <tr>
                             <td>{{ workflow.name }}</td>
-                            <td align="center">{% if workflow.loaded_in_neo4j %}
-                                <i class="fa fa-fw fa-check" style="color: green;"></i>
-                            {% else %}
-                                <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
-                            {% endif %}
-                            </td>
+                            <td>{{ workflow.affiliation }}</td>
+                            {#                            <td align="center">{% if workflow.loaded_in_neo4j %}#}
+                            {#                                <i class="fa fa-fw fa-check" style="color: green;"></i>#}
+                            {#                            {% else %}#}
+                            {#                                <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>#}
+                            {#                            {% endif %}#}
+                            {#                            </td>#}
                             <td style="font-family: Courier"><a href="{% url 'workflow_detail' uuid=workflow.uuid %}"
                                                                 title="Workflow Details">
                                 {% if user.show_uuid %}

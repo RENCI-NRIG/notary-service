@@ -18,7 +18,7 @@ class TestNSJWT(unittest.TestCase):
 
     def test_encode_decode(self):
         tok = NSJWT()
-        tok.setClaims(projectId = "project1", userSet = "user-set",
+        tok.setClaims(projectId = "project1", dataSet = "data-set",
                       nsToken = "nstok", iss = "ns-dev.cyberimpact.us",
                       nsName = "NS for ImPACT", sub = "subject", name = "Test Subject")
 
@@ -40,7 +40,7 @@ class TestNSJWT(unittest.TestCase):
         with self.assertRaises(NSJWTError):
             tok.getClaims()
 
-        tok.setClaims(projectId = "project1", userSet = "user-set",
+        tok.setClaims(projectId = "project1", dataSet = "data-set",
                       nsToken = "nstok", iss = "ns-dev.cyberimpact.us",
                       nsName = "NS for ImPACT", sub = "subject", name = "Test Subject")
 

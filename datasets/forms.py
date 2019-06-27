@@ -7,15 +7,24 @@ class TemplateForm(forms.ModelForm):
     name = forms.CharField(
         widget=forms.TextInput(attrs={'size': 60})
     )
+    type = forms.CharField(
+        widget=forms.Select(
+            choices=(
+                ('research_approval', 'Research Approval'),
+                ('infrastructure_approval', 'Infrastructure Approval'),
+            )
+        )
+    )
 
     class Meta:
         model = NSTemplate
         widgets = {
-            'description': forms.Textarea(attrs={'rows': 6, 'cols': 60}),
+            'description': forms.Textarea(attrs={'rows': 6, 'cols': 60})
         }
         fields = (
             'name',
             'description',
+            'type',
             'graphml_definition',
         )
 
@@ -33,10 +42,10 @@ class DatasetForm(forms.ModelForm):
         label='DOI or metadata URL',
         required=False
     )
-    safe_identifier_as_scid = forms.CharField(
-        widget=forms.TextInput(attrs={'size': 60}),
-        label='SAFE SCID'
-    )
+    # safe_identifier_as_scid = forms.CharField(
+    #     widget=forms.TextInput(attrs={'size': 60}),
+    #     label='SAFE SCID'
+    # )
     templates = forms.ModelMultipleChoiceField(
         queryset=NSTemplate.objects.order_by('name'),
         widget=forms.SelectMultiple(),
@@ -53,6 +62,6 @@ class DatasetForm(forms.ModelForm):
             'description',
             'dataset_identifier_as_url',
             'dataset_identifier_as_doi_or_meta',
-            'safe_identifier_as_scid',
+            # 'safe_identifier_as_scid',
             'templates',
         )

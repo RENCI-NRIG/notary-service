@@ -52,13 +52,30 @@
                             </div>
                         {% endif %}
                         <p>{{ template.description|linebreaksbr }}</p>
-
-                        <b>File:</b>
-                        {% if user.is_dp or user.is_nsadmin %}
-                            <a href="{{ template.graphml_definition.url }}">{{ template.graphml_definition | getfilename }}</a>
-                        {% elif user.is_piadmin %}
-                            {{ template.graphml_definition | getfilename }}
-                        {% endif %}
+                        <table width="100%">
+                            <tr>
+                                <td width="50%"><b>Owner:</b></td>
+                                <td>{{ template.owner }}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Type:</b></td>
+                                <td>{{ template.type }}</td>
+                            </tr>
+                            <tr>
+                                <td><b>File:</b></td>
+                                <td>
+                                    {% if user.is_dp or user.is_nsadmin %}
+                                        <a href="{{ template.graphml_definition.url }}">{{ template.graphml_definition | getfilename }}</a>
+                                    {% elif user.is_piadmin %}
+                                        {{ template.graphml_definition | getfilename }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><b>SAFE SCID:</b></td>
+                                <td>{{ template.safe_identifier_as_scid }}</td>
+                            </tr>
+                        </table>
                         {% if template.is_valid %}
                             <br>
                             <table width="100%">

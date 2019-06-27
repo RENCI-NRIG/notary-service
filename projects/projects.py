@@ -59,7 +59,7 @@ def get_comanage_personnel():
     personnel_found = conn.search(
         ldap_search_base,
         ldap_search_filter,
-        attributes=['cn', 'employeeNumber', 'eduPersonPrincipalName', 'mail']
+        attributes=['cn', 'employeeNumber', 'eduPersonPrincipalName', 'mail', 'uid']
     )
     if personnel_found:
         attributes = conn.entries
@@ -81,6 +81,7 @@ def update_comanage_personnel():
         else:
             eppn = ''
         email = str(person.mail[0])
+        uid = str(person.uid[0])
         if not ComanagePersonnel.objects.filter(dn=dn).exists():
             ComanagePersonnel.objects.create(
                 dn=dn,
@@ -88,6 +89,7 @@ def update_comanage_personnel():
                 employee_number=employee_number,
                 eppn=eppn,
                 email=email,
+                uid=uid,
                 active=True)
         else:
             ComanagePersonnel.objects.filter(dn=dn, employee_number=employee_number).update(active=True)

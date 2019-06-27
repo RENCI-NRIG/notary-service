@@ -6,7 +6,7 @@
 {% block content %}
     {% if user.is_authenticated %}
         {% if not user.is_norole %}
-            <div class="container" style="background-color: lightcyan">
+            <div class="container" style="background-color: #F7F7F7">
                 <div class="post">
                     <h2>{{ dataset.name }}</h2>
                     <p>{{ dataset.description|linebreaksbr }}</p>

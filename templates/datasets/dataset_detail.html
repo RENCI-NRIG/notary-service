@@ -34,6 +34,10 @@
                     <p>{{ dataset.description|linebreaksbr }}</p>
                     <table width="100%">
                         <tr>
+                            <td width="50%"><b>Owner:</b></td>
+                            <td>{{ dataset.owner }}</td>
+                        </tr>
+                        <tr>
                             <td><b>DOI or Metadata URL:</b></td>
                             <td>
                                 <a href="{{ dataset.dataset_identifier_as_doi_or_meta }}" target="_blank">
@@ -58,6 +62,7 @@
                         <table width="100%" border="1px solid black" cellpadding="5px">
                             <tr>
                                 <td align="center"><b>Name</b></td>
+                                <td align="center"><b>Type</b></td>
                                 <td align="center"><b>Validated</b></td>
                                 <td align="center"><b>
                                     {% if user.show_uuid %}
@@ -71,6 +76,7 @@
                             {% for template in templates %}
                                 <tr>
                                     <td>{{ template.name }}</td>
+                                    <td>{{ template.type }}</td>
                                     <td align="center">
                                         {% if template.is_valid %}
                                             <i class="fa fa-fw fa-check" style="color: green;"></i>

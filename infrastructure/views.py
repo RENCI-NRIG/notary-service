@@ -5,6 +5,7 @@ from projects.models import MembershipInfrastructure
 from projects.models import Project
 from .forms import InfrastructureForm
 from .models import Infrastructure
+from users.models import Affiliation
 
 
 def infrastructure_validate(infra_uuid):
@@ -50,34 +51,51 @@ def infrastructure_detail(request, uuid):
 
 def infrastructure_new(request):
     if request.method == "POST":
-        form = InfrastructureForm(request.POST, initial={'affiliation': request.user.idp_name})
+        form = InfrastructureForm(
+            request.POST,
+            user=request.user,
+            initial={'affiliation': Affiliation.objects.get(idp_name=request.user.idp_name).id}
+        )
         if form.is_valid():
             infra = form.save(commit=False)
+            infra.owner = request.user
             infra.created_by = request.user
             infra.modified_by = request.user
             infra.modified_date = timezone.now()
-            infra.idp = request.user.idp
+            infra.affiliation = str(Affiliation.objects.get(id=form['affiliation'].value()).uuid)
             infra.save()
             return redirect('infrastructure_detail', uuid=infra.uuid)
     else:
-        form = InfrastructureForm(initial={'affiliation': request.user.idp_name})
+        form = InfrastructureForm(
+            user=request.user,
+            initial={'affiliation': Affiliation.objects.get(idp_name=request.user.idp_name).id},
+        )
     return render(request, 'infrastructure_new.html', {'infrastructure_page': 'active', 'form': form})
 
 
 def infrastructure_edit(request, uuid):
     infra = get_object_or_404(Infrastructure, uuid=uuid)
     if request.method == "POST":
-        form = InfrastructureForm(request.POST, instance=infra)
+        form = InfrastructureForm(
+            request.POST,
+            instance=infra,
+            user=request.user,
+            initial={'affiliation': Affiliation.objects.get(uuid=infra.affiliation).id},
+        )
         if form.is_valid():
             infra = form.save(commit=False)
             infra.modified_by = request.user
             infra.modified_date = timezone.now()
             infra.is_valid = False
-            infra.idp = request.user.idp
+            infra.affiliation = str(Affiliation.objects.get(id=form['affiliation'].value()).uuid)
             infra.save()
             return redirect('infrastructure_detail', uuid=infra.uuid)
     else:
-        form = InfrastructureForm(instance=infra)
+        form = InfrastructureForm(
+            instance=infra,
+            user=request.user,
+            initial={'affiliation': Affiliation.objects.get(uuid=infra.affiliation).id},
+        )
     return render(request, 'infrastructure_edit.html', {'infrastructure_page': 'active', 'form': form, 'uuid': uuid})
 
 
@@ -92,13 +110,3 @@ def infrastructure_delete(request, uuid):
         'infrastructure': infra,
         'used_by': used_by,
     })
-
-
-def infrastructure_in_use(infra_uuid):
-    proj_list = MembershipInfrastructure.objects.values_list(
-        'project__uuid',
-    ).filter(
-        infrastructure__uuid=infra_uuid,
-    )
-    proj_objs = Project.objects.filter(uuid__in=proj_list).order_by('name')
-    return proj_objs

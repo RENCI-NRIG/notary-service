@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static dataset_tags replace_tags %}
+{% load static dataset_tags replace_tags project_tags %}
 
 {% block head %}
     <meta charset="utf-8">
@@ -34,56 +34,56 @@
                                title="Delete workflow" class="fa fa-fw fa-trash" style="color: #B22222;"></a>
                         {% endif %}
                     </h2>
-                    <p>{{ workflow.description|linebreaksbr }}</p>
-                    <h3>Provenance</h3>
-                    <b>Project:</b> {{ project.project.name }} -
-                    <a href="{% url 'project_detail' uuid=project.project.uuid %}"
-                       title="Edit" style="font-family: Courier">
-                        {% if user.show_uuid %}
-                            {{ project.project.uuid }}
-                        {% else %}
-                            {{ project.project.description|truncatechars:"57" }}
-                        {% endif %}
-                    </a>
-                    <br>
-                    <i class="fa fa-fw fa-level-down"></i>
-                    <b>Dataset:</b> {{ workflow.dataset.name }} -
-                    <a href="{% url 'dataset_detail' uuid=workflow.dataset.uuid %}"
-                       title="Edit" style="font-family: Courier">
-                        {% if user.show_uuid %}
-                            {{ workflow.dataset.uuid }}
-                        {% else %}
-                            {{ workflow.dataset.description|truncatechars:"57" }}
-                        {% endif %}
-                    </a>
-                    <br>
-                    {% if user.is_piadmin or user.is_nsadmin %}
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        <i class="fa fa-fw fa-level-down"></i>
-                        <b>Template:</b> {{ workflow.template.name }} -
-                        <a href="{% url 'template_detail' uuid=workflow.template.uuid %}"
-                           title="Edit" style="font-family: Courier">
-                            {% if user.show_uuid %}
-                                {{ workflow.template.uuid }}
+                    <h3>Workflow Assertions</h3>
+                    Make assertion by checking the related box and pressing the submit button following each statement
+                    <br><br>
+                    <form method="POST" class="post-form">
+                        {% csrf_token %}
+                        {% for assertion in assertions %}
+                            {#                            {{ assertion }}<br><br>#}
+                            {% if assertion.Type == 'AssertionItem' %}
+                                {% if assertion.SAFEParameters %}
+                                    {% if assertion.SAFEParameters != 'None' %}
+                                        {% with single_select=assertion.SAFEParameters|workflow_json_safe_parameters %}
+                                            {{ assertion.description }} (Select only one)<br>
+                                            {% for option in single_select.values %}
+                                                {% with kv_option=option|workflow_safe_parameters_key_value %}
+                                                    <input type="radio"
+                                                           value="{{ kv_option.key }}"
+                                                           name="single_select_{{ assertion.ID }}"/>
+                                                    : {{ kv_option.value }}<br>
+                                                {% endwith %}
+                                            {% endfor %}
+                                            <input type="submit" name="assert_{{ assertion.ID }}"
+                                                   value="{{ assertion.label }}"
+                                                   style="color: darkgreen">
+                                        {% endwith %}
+                                    {% else %}
+                                        <input type="checkbox" name="checkbox_{{ assertion.ID }}"/>
+                                        : {{ assertion.description }}<br>
+                                        <input type="submit" name="assert_{{ assertion.ID }}"
+                                               value="{{ assertion.label }}"
+                                               style="color: darkgreen">
+                                    {% endif %}
+                                {% else %}
+                                    <input type="checkbox" name="checkbox_{{ assertion.ID }}"/>
+                                    : {{ assertion.description }}<br>
+                                    <input type="submit" name="assert_{{ assertion.ID }}"
+                                           value="{{ assertion.label }}"
+                                           style="color: darkgreen">
+                                {% endif %}
+                                <br>
                             {% else %}
-                                {{ workflow.template.description|truncatechars:"57" }}
+                                {% if assertion == 'IS_COMPLETE' %}
+                                    <h3 style="color: darkgreen;">Workflow is complete!</h3>
+                                {% else %}
+                                    <h3 style="color: firebrick;">Assertions by other roles required before
+                                        proceeding...</h3>
+                                {% endif %}
                             {% endif %}
-                        </a>
-                        <br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        <i class="fa fa-fw fa-long-arrow-right"></i>
-                        <b>Workflow:</b> {{ workflow.name }} -
-                        <a href="{% url 'workflow_detail' uuid=workflow.uuid %}"
-                           title="Edit" style="font-family: Courier">
-                            {% if user.show_uuid %}
-                                {{ workflow.uuid }}
-                            {% else %}
-                                {{ workflow.description|truncatechars:"57" }}
-                            {% endif %}
-                        </a>
-                        <br>
-                    {% endif %}
-                    <br>
+                            <br>
+                        {% endfor %}
+                    </form>
                     <h3>Workflow Graph</h3>
                 </div>
                 <table width="100%">
@@ -95,7 +95,6 @@
                         <td width="20%"></td>
                     </tr>
                     <tr>
-                        <td></td>
                         <td align="left">
                             <i class="fa fa-circle" aria-hidden="true" style="color: darkgreen;"></i>
                             Start Node
@@ -112,13 +111,17 @@
                             <i class="fa fa-circle" aria-hidden="true" style="color: lightblue;"></i>
                             Common Set Node
                         </td>
+                        <td align="left">
+                            <i class="fa fa-circle" aria-hidden="true" style="color: lightgrey;"></i>
+                            Not on user path
+                        </td>
                     </tr>
                 </table>
                 <div style="border:1px solid #434343;width:100%;height:600px;overflow:scroll;">
                     <script type="text/javascript">
                         sub_graph = {{ workflow_graph | safe }};
                     </script>
-                    {% include "workflow_graph.html" %}
+                    {% include "workflow_graph_path.html" %}
                 </div>
                 <br>
                 <table width="100%" style="font-size: small">

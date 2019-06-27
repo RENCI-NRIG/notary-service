@@ -3,6 +3,7 @@ from operator import itemgetter
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
+from users.models import Affiliation
 from .models import NotaryServiceUser
 
 
@@ -52,3 +53,15 @@ class UserPreferences(forms.ModelForm):
             'role',
             'show_uuid',
         )
+
+
+class AffiliationCreationForm(forms.ModelForm):
+    class Meta:
+        model = Affiliation
+        fields = ('display_name', 'idp_name', 'idp')
+
+
+class AffiliationChangeForm(forms.ModelForm):
+    class Meta:
+        model = Affiliation
+        fields = ('display_name', 'idp_name', 'idp')

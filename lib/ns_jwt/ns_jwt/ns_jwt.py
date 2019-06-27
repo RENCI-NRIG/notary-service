@@ -22,12 +22,12 @@ class NSJWT:
         self.encoded = True
         self.unset = False
 
-    def setClaims(self, *, projectId: str, userSet: str, nsToken: str, iss: str, nsName: str, sub: str, name: str):
+    def setClaims(self, *, projectId: str, dataSet: str, nsToken: str, iss: str, nsName: str, sub: str, name: str):
         if not self.unset:
             raise NSJWTError("Token or claims already initialized")
 
         self.claims = {
-            'user-set': userSet,
+            'data-set': dataSet,
             'project-id': projectId,
             'ns-token': nsToken,
             'ns-name': nsName,
@@ -103,7 +103,7 @@ class NSJWT:
             return "JWT not initialized"
 
         fstring = f"Token for {self.claims['sub']}/{self.claims['name']}:" + \
-                  f"\n\tuser set: {self.claims['user-set']}" + \
+                  f"\n\tuser set: {self.claims['data-set']}" + \
                   f"\n\tissued by: {self.claims['iss']}/{self.claims['ns-name']}" + \
                   f"\n\tSAFE token: {self.claims['ns-token']}" + \
                   f"\n\tproject: {self.claims['project-id']}"
@@ -124,7 +124,7 @@ def main():
     """ simple test harness """
     tok = NSJWT()
     print(tok)
-    tok.setClaims(projectId = "project1", userSet = "user-set",
+    tok.setClaims(projectId = "project1", dataSet = "data-set",
                   nsToken = "nstok", iss = "ns-dev.cyberimpact.us",
                   nsName = "NS for ImPACT", sub = "subject", name = "Test Subject")
     print(tok)

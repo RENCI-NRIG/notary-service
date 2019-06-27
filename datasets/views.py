@@ -5,11 +5,16 @@ from django.utils import timezone
 from ns_workflow import Neo4jWorkflow, WorkflowError
 
 from projects.models import Project, MembershipDatasets
+from safe.dataset import mock_dataset_safe_registration
+from safe.workflow import mock_workflow_safe_registration
 from workflows.workflow_neo4j import create_workflow_from_template, delete_workflow_by_uuid, \
     get_neo4j_workflow_by_uuid
 from .forms import TemplateForm, DatasetForm
 from .jwt import encode_ns_jwt, decode_ns_jwt
 from .models import NSTemplate, Dataset, MembershipNSTemplate
+
+# string constant to display prior to registering in SAFE
+SAFE_SET_FLAG = 'SET_ON_VALIDATAION'
 
 
 def datasets(request):
@@ -45,6 +50,8 @@ def dataset_detail(request, uuid):
     tpl_objs = NSTemplate.objects.filter(uuid__in=tpl_list).order_by('name')
     if request.method == "POST":
         dataset.is_valid, dataset_error = dataset_validate(tpl_objs, request.user.show_uuid)
+        if dataset.is_valid:
+            dataset.safe_identifier_as_scid = mock_dataset_safe_registration(dataset.uuid)
         dataset.save()
     else:
         dataset_error = None
@@ -65,7 +72,11 @@ def dataset_access(request, uuid):
     jwt_claims = None
     if request.method == "POST":
         if request.POST.get("generate-jwt"):
-            signed_jwt = encode_ns_jwt(project_uuid, request.user)
+            signed_jwt = encode_ns_jwt(
+                project_uuid=project_uuid,
+                dataset_scid=dataset.safe_identifier_as_scid,
+                user=request.user
+            )
             jwt_claims = decode_ns_jwt(signed_jwt)
     return render(request, 'dataset_access.html', {
         'datasets_page': 'active',
@@ -87,6 +98,8 @@ def dataset_new(request):
         form = DatasetForm(request.POST)
         if form.is_valid():
             dataset = form.save(commit=False)
+            dataset.owner = request.user
+            dataset.safe_identifier_as_scid = SAFE_SET_FLAG
             dataset.created_by = request.user
             dataset.modified_by = request.user
             dataset.modified_date = timezone.now()
@@ -112,7 +125,6 @@ def dataset_edit(request, uuid):
         form = DatasetForm(request.POST, instance=dataset)
         if form.is_valid():
             dataset = form.save(commit=False)
-            dataset.created_by = request.user
             dataset.modified_by = request.user
             dataset.modified_date = timezone.now()
             dataset.is_valid = False
@@ -241,6 +253,8 @@ def template_detail(request, uuid):
             template.is_valid, template_error = template_validate(template.graphml_definition.name, str(template.uuid))
             template.save()
             if template.is_valid:
+                template.safe_identifier_as_scid = mock_workflow_safe_registration(template.uuid)
+                template.save()
                 return redirect('template_detail', uuid=template.uuid)
     return render(request, 'template_detail.html', {
         'templates_page': 'active',
@@ -256,6 +270,8 @@ def template_new(request):
         form = TemplateForm(request.POST, request.FILES)
         if form.is_valid():
             template = form.save(commit=False)
+            template.owner = request.user
+            template.safe_identifier_as_scid = SAFE_SET_FLAG
             template.created_by = request.user
             template.modified_by = request.user
             template.modified_date = timezone.now()

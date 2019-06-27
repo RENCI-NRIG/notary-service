@@ -1,18 +1,20 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 
-from datasets.models import Dataset, MembershipNSTemplate, NSTemplate
+from datasets.models import Dataset, NSTemplate
 from infrastructure.models import Infrastructure
+from users.models import Affiliation
 from users.models import NotaryServiceUser
 from workflows import views as wf_views
 from workflows.models import WorkflowNeo4j
 from workflows.workflow_neo4j import delete_workflow_by_uuid
 from .forms import ProjectForm
-from .models import Project, ComanageStaff, ComanagePIAdmin, ComanagePIMember, ComanageInfrastructureProvider, \
-    ComanageInstitutionalGovernance, MembershipComanageStaff, MembershipComanagePIAdmin, \
-    MembershipComanagePersonnel, MembershipComanagePIMember, MembershipDatasets, MembershipWorkflow, \
-    MembershipInfrastructure, MembershipComanageInfrastructureProvider, MembershipComanageInstitutionalGovernance
+from .models import Project, ComanageStaff, ComanagePIAdmin, ComanagePIMember, MembershipAffiliations, \
+    MembershipComanageStaff, MembershipComanagePIAdmin, MembershipComanagePersonnel, MembershipComanagePIMember, \
+    MembershipDatasets, MembershipProjectWorkflow, \
+    MembershipInfrastructure, ComanagePersonnel
 from .projects import update_comanage_group, personnel_by_comanage_group, update_comanage_personnel
+from .workflows import create_base_project_workflows, generate_neo4j_user_workflow_status
 
 
 def projects(request):
@@ -23,13 +25,14 @@ def projects(request):
         return render(request, 'projects.html', context)
 
 
-def project_validate(ds_objs, show_uuid):
+def project_validate(ds_objs, show_uuid, project_uuid, user):
     for ds in ds_objs:
         if not ds.is_valid:
             if show_uuid:
                 return False, 'Dataset ' + str(ds.uuid) + ' is not validated'
             else:
                 return False, 'Dataset (' + str(ds.description)[:34] + '..) is not validated'
+    create_base_project_workflows(project_uuid, user)
     return True, None
 
 
@@ -37,14 +40,15 @@ def project_detail(request, uuid):
     project = get_object_or_404(Project, uuid=uuid)
     if request.method == "POST":
         if request.POST.get("refresh-personnel"):
-            print('hello')
             update_comanage_group()
             update_comanage_personnel()
             for group_pk in MembershipComanageStaff.objects.values_list('comanage_group_id').filter(
-                project=project.id
+                    project=project.id
             ):
-                if not MembershipComanageStaff.objects.filter(project=project.id,
-                                                              comanage_group=group_pk).exists():
+                if not MembershipComanageStaff.objects.filter(
+                        project=project.id,
+                        comanage_group=group_pk
+                ).exists():
                     MembershipComanageStaff.objects.create(
                         project=project,
                         comanage_group=ComanageStaff.objects.get(id=group_pk)
@@ -62,7 +66,9 @@ def project_detail(request, uuid):
                                 comanage_pi_members=None,
                                 comanage_staff=ComanageStaff.objects.get(id=group_pk)
                             )
-
+    affiliations = MembershipAffiliations.objects.values_list('affiliation__uuid', flat=True).filter(
+        project__uuid=project.uuid,
+    )
     comanage_pi_admins = ComanagePIAdmin.objects.filter(
         cn__contains='-PI:admins',
         project=project
@@ -75,23 +81,16 @@ def project_detail(request, uuid):
         cn__contains='-STAFF:members:active',
         project=project
     ).order_by('cn')
-    comanage_inp = ComanageInfrastructureProvider.objects.filter(
-        cn__contains='-INP:members:active',
-        project=project
-    ).order_by('cn')
-    comanage_ig = ComanageInstitutionalGovernance.objects.filter(
-        cn__contains='-IG:members:active',
-        project=project
-    ).order_by('cn')
     project_pi_admins = list(MembershipComanagePersonnel.objects.values_list(
         'comanage_pi_admins__cn',
         'person__cn',
         'person__employee_number',
         'person__eppn',
         'person__email',
+        'person__uid',
     ).order_by(
+        'person__cn',
         'comanage_pi_admins__cn',
-        'person__cn'
     ).filter(
         project=project,
         comanage_pi_admins__in=comanage_pi_admins
@@ -102,9 +101,10 @@ def project_detail(request, uuid):
         'person__employee_number',
         'person__eppn',
         'person__email',
+        'person__uid',
     ).order_by(
+        'person__cn',
         'comanage_pi_members__cn',
-        'person__cn'
     ).filter(
         project=project,
         comanage_pi_members__in=comanage_pi_members
@@ -114,39 +114,14 @@ def project_detail(request, uuid):
         'person__cn',
         'person__employee_number',
         'person__eppn',
-        'person__email'
+        'person__email',
+        'person__uid',
     ).order_by(
+        'person__cn',
         'comanage_staff__cn',
-        'person__cn'
     ).filter(
         project=project,
         comanage_staff__in=comanage_staff
-    ))
-    project_inp = list(MembershipComanagePersonnel.objects.values_list(
-        'comanage_inp__cn',
-        'person__cn',
-        'person__employee_number',
-        'person__eppn',
-        'person__email'
-    ).order_by(
-        'comanage_inp__cn',
-        'person__cn'
-    ).filter(
-        project=project,
-        comanage_inp__in=comanage_inp
-    ))
-    project_ig = list(MembershipComanagePersonnel.objects.values_list(
-        'comanage_ig__cn',
-        'person__cn',
-        'person__employee_number',
-        'person__eppn',
-        'person__email'
-    ).order_by(
-        'comanage_ig__cn',
-        'person__cn'
-    ).filter(
-        project=project,
-        comanage_ig__in=comanage_ig
     ))
     ds_list = MembershipDatasets.objects.values_list('dataset__uuid').filter(project__uuid=uuid)
     ds_objs = Dataset.objects.filter(uuid__in=ds_list).order_by('name')
@@ -155,66 +130,43 @@ def project_detail(request, uuid):
     project_error = None
     if request.method == "POST":
         if request.POST.get("validate"):
-            project.is_valid, project_error = project_validate(ds_objs, request.user.show_uuid)
+            project.is_valid, project_error = project_validate(ds_objs, request.user.show_uuid, project.uuid,
+                                                               request.user)
         elif request.POST.get("generate_workflow"):
-            # delete workflows that are no longer part of the project
-            wf_ds_list = MembershipWorkflow.objects.values_list('dataset__uuid').filter(project__uuid=uuid)
-            wf_ds_objs = Dataset.objects.filter(uuid__in=wf_ds_list)
-            for ds in wf_ds_objs:
-                # check at dataset level
-                if ds not in ds_objs:
-                    rm_wf_list = MembershipWorkflow.objects.values_list('workflow__uuid').filter(
-                        project=project, dataset=ds)
-                    rm_wf_objs = WorkflowNeo4j.objects.filter(uuid__in=rm_wf_list)
-                    for wf in rm_wf_objs:
-                        delete_workflow_by_uuid(workflow_uuid=str(wf.uuid))
-                        wf.delete()
-                    MembershipWorkflow.objects.filter(project=project, dataset=ds).delete()
-                else:
-                    # check at template level
-                    wf_tpl_list = MembershipWorkflow.objects.values_list('template__uuid').filter(project__uuid=uuid)
-                    wf_tpl_objs = NSTemplate.objects.filter(uuid__in=wf_tpl_list)
-                    for tpl in wf_tpl_objs:
-                        if not MembershipNSTemplate.objects.filter(dataset=ds, template=tpl).exists():
-                            rm_wf_list = MembershipWorkflow.objects.values_list('workflow__uuid').filter(
-                                project=project, dataset=ds, template=tpl
-                            )
-                            rm_wf_objs = WorkflowNeo4j.objects.filter(uuid__in=rm_wf_list)
-                            for wf in rm_wf_objs:
-                                delete_workflow_by_uuid(workflow_uuid=str(wf.uuid))
-                                wf.delete()
-                                MembershipWorkflow.objects.filter(
-                                    project=project, dataset=ds, template=tpl
-                                ).delete()
-            # create workflows as needed from updated project
-            for ds in ds_objs:
-                tpl_list = MembershipNSTemplate.objects.values_list('template__uuid').filter(dataset__uuid=ds.uuid)
-                tpl_objs = NSTemplate.objects.filter(uuid__in=tpl_list).order_by('name')
-                for tpl in tpl_objs:
-                    if not MembershipWorkflow.objects.filter(
-                            project=project, dataset=ds, template=tpl
-                    ).exists():
-                        create_new_workflow(
-                            project_obj=project, dataset_obj=ds, template_obj=tpl, user_obj=request.user
-                        )
-        project.save()
-    wf_list = MembershipWorkflow.objects.values_list('workflow__uuid').filter(project__uuid=project.uuid)
+            generate_neo4j_user_workflow_status(project, request.user)
+    if request.user.is_nsadmin or request.user.is_piadmin or request.user.is_dp or request.user.is_inp:
+        wf_list = MembershipProjectWorkflow.objects.values_list('workflow__uuid').filter(
+            project__uuid=project.uuid,
+        )
+    else:
+        wf_list = MembershipProjectWorkflow.objects.values_list('workflow__uuid').filter(
+            project__uuid=project.uuid,
+            affiliation__uuid=request.user.ns_affiliation,
+        )
     wf_objs = WorkflowNeo4j.objects.filter(uuid__in=wf_list).order_by('name')
+    ig_list = MembershipComanagePersonnel.objects.values_list('person__uid', flat=True).filter(
+        project__uuid=uuid,
+        affiliation_ig__isnull=False
+    )
+    ig_objs = NotaryServiceUser.objects.filter(
+        sub__in=ig_list
+    ).order_by('name')
+    project.save()
     return render(request, 'project_detail.html', {
         'projects_page': 'active',
         'project': project,
+        'affiliations': affiliations,
         'comanage_pi_admins': comanage_pi_admins,
         'comanage_pi_members': comanage_pi_members,
         'comanage_staff': comanage_staff,
         'project_pi_admins': project_pi_admins,
         'project_pi_members': project_pi_members,
         'project_staff': project_staff,
-        'project_inp': project_inp,
-        'project_ig': project_ig,
         'datasets': ds_objs,
         'project_error': project_error,
         'workflows': wf_objs,
         'infrastructure': infra_objs,
+        'institutional_governance': ig_objs,
     })
 
 
@@ -241,7 +193,7 @@ def create_new_workflow(project_obj: Project,
     if wf_created:
         workflow.loaded_in_neo4j = True
         workflow.save()
-        MembershipWorkflow.objects.create(
+        MembershipProjectWorkflow.objects.create(
             project=project_obj,
             dataset=dataset_obj,
             template=template_obj,
@@ -251,25 +203,99 @@ def create_new_workflow(project_obj: Project,
 
 
 def project_list(request):
-    projects = Project.objects.filter(created_date__lte=timezone.now()).order_by('name')
-    return render(request, 'projects.html', {'projects_page': 'active', 'projects': projects})
+    if request.user.is_nsadmin:
+        proj_objs = Project.objects.filter(created_date__lte=timezone.now()).order_by('name')
+    elif request.user.is_ig:
+        if request.method == "POST":
+            if request.POST.get("ig-self-assign-project"):
+                if not MembershipComanagePersonnel.objects.filter(
+                        project__uuid=request.POST.get("project_uuid"),
+                        person=ComanagePersonnel.objects.get(
+                            uid=request.user.sub,
+                        ),
+                        affiliation_ig=Affiliation.objects.get(uuid=request.user.ns_affiliation),
+                ).exists():
+                    MembershipComanagePersonnel.objects.create(
+                        person=ComanagePersonnel.objects.get(
+                            uid=request.user.sub,
+                        ),
+                        project=Project.objects.get(uuid=request.POST.get("project_uuid")),
+                        comanage_pi_admins=None,
+                        comanage_pi_members=None,
+                        comanage_staff=None,
+                        dataset_dso=None,
+                        affiliation_ig=Affiliation.objects.get(uuid=request.user.ns_affiliation),
+                        infrastructure_inp=None,
+                    )
+        proj_objs = Project.objects.filter(
+            affiliations__idp__contains=Affiliation.objects.get(
+                uuid=request.user.ns_affiliation,
+            ).idp
+        ).order_by('name')
+    elif request.user.is_dp:
+        proj_objs = Project.objects.filter(
+            id__in=MembershipDatasets.objects.values('project_id').filter(
+                dataset__owner=request.user.id,
+            ).distinct('project_id')
+        ).order_by('name')
+    elif request.user.is_inp:
+        proj_objs = Project.objects.filter(
+            id__in=MembershipInfrastructure.objects.values('project_id').filter(
+                infrastructure__owner=request.user.id,
+            ).distinct('project_id')
+        ).order_by('name')
+    elif request.user.is_piadmin:
+        proj_objs = Project.objects.filter(
+            id__in=MembershipComanagePersonnel.objects.values('project_id').filter(
+                person=request.user.id,
+                comanage_pi_admins=request.user.id,
+            ).distinct('project_id')
+        ).order_by('name')
+    elif request.user.is_pi:
+        proj_objs = Project.objects.filter(
+            id__in=MembershipComanagePersonnel.objects.values('project_id').filter(
+                person=request.user.id,
+                comanage_pi_members=request.user.id,
+            ).distinct('project_id')
+        ).order_by('name')
+    elif request.user.is_staff:
+        proj_objs = Project.objects.filter(
+            id__in=MembershipComanagePersonnel.objects.values('project_id').filter(
+                person=request.user.id,
+                comanage_staff=request.user.id,
+            ).distinct('project_id')
+        ).order_by('name')
+    else:
+        proj_objs = Project.objects.filter(created_date__lte=timezone.now()).order_by('name')
+    return render(request, 'projects.html', {'projects_page': 'active', 'projects': proj_objs})
 
 
 def project_new(request):
+    """
+    Note that IG will be a self assigned attribute based on Affiliation
+    :param request:
+    :return:
+    """
     update_comanage_group()
     update_comanage_personnel()
     if request.method == "POST":
-        form = ProjectForm(request.POST)
+        form = ProjectForm(request.POST, user=request.user)
         if form.is_valid():
             project = form.save(commit=False)
-            project.affiliation = []
-            project.idp = []
-            project.affiliation.append(str(request.user.idp_name))
-            project.idp.append(str(request.user.idp))
             project.created_by = request.user
             project.modified_by = request.user
             project.modified_date = timezone.now()
             project.save()
+            # project affiliations
+            for affiliiation_pk in form.data.getlist('affiliations'):
+                if not MembershipAffiliations.objects.filter(
+                        project=project.id,
+                        affiliation=affiliiation_pk
+                ).exists():
+                    MembershipAffiliations.objects.create(
+                        project=project,
+                        affiliation=Affiliation.objects.get(id=affiliiation_pk),
+                    )
             # project pi admins
             for group_pk in form.data.getlist('comanage_pi_admins'):
                 if not MembershipComanagePIAdmin.objects.filter(project=project.id, comanage_group=group_pk).exists():
@@ -288,12 +314,17 @@ def project_new(request):
                                 project=project,
                                 comanage_pi_admins=ComanagePIAdmin.objects.get(id=group_pk),
                                 comanage_pi_members=None,
-                                comanage_staff=None
+                                comanage_staff=None,
+                                dataset_dso=None,
+                                affiliation_ig=None,
+                                infrastructure_inp=None,
                             )
             # project pi members
             for group_pk in form.data.getlist('comanage_pi_members'):
-                if not MembershipComanagePIMember.objects.filter(project=project.id,
-                                                                comanage_group=group_pk).exists():
+                if not MembershipComanagePIMember.objects.filter(
+                        project=project.id,
+                        comanage_group=group_pk
+                ).exists():
                     MembershipComanagePIMember.objects.create(
                         project=project,
                         comanage_group=ComanagePIMember.objects.get(id=group_pk)
@@ -309,7 +340,10 @@ def project_new(request):
                                 project=project,
                                 comanage_pi_admins=None,
                                 comanage_pi_members=ComanagePIMember.objects.get(id=group_pk),
-                                comanage_staff=None
+                                comanage_staff=None,
+                                dataset_dso=None,
+                                affiliation_ig=None,
+                                infrastructure_inp=None,
                             )
             # staff / project members
             for group_pk in form.data.getlist('comanage_staff'):
@@ -331,14 +365,35 @@ def project_new(request):
                                 comanage_pi_admins=None,
                                 comanage_pi_members=None,
                                 comanage_staff=ComanageStaff.objects.get(id=group_pk),
+                                dataset_dso=None,
+                                affiliation_ig=None,
+                                infrastructure_inp=None,
                             )
             # datasets
             for ds_pk in form.data.getlist('datasets'):
                 if not MembershipDatasets.objects.filter(project=project.id, dataset=ds_pk).exists():
+                    # add dataset membership
                     MembershipDatasets.objects.create(
                         project=project,
                         dataset=Dataset.objects.get(id=ds_pk),
                     )
+                    # add dataset provider relationship
+                    dso = ComanagePersonnel.objects.get(
+                        email=NotaryServiceUser.objects.get(
+                            id=Dataset.objects.get(id=ds_pk).id
+                        ).email
+                    )
+                    MembershipComanagePersonnel.objects.create(
+                        person=dso,
+                        project=project,
+                        comanage_pi_admins=None,
+                        comanage_pi_members=None,
+                        comanage_staff=None,
+                        dataset_dso=MembershipDatasets.objects.get(project=project.id, dataset=ds_pk),
+                        affiliation_ig=None,
+                        infrastructure_inp=None,
+                    )
+
             # infrastructure
             for inf_pk in form.data.getlist('infrastructure'):
                 if not MembershipInfrastructure.objects.filter(project=project.id, infrastructure=inf_pk).exists():
@@ -346,10 +401,28 @@ def project_new(request):
                         project=project,
                         infrastructure=Infrastructure.objects.get(id=inf_pk),
                     )
-
+                    # add dataset provider relationship
+                    inp = ComanagePersonnel.objects.get(
+                        email=NotaryServiceUser.objects.get(
+                            id=Infrastructure.objects.get(id=inf_pk).id
+                        ).email
+                    )
+                    MembershipComanagePersonnel.objects.create(
+                        person=inp,
+                        project=project,
+                        comanage_pi_admins=None,
+                        comanage_pi_members=None,
+                        comanage_staff=None,
+                        dataset_dso=None,
+                        affiliation_ig=None,
+                        infrastructure_inp=MembershipInfrastructure.objects.get(
+                            project=project.id,
+                            infrastructure=inf_pk
+                        ),
+                    )
             return redirect('project_detail', uuid=project.uuid)
     else:
-        form = ProjectForm()
+        form = ProjectForm(user=request.user)
     return render(request, 'project_new.html', {'projects_page': 'active', 'form': form})
 
 
@@ -357,21 +430,36 @@ def project_edit(request, uuid):
     project = get_object_or_404(Project, uuid=uuid)
     update_comanage_group()
     if request.method == "POST":
-        form = ProjectForm(request.POST, instance=project)
+        form = ProjectForm(request.POST, instance=project, user=request.user)
         if form.is_valid():
             project = form.save(commit=False)
-            if request.user.idp not in project.idp:
-                project.affiliation.append(str(request.user.idp_name))
-                project.idp.append(str(request.user.idp))
             project.modified_by = request.user
             project.modified_date = timezone.now()
             project.save()
+            # project affiliations
+            current_affiliations = MembershipAffiliations.objects.filter(project=project.id)
+            for affiliation in current_affiliations:
+                if str(affiliation.affiliation.id) not in form.data.getlist('affiliations'):
+                    MembershipAffiliations.objects.filter(
+                        project=project.id,
+                        affiliation=affiliation.affiliation.id,
+                    ).delete()
+            for affiliiation_pk in form.data.getlist('affiliations'):
+                if not MembershipAffiliations.objects.filter(
+                        project=project.id,
+                        affiliation=affiliiation_pk
+                ).exists():
+                    MembershipAffiliations.objects.create(
+                        project=project,
+                        affiliation=Affiliation.objects.get(id=affiliiation_pk),
+                    )
             # project pi admins
             current_groups = MembershipComanagePIAdmin.objects.filter(project=project.id)
             for group in current_groups:
                 if str(group.comanage_group.id) not in form.data.getlist('comanage_pi_admins'):
-                    MembershipComanagePersonnel.objects.filter(project=project.id,
-                                                               comanage_pi_admins=group.comanage_group.id).delete()
+                    MembershipComanagePersonnel.objects.filter(
+                        project=project.id,
+                        comanage_pi_admins=group.comanage_group.id).delete()
                     group.delete()
             for group_pk in form.data.getlist('comanage_pi_admins'):
                 if not MembershipComanagePIAdmin.objects.filter(project=project.id, comanage_group=group_pk).exists():
@@ -390,7 +478,9 @@ def project_edit(request, uuid):
                                 project=project,
                                 comanage_pi_admins=ComanagePIAdmin.objects.get(id=group_pk),
                                 comanage_pi_members=None,
-                                comanage_staff=None
+                                comanage_staff=None,
+                                dataset_dso=None,
+                                affiliation_ig=None,
                             )
             # project pi members
             current_groups = MembershipComanagePIMember.objects.filter(project=project.id)
@@ -416,7 +506,9 @@ def project_edit(request, uuid):
                                 project=project,
                                 comanage_pi_admins=None,
                                 comanage_pi_members=ComanagePIMember.objects.get(id=group_pk),
-                                comanage_staff=None
+                                comanage_staff=None,
+                                dataset_dso=None,
+                                affiliation_ig=None,
                             )
             # project members/staff
             current_groups = MembershipComanageStaff.objects.filter(project=project.id)
@@ -445,7 +537,9 @@ def project_edit(request, uuid):
                                 project=project,
                                 comanage_pi_admins=None,
                                 comanage_pi_members=None,
-                                comanage_staff=ComanageStaff.objects.get(id=group_pk)
+                                comanage_staff=ComanageStaff.objects.get(id=group_pk),
+                                dataset_dso=None,
+                                affiliation_ig=None,
                             )
             # datasets
             current_datasets = MembershipDatasets.objects.filter(project=project.id)
@@ -476,26 +570,31 @@ def project_edit(request, uuid):
                         project=project,
                         infrastructure=Infrastructure.objects.get(id=inf_pk),
                     )
-
+            project.is_valid = False
+            project.save()
             return redirect('project_detail', uuid=project.uuid)
     else:
-        form = ProjectForm(instance=project)
+        form = ProjectForm(instance=project, user=request.user)
     return render(request, 'project_edit.html', {'projects_page': 'active', 'form': form, 'project_uuid': uuid})
 
 
 def project_delete(request, uuid):
     project = get_object_or_404(Project, uuid=uuid)
     comanage_pi_admins = ComanagePIAdmin.objects.filter(cn__contains='-PI:admins', project=project).order_by('cn')
-    comanage_pi_members = ComanagePIMember.objects.filter(cn__contains='-PI:members:active', project=project).order_by('cn')
+    comanage_pi_members = ComanagePIMember.objects.filter(cn__contains='-PI:members:active', project=project).order_by(
+        'cn')
     comanage_staff = ComanageStaff.objects.filter(cn__contains='-STAFF:members:active', project=project).order_by('cn')
     ds_list = MembershipDatasets.objects.values_list('dataset__uuid').filter(project__uuid=uuid)
     ds_objs = Dataset.objects.filter(uuid__in=ds_list).order_by('name')
-    wf_list = MembershipWorkflow.objects.values_list('workflow__uuid').filter(project__uuid=project.uuid)
+    wf_list = MembershipProjectWorkflow.objects.values_list('workflow__uuid').filter(project__uuid=project.uuid)
     wf_objs = WorkflowNeo4j.objects.filter(uuid__in=wf_list).order_by('name')
     infra_list = MembershipInfrastructure.objects.values_list('infrastructure__uuid').filter(project__uuid=project.uuid)
     infra_objs = Infrastructure.objects.filter(uuid__in=infra_list).order_by('name')
+    affiliations = MembershipAffiliations.objects.values_list('affiliation__uuid', flat=True).filter(
+        project__uuid=project.uuid,
+    )
     if request.method == "POST":
-        pr_wf_list = MembershipWorkflow.objects.values_list('workflow__uuid').filter(
+        pr_wf_list = MembershipProjectWorkflow.objects.values_list('workflow__uuid').filter(
             project=project)
         pr_wf_objs = WorkflowNeo4j.objects.filter(uuid__in=pr_wf_list)
         for wf in pr_wf_objs:
@@ -509,6 +608,7 @@ def project_delete(request, uuid):
     return render(request, 'project_delete.html', {
         'projects_page': 'active',
         'project': project,
+        'affiliations': affiliations,
         'comanage_pi_admins': comanage_pi_admins,
         'comanage_pi_members': comanage_pi_members,
         'comanage_staff': comanage_staff,

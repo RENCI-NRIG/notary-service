@@ -24,7 +24,7 @@
     "msg": "Type, Role, ID, SAFEType properties must be present on each node"
   },
   {
-    "rule": "MATCH (n {GraphID: $graphId}) -[r]-> (m {GraphID: $graphId}) RETURN ALL(r IN collect(r) WHERE exists(r.ParameterValue))",
+    "rule": "MATCH (n {GraphID: $graphId}) -[r]-> (m {GraphID: $graphId}) RETURN ALL(r IN collect(r) WHERE COALESCE(r.ParameterValue, 'None') IS NOT NULL)",
     "msg": "All relationships must have ParameterValue properties"
   },
   {
