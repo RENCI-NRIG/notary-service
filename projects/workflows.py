@@ -9,7 +9,7 @@ from users.models import Role
 from workflows.models import WorkflowNeo4j
 from workflows.workflow_neo4j import create_workflow_from_template, delete_workflow_by_uuid
 from .models import MembershipProjectWorkflow, Project, MembershipComanagePersonnel, \
-    ProjectWorkflowUserCompletionByRole, MembershipInfrastructure, MembershipDatasets
+    ProjectWorkflowUserCompletionByRole, MembershipInfrastructure, MembershipDatasets, ComanagePersonnel
 
 bolt_url = os.getenv('NEO4J_BOLT_URL')
 neo_user = os.getenv('NEO4J_USER')
@@ -164,6 +164,7 @@ def generate_neo4j_user_workflow_status(project_obj, user_obj):
     )
     # get workflows from project and match to user by affiliation
     if user_obj.is_dp or user_obj.is_inp:
+        # if user is DP or INP, show all workflows that relate to them (regardless of affiliation)
         project_workflows = WorkflowNeo4j.objects.values_list('uuid', flat=True).filter(
             uuid__in=MembershipProjectWorkflow.objects.values_list('workflow__uuid').filter(
                 project=project_obj
@@ -179,9 +180,10 @@ def generate_neo4j_user_workflow_status(project_obj, user_obj):
             ).id
         ).distinct()
     # get user roles
-    user_roles = NotaryServiceUser.objects.values_list('roles__id', flat=True).filter(
-        uuid=user_obj.uuid
-    ).order_by('roles__id')
+    # user_roles = NotaryServiceUser.objects.values_list('roles__id', flat=True).filter(
+    #     uuid=user_obj.uuid
+    # ).order_by('roles__id')
+    user_roles = [user_obj.role]
     # for each workflow, for each role, generate appropriate child nodes
     for workflow in project_workflows:
         workflow_roles = WorkflowNeo4j.objects.values_list('roles__id', flat=True).filter(
@@ -192,18 +194,18 @@ def generate_neo4j_user_workflow_status(project_obj, user_obj):
             print('- Checking Role: ' + str(Role.objects.get(id=role)))
             if role in workflow_roles and validate_active_user_role_for_project(project_obj.id, user_obj.id, role,
                                                                                 workflow):
-                num_nodes = n.count_nodes(
-                    graphId=str(workflow),
-                    nodeRole=convert_comanage_role_id_to_neo4j_node_role(role_id=role),
-                )
-                print('  - Assign ' + str(num_nodes) + ' nodes to '
-                      + user_obj.name + ' as ' + str(Role.objects.get(id=role)))
+                # num_nodes = n.count_nodes(
+                #     graphId=str(workflow),
+                #     nodeRole=convert_comanage_role_id_to_neo4j_node_role(role_id=role),
+                # )
+                # print('  - Assign ' + str(num_nodes) + ' nodes to '
+                #       + user_obj.name + ' as ' + str(Role.objects.get(id=role)))
                 is_complete = n.is_workflow_complete(
                     principalId=str(user_obj.uuid),
                     role=role,
                     graphId=str(workflow),
                 )
-                print('    is complete? ' + str(is_complete))
+                print('  is complete? ' + str(is_complete))
                 # create project/person/workflow/role relationship if it does not exist
                 if not ProjectWorkflowUserCompletionByRole.objects.filter(
                         project=project_obj,
@@ -282,7 +284,9 @@ def validate_active_user_role_for_project(project_obj, user_obj, role_id, workfl
     elif role == 'IG':
         if MembershipComanagePersonnel.objects.filter(
                 project=project_obj,
-                person=user_obj,
+                person=ComanagePersonnel.objects.get(
+                    uid=NotaryServiceUser.objects.get(id=user_obj).sub
+                ),
                 affiliation_ig__isnull=False,
         ):
             return True
@@ -297,8 +301,8 @@ def validate_active_user_role_for_project(project_obj, user_obj, role_id, workfl
     return False
 
 
-def take_user_through_workflow(user, workflow):
-    role = convert_comanage_role_id_to_neo4j_node_role(user.role)
+def take_user_through_workflow(user_obj, workflow):
+    role = convert_comanage_role_id_to_neo4j_node_role(user_obj.role)
     assertions = []
     n = Neo4jWorkflow(
         url=bolt_url,
@@ -308,30 +312,45 @@ def take_user_through_workflow(user, workflow):
         importDir=import_dir,
     )
     is_complete = n.is_workflow_complete(
-        principalId=str(user.uuid),
+        principalId=str(user_obj.cert_subject_dn),
         role=role,
         graphId=workflow,
     )
-    print('IS_COMPLETE: ' + str(role) + ' ' + str(is_complete))
+    # print('IS_COMPLETE: ' + str(role) + ' ' + str(is_complete))
     if is_complete:
         assertions.append("IS_COMPLETE")
         return assertions
 
     next_set = set()
     n.find_reachable_not_completed_nodes(
-        principalId=str(user.uuid),
+        principalId=str(user_obj.cert_subject_dn),
         role=role,
         graphId=workflow,
         nodeId="Start",
         incompleteNodeSet=next_set,
     )
     if len(next_set) == 0:
-        assertions.append('Waiting on another user to complete their assertion(s) first...')
+        assertions.append('Assertions by other roles required before proceeding...')
         return assertions
     for node in next_set:
         props = n.get_node_properties(graphId=workflow, nodeId=node)
         assertions.append(props)
     return assertions
+
+
+def workflow_make_conditional_selection_and_disable_branches(graph_id, node_id, cond_value):
+    n = Neo4jWorkflow(
+        url=bolt_url,
+        user=neo_user,
+        pswd=neo_pass,
+        importHostDir=import_host_dir,
+        importDir=import_dir
+    )
+    n.make_conditional_selection_and_disable_branches(
+        graphId=graph_id,
+        nodeId=node_id,
+        value=cond_value
+    )
 
 
 def workflow_update_node_property(graph_id, node_id, prop_name, prop_value):
@@ -350,7 +369,7 @@ def workflow_update_node_property(graph_id, node_id, prop_name, prop_value):
     )
 
 
-def workflow_save_safe_token_and_complete(graph_id, node_id):
+def workflow_save_safe_token_and_complete(graph_id, node_id, user_dn):
     n = Neo4jWorkflow(
         url=bolt_url,
         user=neo_user,
@@ -362,7 +381,8 @@ def workflow_save_safe_token_and_complete(graph_id, node_id):
     n.save_safe_token_and_complete(
         graphId=graph_id,
         nodeId=node_id,
-        token=assertion_scid
+        token=assertion_scid,
+        principalId=user_dn
     )
 
 
