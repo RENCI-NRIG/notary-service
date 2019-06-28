@@ -229,9 +229,7 @@ def project_list(request):
                         infrastructure_inp=None,
                     )
         proj_objs = Project.objects.filter(
-            affiliations__idp__contains=Affiliation.objects.get(
-                uuid=request.user.ns_affiliation,
-            ).idp
+            affiliations__idp__contains=request.user.idp,
         ).order_by('name')
     elif request.user.is_dp:
         proj_objs = Project.objects.filter(
@@ -248,22 +246,28 @@ def project_list(request):
     elif request.user.is_piadmin:
         proj_objs = Project.objects.filter(
             id__in=MembershipComanagePersonnel.objects.values('project_id').filter(
-                person=request.user.id,
-                comanage_pi_admins=request.user.id,
+                person=ComanagePersonnel.objects.get(
+                    uid=request.user.sub,
+                ),
+                comanage_pi_admins__isnull=False,
             ).distinct('project_id')
         ).order_by('name')
     elif request.user.is_pi:
         proj_objs = Project.objects.filter(
             id__in=MembershipComanagePersonnel.objects.values('project_id').filter(
-                person=request.user.id,
-                comanage_pi_members=request.user.id,
+                person=ComanagePersonnel.objects.get(
+                    uid=request.user.sub,
+                ),
+                comanage_pi_members__isnull=False,
             ).distinct('project_id')
         ).order_by('name')
     elif request.user.is_staff:
         proj_objs = Project.objects.filter(
             id__in=MembershipComanagePersonnel.objects.values('project_id').filter(
-                person=request.user.id,
-                comanage_staff=request.user.id,
+                person=ComanagePersonnel.objects.get(
+                    uid=request.user.sub,
+                ),
+                comanage_staff__isnull=False,
             ).distinct('project_id')
         ).order_by('name')
     else:

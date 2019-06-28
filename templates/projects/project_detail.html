@@ -59,7 +59,7 @@
                             </tr>
                             {% for group, name, employee_number, eppn, email, uid in project_pi_admins %}
                                 <tr
-                                        {% if email == user.email %}
+                                        {% if uid == user.sub %}
                                             style="color: darkgreen"
                                         {% else %}
                                             style="color: darkgray"
@@ -82,7 +82,7 @@
                         </tr>
                         {% for group, name, employee_number, eppn, email, uid in project_pi_members %}
                             <tr
-                                    {% if email == user.email %}
+                                    {% if uid == user.sub %}
                                         style="color: darkgreen"
                                     {% else %}
                                         style="color: darkgray"
@@ -104,7 +104,7 @@
                         </tr>
                         {% for group, name, employee_number, eppn, email, uid in project_staff %}
                             <tr
-                                    {% if email == user.email %}
+                                    {% if uid == user.sub %}
                                         style="color: darkgreen"
                                     {% else %}
                                         style="color: darkgray"
