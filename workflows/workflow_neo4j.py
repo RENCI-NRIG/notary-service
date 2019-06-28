@@ -107,7 +107,8 @@ def get_neo4j_workflow_by_uuid(workflow_uuid):
     return graph
 
 
-def get_neo4j_workflow_by_uuid_and_role(workflow_uuid, role_id, user_uuid):
+def get_neo4j_workflow_by_uuid_and_role(workflow_uuid, role_id, user_dn):
+    # from pprint import pprint
     role = convert_comanage_role_id_to_neo4j_node_role(role_id)
     bolt_driver = GraphDatabase.driver(bolt_url, auth=basic_auth(neo_user, neo_pass))
     db = bolt_driver.session()
@@ -130,10 +131,7 @@ def get_neo4j_workflow_by_uuid_and_role(workflow_uuid, role_id, user_uuid):
             if key == 'description':
                 entry['description'] += str('Description: ' + properties['description'] + '\n')
             if key == 'SAFEType':
-                if properties['SAFEType'] == 'None':
-                    entry['safetype'] = 'no-safe-type'
-                else:
-                    entry['safetype'] = properties['SAFEType']
+                entry['safetype'] = properties['SAFEType']
             if key == 'principal':
                 entry['principal'] = properties['principal']
         entry['description'] = entry['description'].rstrip('\n')
@@ -147,7 +145,7 @@ def get_neo4j_workflow_by_uuid_and_role(workflow_uuid, role_id, user_uuid):
         else:
             entry['path'] = 'False'
         if entry['safetype'] == 'user-set':
-            if entry['principal'] == str(user_uuid):
+            if entry['principal'] == str(user_dn):
                 nodes.append(entry)
         else:
             nodes.append(entry)
@@ -170,4 +168,5 @@ def get_neo4j_workflow_by_uuid_and_role(workflow_uuid, role_id, user_uuid):
         entry['type'] = relationship.type
         links.append(entry)
     graph = {'nodes': nodes, 'links': links}
+    # pprint(graph)
     return graph

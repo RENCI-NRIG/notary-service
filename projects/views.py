@@ -151,6 +151,7 @@ def project_detail(request, uuid):
     ig_objs = NotaryServiceUser.objects.filter(
         sub__in=ig_list
     ).order_by('name')
+    generate_neo4j_user_workflow_status(project, request.user)
     project.save()
     return render(request, 'project_detail.html', {
         'projects_page': 'active',
@@ -379,9 +380,9 @@ def project_new(request):
                     )
                     # add dataset provider relationship
                     dso = ComanagePersonnel.objects.get(
-                        email=NotaryServiceUser.objects.get(
-                            id=Dataset.objects.get(id=ds_pk).id
-                        ).email
+                        uid=NotaryServiceUser.objects.get(
+                            id=Dataset.objects.get(id=ds_pk).owner_id
+                        ).sub
                     )
                     MembershipComanagePersonnel.objects.create(
                         person=dso,
@@ -403,9 +404,9 @@ def project_new(request):
                     )
                     # add dataset provider relationship
                     inp = ComanagePersonnel.objects.get(
-                        email=NotaryServiceUser.objects.get(
-                            id=Infrastructure.objects.get(id=inf_pk).id
-                        ).email
+                        uid=NotaryServiceUser.objects.get(
+                            id=Infrastructure.objects.get(id=inf_pk).owner_id
+                        ).sub
                     )
                     MembershipComanagePersonnel.objects.create(
                         person=inp,

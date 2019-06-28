@@ -20,7 +20,7 @@
                         {% if not project.is_valid %}
                             <form method="POST" class="post-form">
                                 {% csrf_token %}
-                                <input type="submit" name="validate" value="Validate Workflow(s)"
+                                <input type="submit" name="validate" value="Generate/Refresh Workflow(s)"
                                        style="color: darkgreen">
                             </form>
                         {% endif %}
@@ -263,18 +263,18 @@
                     </table>
                     <br>
                     <h3>Workflows</h3>
-                    <form method="POST" class="post-form">
-                        {% csrf_token %}
-                        {% if project.is_valid %}
-                            <input type="submit" name="generate_workflow" value="Generate/Refresh my workflow status"
-                                   style="color: darkgreen">
-                        {% else %}
-                            <input type="submit" name="generate_workflow" value="Generate/Refresh my workflow status"
-                                   style="color: grey"
-                                   disabled>
-                        {% endif %}
-                    </form>
-                    <br>
+{#                    <form method="POST" class="post-form">#}
+{#                        {% csrf_token %}#}
+{#                        {% if project.is_valid %}#}
+{#                            <input type="submit" name="generate_workflow" value="Generate/Refresh my workflow status"#}
+{#                                   style="color: darkgreen">#}
+{#                        {% else %}#}
+{#                            <input type="submit" name="generate_workflow" value="Generate/Refresh my workflow status"#}
+{#                                   style="color: grey"#}
+{#                                   disabled>#}
+{#                        {% endif %}#}
+{#                    </form>#}
+{#                    <br>#}
                     <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
                             <td align="center"><b>Status</b></td>
