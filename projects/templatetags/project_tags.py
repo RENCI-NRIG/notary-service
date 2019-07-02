@@ -55,13 +55,7 @@ def workflow_status_is_completed(request, workflow_uuid):
     ).exists():
         return 'Role N/A'
     else:
-        if ProjectWorkflowUserCompletionByRole.objects.get(
-                person=request.user.id,
-                workflow=WorkflowNeo4j.objects.get(uuid=workflow_uuid),
-                role=request.user.role,
-        ).is_complete:
-            return 'True'
-    return 'False'
+        return str(workflow_is_complete(request=request, workflow_uuid=workflow_uuid))
 
 
 @register.filter
@@ -111,12 +105,37 @@ def workflow_is_complete(request, workflow_uuid):
 
 
 @register.filter
+def dataset_all_workflows_complete(request, project_uuid, dataset_uuid):
+    wf_uuid_list = ProjectWorkflowUserCompletionByRole.objects.values_list('workflow__uuid', flat=True).filter(
+        project__uuid=project_uuid,
+        dataset__uuid=dataset_uuid,
+        role=request.user.role
+    )
+    if len(wf_uuid_list) == 0:
+        return False
+    for wf_uuid in wf_uuid_list:
+        if not workflow_is_complete(request=request, workflow_uuid=wf_uuid):
+            return False
+    return True
+
+
+@register.filter
 def workflow_json_safe_parameters(safe_parameters):
+    """
+    convert SAFE parameters from Neo4j property to JSON
+    :param safe_parameters:
+    :return:
+    """
     return json.loads(safe_parameters)
 
 
 @register.filter
 def workflow_safe_parameters_key_value(kv_pair):
+    """
+    Return single key/value pair for parsing at the template level from kv_pair object
+    :param kv_pair:
+    :return:
+    """
     key = ''
     value = ''
     for k, v in kv_pair.items():

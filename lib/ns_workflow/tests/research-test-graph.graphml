@@ -168,9 +168,10 @@
     <node id="n7">
       <data key="d5" xml:space="preserve"><![CDATA[CodeBackupSelectionPledge]]></data>
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
+      <data key="d11" xml:space="preserve"><![CDATA[{ "fieldname": "CodeBackupSelectionPledge", "type": "MultiSelection", "values": [ { "local": "Retain a local copy"}, {"cloud": "Cloud services are used for backup"}, {"repository": "Code and documentation is checked into a repository"}, {"other": "Other backup methods are used"} ] }]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
       <data key="d13" xml:space="preserve"/>
-      <data key="d14" xml:space="preserve"><![CDATA[I understand that I may and should back up my program code and documentation, as described below]]></data>
+      <data key="d14" xml:space="preserve"><![CDATA[How do you plan to back up your program code and documentation?]]></data>
       <data key="d15">
         <y:ShapeNode>
           <y:Geometry height="43.0" width="205.0" x="943.5" y="360.5"/>
@@ -184,6 +185,7 @@
     <node id="n8">
       <data key="d5" xml:space="preserve"><![CDATA[PrintEnvironment]]></data>
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
+      <data key="d11" xml:space="preserve"><![CDATA[{ "fieldname": "PrintEnvironment", "type": "String" }]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
       <data key="d13" xml:space="preserve"/>
       <data key="d14" xml:space="preserve"><![CDATA[Where will hard copy info be printed? ]]></data>
@@ -200,9 +202,10 @@
     <node id="n9">
       <data key="d5" xml:space="preserve"><![CDATA[HardcopyDiscardPledge]]></data>
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
+      <data key="d11" xml:space="preserve"><![CDATA[{ "fieldname": "HardcopyDiscardPledge", "type": "String" }]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
       <data key="d13" xml:space="preserve"/>
-      <data key="d14" xml:space="preserve"><![CDATA[How will hard copy data be handled/stored/discarded?]]></data>
+      <data key="d14" xml:space="preserve"><![CDATA[How will hard copy data be discarded?]]></data>
       <data key="d15">
         <y:ShapeNode>
           <y:Geometry height="43.0" width="172.0" x="600.0" y="630.5"/>
@@ -322,7 +325,7 @@
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[template-user-set]]></data>
       <data key="d13" xml:space="preserve"/>
-      <data key="d14" xml:space="preserve"><![CDATA[I agree not abide by the IRB]]></data>
+      <data key="d14" xml:space="preserve"><![CDATA[I agree to abide by the IRB]]></data>
       <data key="d15">
         <y:ShapeNode>
           <y:Geometry height="43.0" width="169.44196044711956" x="1.2790197764402222" y="480.5"/>
@@ -336,9 +339,10 @@
     <node id="n17">
       <data key="d5" xml:space="preserve"><![CDATA[SplitPledge1]]></data>
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
+      <data key="d11" xml:space="preserve"><![CDATA[{ "fieldname": "SplitPledge1", "type": "String" }]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
       <data key="d13" xml:space="preserve"/>
-      <data key="d14" xml:space="preserve"><![CDATA[How will hard copy data be handled/stored/discarded?]]></data>
+      <data key="d14" xml:space="preserve"><![CDATA[How will hard copy data be handled?]]></data>
       <data key="d15">
         <y:ShapeNode>
           <y:Geometry height="43.0" width="172.0" x="390.0" y="540.5"/>
@@ -352,9 +356,10 @@
     <node id="n18">
       <data key="d5" xml:space="preserve"><![CDATA[SplitPledge2]]></data>
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
+      <data key="d11" xml:space="preserve"><![CDATA[{ "fieldname": "SplitPledge2", "type": "String" }]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
       <data key="d13" xml:space="preserve"/>
-      <data key="d14" xml:space="preserve"><![CDATA[How will hard copy data be handled/stored/discarded?]]></data>
+      <data key="d14" xml:space="preserve"><![CDATA[How will hard copy data be stored?]]></data>
       <data key="d15">
         <y:ShapeNode>
           <y:Geometry height="43.0" width="172.0" x="600.0" y="540.5"/>
@@ -372,6 +377,7 @@
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[template-user-set]]></data>
       <data key="d13" xml:space="preserve"/>
+      <data key="d14" xml:space="preserve"><![CDATA[read the security pledge]]></data>
       <data key="d15">
         <y:ShapeNode>
           <y:Geometry height="43.0" width="205.0" x="703.5" y="270.5"/>
@@ -389,6 +395,7 @@
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[template-user-set]]></data>
       <data key="d13" xml:space="preserve"/>
+      <data key="d14" xml:space="preserve"><![CDATA[Read, sign, and return the security pledge to your PI]]></data>
       <data key="d15">
         <y:ShapeNode>
           <y:Geometry height="43.0" width="205.0" x="943.5" y="270.5"/>

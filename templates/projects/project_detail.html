@@ -236,12 +236,14 @@
                         {% for dataset in datasets %}
                             <tr>
                             <td>
-                                <button
-                                        onclick="location.href = '{% url 'dataset_access' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
-                                        id="get-dataset-access"
-                                        style="color: deeppink;"
-                                >Get Access
-                                </button>
+                                {% if user.is_pi or user.is_member %}
+                                    <button
+                                            onclick="location.href = '{% url 'dataset_access' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
+                                            id="get-dataset-access"
+                                            style="color: deeppink;"
+                                    >Get Access
+                                    </button>
+                                {% endif %}
                                 {{ dataset.name }}
                             </td>
                             <td align="center">{% if dataset.is_valid %}
@@ -263,18 +265,18 @@
                     </table>
                     <br>
                     <h3>Workflows</h3>
-{#                    <form method="POST" class="post-form">#}
-{#                        {% csrf_token %}#}
-{#                        {% if project.is_valid %}#}
-{#                            <input type="submit" name="generate_workflow" value="Generate/Refresh my workflow status"#}
-{#                                   style="color: darkgreen">#}
-{#                        {% else %}#}
-{#                            <input type="submit" name="generate_workflow" value="Generate/Refresh my workflow status"#}
-{#                                   style="color: grey"#}
-{#                                   disabled>#}
-{#                        {% endif %}#}
-{#                    </form>#}
-{#                    <br>#}
+                    {#                    <form method="POST" class="post-form">#}
+                    {#                        {% csrf_token %}#}
+                    {#                        {% if project.is_valid %}#}
+                    {#                            <input type="submit" name="generate_workflow" value="Generate/Refresh my workflow status"#}
+                    {#                                   style="color: darkgreen">#}
+                    {#                        {% else %}#}
+                    {#                            <input type="submit" name="generate_workflow" value="Generate/Refresh my workflow status"#}
+                    {#                                   style="color: grey"#}
+                    {#                                   disabled>#}
+                    {#                        {% endif %}#}
+                    {#                    </form>#}
+                    {#                    <br>#}
                     <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
                             <td align="center"><b>Status</b></td>

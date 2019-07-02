@@ -40,7 +40,7 @@
                     <form method="POST" class="post-form">
                         {% csrf_token %}
                         {% for assertion in assertions %}
-                            <font style="color: grey;">{{ assertion }}</font><br>
+                            {#                            <font style="color: grey;">{{ assertion }}</font><br>#}
                             {% if assertion.Type == 'ConditionalAssertionItem' %}
                                 {% if assertion.SAFEParameters %}
                                     {% if assertion.SAFEParameters != 'None' %}
@@ -50,11 +50,11 @@
                                                 {% with kv_option=option|workflow_safe_parameters_key_value %}
                                                     <input type="radio"
                                                            value="{{ kv_option.key }}"
-                                                           name="singleselection_{{ assertion.ID }}"/>
+                                                           name="cond_singleselection_{{ assertion.ID }}"/>
                                                     : {{ kv_option.value }}<br>
                                                 {% endwith %}
                                             {% endfor %}
-                                            {% if assertion.DescriptionURL != 'None' %}
+                                            {% if assertion.DescriptionURL and assertion.DescriptionURL != 'None' %}
                                                 <b>Reference: </b>
                                                 <a href="{{ assertion.DescriptionURL }}" target="_blank">
                                                     {{ assertion.DescriptionURL }}
@@ -62,7 +62,7 @@
                                                 <br>
                                             {% endif %}
                                             <input type="submit" name="assert_{{ assertion.ID }}"
-                                                   value="{{ assertion.label }}"
+                                                   value="Submit"
                                                    style="color: darkgreen">
                                         {% endwith %}
                                     {% endif %}
@@ -70,18 +70,42 @@
                             {% elif assertion.Type == 'AssertionItem' %}
                                 {% if assertion.SAFEParameters %}
                                     {% if assertion.SAFEParameters != 'None' %}
-                                        {% if assertion.SAFEParameters.type == 'SingleSelection' %}
-                                            {% with single_select=assertion.SAFEParameters|workflow_json_safe_parameters %}
-                                                {{ assertion.description }} (Select only one)<br>
-                                                {% for option in single_select.values %}
-                                                    {% with kv_option=option|workflow_safe_parameters_key_value %}
-                                                        <input type="radio"
-                                                               value="{{ kv_option.key }}"
-                                                               name="singleselection_{{ assertion.ID }}"/>
-                                                        : {{ kv_option.value }}<br>
-                                                    {% endwith %}
-                                                {% endfor %}
-                                                {% if assertion.DescriptionURL != 'None' %}
+                                        {% with safe_parameters=assertion.SAFEParameters|workflow_json_safe_parameters %}
+                                            {% if safe_parameters.type == 'SingleSelection' %}
+                                                {% with single_select=assertion.SAFEParameters|workflow_json_safe_parameters %}
+                                                    {{ assertion.description }} (Select only one)<br>
+                                                    {% for option in single_select.values %}
+                                                        {% with kv_option=option|workflow_safe_parameters_key_value %}
+                                                            <input type="radio"
+                                                                   value="{{ kv_option.key }}"
+                                                                   name="assert_singleselection_{{ assertion.ID }}"/>
+                                                            : {{ kv_option.value }}<br>
+                                                        {% endwith %}
+                                                    {% endfor %}
+                                                    {% if assertion.DescriptionURL and assertion.DescriptionURL != 'None' %}
+                                                        <b>Reference: </b>
+                                                        <a href="{{ assertion.DescriptionURL }}" target="_blank">
+                                                            {{ assertion.DescriptionURL }}
+                                                        </a>
+                                                        <br>
+                                                    {% endif %}
+                                                    <input type="submit" name="assert_{{ assertion.ID }}"
+                                                           value="Submit"
+                                                           style="color: darkgreen">
+                                                {% endwith %}
+                                            {% elif safe_parameters.type == 'MultiSelection' %}
+                                                {{ assertion.description }} (Check all that apply)<br>
+                                                <select name="assert_multiselection_{{ assertion.ID }}" multiple>
+                                                    {% for option in safe_parameters.values %}
+                                                        {% with kv_option=option|workflow_safe_parameters_key_value %}
+                                                            <option value="{{ kv_option.key }}">
+                                                                {{ kv_option.value }}
+                                                            </option>
+                                                        {% endwith %}
+                                                    {% endfor %}
+                                                </select>
+                                                <br>
+                                                {% if assertion.DescriptionURL and assertion.DescriptionURL != 'None' %}
                                                     <b>Reference: </b>
                                                     <a href="{{ assertion.DescriptionURL }}" target="_blank">
                                                         {{ assertion.DescriptionURL }}
@@ -89,50 +113,62 @@
                                                     <br>
                                                 {% endif %}
                                                 <input type="submit" name="assert_{{ assertion.ID }}"
-                                                       value="{{ assertion.label }}"
+                                                       value="Submit"
                                                        style="color: darkgreen">
-                                            {% endwith %}
-                                        {% elif assertion.SAFEParameters.type == 'MultiSelection' %}
-                                            multi selection
-                                            {% if assertion.DescriptionURL != 'None' %}
-                                                <b>Reference: </b>
-                                                <a href="{{ assertion.DescriptionURL }}" target="_blank">
-                                                    {{ assertion.DescriptionURL }}
-                                                </a>
-                                                <br>
+                                            {% elif safe_parameters.type == 'String' %}
+                                                {{ assertion.description }}<br>
+                                                <textarea name="assert_string_{{ assertion.ID }}"
+                                                          rows="6"
+                                                          cols="60"></textarea><br>
+
+                                                {% if assertion.DescriptionURL and assertion.DescriptionURL != 'None' %}
+                                                    <b>Reference: </b>
+                                                    <a href="{{ assertion.DescriptionURL }}" target="_blank">
+                                                        {{ assertion.DescriptionURL }}
+                                                    </a>
+                                                    <br>
+                                                {% endif %}
+                                                <input type="submit" name="assert_{{ assertion.ID }}"
+                                                       value="Submit"
+                                                       style="color: darkgreen">
+                                            {% elif safe_parameters.type == 'StringList' %}
+                                                {{ assertion.description }} (one item per line):<br>
+                                                <textarea name="assert_stringlist_{{ assertion.ID }}"
+                                                          rows="6"
+                                                          cols="60"></textarea><br>
+
+                                                {% if assertion.DescriptionURL and assertion.DescriptionURL != 'None' %}
+                                                    <b>Reference: </b>
+                                                    <a href="{{ assertion.DescriptionURL }}" target="_blank">
+                                                        {{ assertion.DescriptionURL }}
+                                                    </a>
+                                                    <br>
+                                                {% endif %}
+                                                <input type="submit" name="assert_{{ assertion.ID }}"
+                                                       value="Submit"
+                                                       style="color: darkgreen">
+                                            {% elif safe_parameters.type == 'IPv4List' %}
+                                                {{ assertion.description }} (one FQDN or IP per line):<br>
+                                                <textarea name="assert_ipv4list_{{ assertion.ID }}"
+                                                          rows="6"
+                                                          cols="60"></textarea><br>
+
+                                                {% if assertion.DescriptionURL and assertion.DescriptionURL != 'None' %}
+                                                    <b>Reference: </b>
+                                                    <a href="{{ assertion.DescriptionURL }}" target="_blank">
+                                                        {{ assertion.DescriptionURL }}
+                                                    </a>
+                                                    <br>
+                                                {% endif %}
+                                                <input type="submit" name="assert_{{ assertion.ID }}"
+                                                       value="Submit"
+                                                       style="color: darkgreen">
                                             {% endif %}
-                                        {% elif assertion.SAFEParameters.type == 'String' %}
-                                            string
-                                            {% if assertion.DescriptionURL != 'None' %}
-                                                <b>Reference: </b>
-                                                <a href="{{ assertion.DescriptionURL }}" target="_blank">
-                                                    {{ assertion.DescriptionURL }}
-                                                </a>
-                                                <br>
-                                            {% endif %}
-                                        {% elif assertion.SAFEParameters.type == 'StringList' %}
-                                            string list
-                                            {% if assertion.DescriptionURL != 'None' %}
-                                                <b>Reference: </b>
-                                                <a href="{{ assertion.DescriptionURL }}" target="_blank">
-                                                    {{ assertion.DescriptionURL }}
-                                                </a>
-                                                <br>
-                                            {% endif %}
-                                        {% elif assertion.SAFEParameters.type == 'IPv4List' %}
-                                            ipv4 list
-                                            {% if assertion.DescriptionURL != 'None' %}
-                                                <b>Reference: </b>
-                                                <a href="{{ assertion.DescriptionURL }}" target="_blank">
-                                                    {{ assertion.DescriptionURL }}
-                                                </a>
-                                                <br>
-                                            {% endif %}
-                                        {% endif %}
+                                        {% endwith %}
                                     {% else %}
                                         <input type="checkbox" name="checkbox_{{ assertion.ID }}"/>
                                         : {{ assertion.description }}<br>
-                                        {% if assertion.DescriptionURL != 'None' %}
+                                        {% if assertion.DescriptionURL and assertion.DescriptionURL != 'None' %}
                                             <b>Reference: </b>
                                             <a href="{{ assertion.DescriptionURL }}" target="_blank">
                                                 {{ assertion.DescriptionURL }}
@@ -140,13 +176,13 @@
                                             <br>
                                         {% endif %}
                                         <input type="submit" name="assert_{{ assertion.ID }}"
-                                               value="{{ assertion.label }}"
+                                               value="I Agree"
                                                style="color: darkgreen">
                                     {% endif %}
                                 {% else %}
                                     <input type="checkbox" name="checkbox_{{ assertion.ID }}"/>
                                     : {{ assertion.description }}<br>
-                                    {% if assertion.DescriptionURL != 'None' %}
+                                    {% if assertion.DescriptionURL and assertion.DescriptionURL != 'None' %}
                                         <b>Reference: </b>
                                         <a href="{{ assertion.DescriptionURL }}" target="_blank">
                                             {{ assertion.DescriptionURL }}
@@ -154,7 +190,7 @@
                                         <br>
                                     {% endif %}
                                     <input type="submit" name="assert_{{ assertion.ID }}"
-                                           value="{{ assertion.label }}"
+                                           value="I Agree"
                                            style="color: darkgreen">
                                 {% endif %}
                             {% else %}
