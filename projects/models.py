@@ -165,6 +165,7 @@ class MembershipComanagePersonnel(models.Model):
 
 class ProjectWorkflowUserCompletionByRole(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
     workflow = models.ForeignKey(WorkflowNeo4j, on_delete=models.CASCADE)
     person = models.ForeignKey(NotaryServiceUser, on_delete=models.CASCADE)
     role = models.ForeignKey(Role, on_delete=models.CASCADE)

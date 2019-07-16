@@ -91,29 +91,97 @@ def workflow_access(request, uuid):
     workflow = get_object_or_404(WorkflowNeo4j, uuid=uuid)
     if request.method == "POST":
         for key, value in request.POST.items():
-            if 'singleselection_' in key:
+            if 'cond_singleselection_' in key:
                 workflow_make_conditional_selection_and_disable_branches(
                     graph_id=str(uuid),
-                    node_id=key.split('singleselection_', 1)[1],
+                    node_id=key.split('cond_singleselection_', 1)[1],
                     cond_value=str(value)
                 )
                 workflow_save_safe_token_and_complete(
                     graph_id=str(uuid),
-                    node_id=key.split('singleselection_', 1)[1],
+                    node_id=key.split('cond_singleselection_', 1)[1],
                     user_dn=request.user.cert_subject_dn
                 )
-            elif 'checkbox_' in key:
-                if value == 'on':
+            elif 'assert_singleselection_' in key:
+                workflow_update_node_property(
+                    graph_id=str(uuid),
+                    node_id=key.split('assert_singleselection_', 1)[1],
+                    prop_name='ParameterValue',
+                    prop_value=str(value)
+                )
+                workflow_save_safe_token_and_complete(
+                    graph_id=str(uuid),
+                    node_id=key.split('assert_singleselection_', 1)[1],
+                    user_dn=request.user.cert_subject_dn
+                )
+            elif 'assert_string_' in key:
+                if str(value).rstrip('\r\n') != '':
+                    workflow_update_node_property(
+                        graph_id=str(uuid),
+                        node_id=key.split('assert_string_', 1)[1],
+                        prop_name='ParameterValue',
+                        prop_value=str(value).rstrip('\r\n')
+                    )
                     workflow_save_safe_token_and_complete(
                         graph_id=str(uuid),
-                        node_id=key.split('checkbox_', 1)[1],
+                        node_id=key.split('assert_string_', 1)[1],
                         user_dn=request.user.cert_subject_dn
                     )
+            elif 'assert_stringlist_' in key:
+                if str(value).rstrip('\r\n') != '':
+                    workflow_update_node_property(
+                        graph_id=str(uuid),
+                        node_id=key.split('assert_stringlist_', 1)[1],
+                        prop_name='ParameterValue',
+                        prop_value=str(value).rstrip('\r\n').split('\r\n')
+                    )
+                    workflow_save_safe_token_and_complete(
+                        graph_id=str(uuid),
+                        node_id=key.split('assert_stringlist_', 1)[1],
+                        user_dn=request.user.cert_subject_dn
+                    )
+            elif 'assert_ipv4list_' in key:
+                if str(value).rstrip('\r\n') != '':
+                    # TODO: FQDN or IP validation on value
+                    workflow_update_node_property(
+                        graph_id=str(uuid),
+                        node_id=key.split('assert_ipv4list_', 1)[1],
+                        prop_name='ParameterValue',
+                        prop_value=str(value).rstrip('\r\n').split('\r\n')
+                    )
+                    workflow_save_safe_token_and_complete(
+                        graph_id=str(uuid),
+                        node_id=key.split('assert_ipv4list_', 1)[1],
+                        user_dn=request.user.cert_subject_dn
+                    )
+            elif 'assert_multiselection_' in key:
+                value_list = ''
+                for item in request.POST.getlist(key):
+                    value_list += str(item) + ', '
+                if str(value).rstrip('\r\n') != '':
+                    workflow_update_node_property(
+                        graph_id=str(uuid),
+                        node_id=key.split('assert_multiselection_', 1)[1],
+                        prop_name='ParameterValue',
+                        prop_value=value_list.rstrip(', ')
+                    )
+                    workflow_save_safe_token_and_complete(
+                        graph_id=str(uuid),
+                        node_id=key.split('assert_multiselection_', 1)[1],
+                        user_dn=request.user.cert_subject_dn
+                    )
+            elif 'checkbox_' in key:
+                if value == 'on':
                     workflow_update_node_property(
                         graph_id=str(uuid),
                         node_id=key.split('checkbox_', 1)[1],
                         prop_name='ParameterValue',
                         prop_value='True'
+                    )
+                    workflow_save_safe_token_and_complete(
+                        graph_id=str(uuid),
+                        node_id=key.split('checkbox_', 1)[1],
+                        user_dn=request.user.cert_subject_dn
                     )
                 else:
                     workflow_update_node_property(

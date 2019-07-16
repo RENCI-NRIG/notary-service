@@ -223,6 +223,7 @@
                     <h3>Datasets</h3>
                     <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
+                            <td align="center"><b>Action</b></td>
                             <td align="center"><b>Name</b></td>
                             <td align="center"><b>Validated</b></td>
                             <td align="center"><b>
@@ -236,12 +237,50 @@
                         {% for dataset in datasets %}
                             <tr>
                             <td>
-                                <button
-                                        onclick="location.href = '{% url 'dataset_access' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
-                                        id="get-dataset-access"
-                                        style="color: deeppink;"
-                                >Get Access
-                                </button>
+                                {% if user.is_pi or user.is_nsstaff %}
+                                    {% if request|dataset_get_access_button_status:dataset %}
+                                        <button
+                                                onclick="location.href = '{% url 'dataset_access' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
+                                                id="get-dataset-access"
+                                                style="color: deeppink;"
+                                        >Get Access
+                                        </button>
+                                    {% else %}
+                                        <button
+                                                onclick="location.href = '{% url 'dataset_access' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
+                                                id="get-dataset-access"
+                                                style="color: grey;"
+                                                disabled
+                                        >Get Access
+                                        </button>
+                                    {% endif %}
+                                {% else %}
+                                    <button
+                                            onclick="location.href = '{% url 'dataset_access' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
+                                            id="get-dataset-access"
+                                            style="color: grey;"
+                                            disabled
+                                    >Get Access
+                                    </button>
+                                {% endif %}
+                                {% if user.is_dp or user.is_pi or user.is_ig %}
+                                    <button
+                                            onclick="location.href = '{% url 'dataset_report' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
+                                            id="get-dataset-report"
+                                            style="color: deeppink;"
+                                    >Get Report
+                                    </button>
+                                {% else %}
+                                    <button
+                                            onclick="location.href = '{% url 'dataset_report' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
+                                            id="get-dataset-report"
+                                            style="color: grey;"
+                                            disabled
+                                    >Get Report
+                                    </button>
+                                {% endif %}
+                            </td>
+                            <td>
                                 {{ dataset.name }}
                             </td>
                             <td align="center">{% if dataset.is_valid %}
@@ -263,18 +302,6 @@
                     </table>
                     <br>
                     <h3>Workflows</h3>
-{#                    <form method="POST" class="post-form">#}
-{#                        {% csrf_token %}#}
-{#                        {% if project.is_valid %}#}
-{#                            <input type="submit" name="generate_workflow" value="Generate/Refresh my workflow status"#}
-{#                                   style="color: darkgreen">#}
-{#                        {% else %}#}
-{#                            <input type="submit" name="generate_workflow" value="Generate/Refresh my workflow status"#}
-{#                                   style="color: grey"#}
-{#                                   disabled>#}
-{#                        {% endif %}#}
-{#                    </form>#}
-{#                    <br>#}
                     <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
                             <td align="center"><b>Status</b></td>
@@ -295,12 +322,22 @@
                                     {% if request|workflow_status_is_completed:workflow.uuid == 'True' %}
                                         <i class="fa fa-fw fa-check" style="color: green;"></i>
                                     {% elif request|workflow_status_is_completed:workflow.uuid == 'False' %}
-                                        <button
-                                                onclick="location.href = '{% url 'workflow_access' uuid=workflow.uuid %}';"
-                                                id="project-workflow"
-                                                style="color: deeppink;"
-                                        >Needs Input
-                                        </button>
+                                        {% if request|workflow_waiting_on_others:workflow.uuid == 'True' %}
+                                            <button
+                                                    onclick="location.href = '{% url 'workflow_access' uuid=workflow.uuid %}';"
+                                                    id="project-workflow"
+                                                    style="color: grey;"
+                                                    disabled
+                                            >Waiting on Others
+                                            </button>
+                                        {% else %}
+                                            <button
+                                                    onclick="location.href = '{% url 'workflow_access' uuid=workflow.uuid %}';"
+                                                    id="project-workflow"
+                                                    style="color: deeppink;"
+                                            >Needs Input
+                                            </button>
+                                        {% endif %}
                                     {% else %}
                                         <b style="color: firebrick">{{ request|workflow_status_is_completed:workflow.uuid }}</b>
                                     {% endif %}

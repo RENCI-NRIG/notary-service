@@ -57,7 +57,7 @@
       <data key="d13" xml:space="preserve"/>
       <data key="d15">
         <y:ShapeNode>
-          <y:Geometry height="74.0" width="76.0" x="557.8043650793651" y="0.0"/>
+          <y:Geometry height="74.0" width="76.0" x="668.9710317460317" y="0.0"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" raised="false" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="30.9765625" x="22.51171875" xml:space="preserve" y="27.93359375">Start<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
@@ -168,9 +168,10 @@
     <node id="n7">
       <data key="d5" xml:space="preserve"><![CDATA[CodeBackupSelectionPledge]]></data>
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
+      <data key="d11" xml:space="preserve"><![CDATA[{ "fieldname": "CodeBackupSelectionPledge", "type": "MultiSelection", "values": [ { "local": "Retain a local copy"}, {"cloud": "Cloud services are used for backup"}, {"repository": "Code and documentation is checked into a repository"}, {"other": "Other backup methods are used"} ] }]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
       <data key="d13" xml:space="preserve"/>
-      <data key="d14" xml:space="preserve"><![CDATA[I understand that I may and should back up my program code and documentation, as described below]]></data>
+      <data key="d14" xml:space="preserve"><![CDATA[How do you plan to back up your program code and documentation?]]></data>
       <data key="d15">
         <y:ShapeNode>
           <y:Geometry height="43.0" width="205.0" x="619.4710317460317" y="306.801986049843"/>
@@ -184,6 +185,7 @@
     <node id="n8">
       <data key="d5" xml:space="preserve"><![CDATA[PrintEnvironment]]></data>
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
+      <data key="d11" xml:space="preserve"><![CDATA[{ "fieldname": "PrintEnvironment", "type": "String" }]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
       <data key="d13" xml:space="preserve"/>
       <data key="d14" xml:space="preserve"><![CDATA[Where will hard copy info be printed? ]]></data>
@@ -200,9 +202,10 @@
     <node id="n9">
       <data key="d5" xml:space="preserve"><![CDATA[HardcopyDiscardPledge]]></data>
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
+      <data key="d11" xml:space="preserve"><![CDATA[{ "fieldname": "HardcopyDiscardPledge", "type": "String" }]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
       <data key="d13" xml:space="preserve"/>
-      <data key="d14" xml:space="preserve"><![CDATA[How will hard copy data be handled/stored/discarded?]]></data>
+      <data key="d14" xml:space="preserve"><![CDATA[How will hard copy data be discarded?]]></data>
       <data key="d15">
         <y:ShapeNode>
           <y:Geometry height="43.0" width="172.0" x="751.9710317460317" y="573.801986049843"/>
@@ -339,6 +342,7 @@
       <data key="d5" xml:space="preserve"><![CDATA[WorkstationSecurityProtocols]]></data>
       <data key="d8" xml:space="preserve"><![CDATA[INP]]></data>
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Infrastructure-Approval]]></data>
+      <data key="d11" xml:space="preserve"><![CDATA[{ "fieldname": "HardcopyDiscardPledge", "type": "StringList" }]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
       <data key="d13" xml:space="preserve"/>
       <data key="d14" xml:space="preserve"><![CDATA[List workstation security protocols]]></data>
@@ -356,6 +360,7 @@
       <data key="d5" xml:space="preserve"><![CDATA[ServerSecurityProtocols]]></data>
       <data key="d8" xml:space="preserve"><![CDATA[INP]]></data>
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Infrastructure-Approval]]></data>
+      <data key="d11" xml:space="preserve"><![CDATA[{ "fieldname": "HardcopyDiscardPledge", "type": "StringList" }]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
       <data key="d13" xml:space="preserve"/>
       <data key="d14" xml:space="preserve"><![CDATA[List server security protocols]]></data>
@@ -373,6 +378,7 @@
       <data key="d5" xml:space="preserve"><![CDATA[ServerUsedInOtherProjects]]></data>
       <data key="d8" xml:space="preserve"><![CDATA[INP]]></data>
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Infrastructure-Approval]]></data>
+      <data key="d11" xml:space="preserve"><![CDATA[{ "fieldname": "YesOrNo", "type": "SingleSelection", "values": [ { "Yes": "Yes"}, {"No": "No"} ] }]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
       <data key="d13" xml:space="preserve"/>
       <data key="d14" xml:space="preserve"><![CDATA[Is the server used in other projects?]]></data>
@@ -426,7 +432,7 @@
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[template-user-set]]></data>
       <data key="d13" xml:space="preserve"/>
-      <data key="d14" xml:space="preserve"><![CDATA[I agree not abide by the IRB]]></data>
+      <data key="d14" xml:space="preserve"><![CDATA[I agree to abide by the IRB]]></data>
       <data key="d15">
         <y:ShapeNode>
           <y:Geometry height="43.0" width="169.44196044711956" x="1.2790197764402222" y="238.80198604984298"/>
@@ -440,9 +446,10 @@
     <node id="n23">
       <data key="d5" xml:space="preserve"><![CDATA[SplitPledge1]]></data>
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
+      <data key="d11" xml:space="preserve"><![CDATA[{ "fieldname": "SplitPledge1", "type": "String" }]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
       <data key="d13" xml:space="preserve"/>
-      <data key="d14" xml:space="preserve"><![CDATA[How will hard copy data be handled/stored/discarded?]]></data>
+      <data key="d14" xml:space="preserve"><![CDATA[How will hard copy data be handled?]]></data>
       <data key="d15">
         <y:ShapeNode>
           <y:Geometry height="43.0" width="172.0" x="592.9710317460317" y="505.801986049843"/>
@@ -456,9 +463,10 @@
     <node id="n24">
       <data key="d5" xml:space="preserve"><![CDATA[SplitPledge2]]></data>
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
+      <data key="d11" xml:space="preserve"><![CDATA[{ "fieldname": "SplitPledge2", "type": "String" }]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
       <data key="d13" xml:space="preserve"/>
-      <data key="d14" xml:space="preserve"><![CDATA[How will hard copy data be handled/stored/discarded?]]></data>
+      <data key="d14" xml:space="preserve"><![CDATA[How will hard copy data be stored?]]></data>
       <data key="d15">
         <y:ShapeNode>
           <y:Geometry height="43.0" width="172.0" x="794.9710317460317" y="505.801986049843"/>
@@ -476,6 +484,7 @@
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[template-user-set]]></data>
       <data key="d13" xml:space="preserve"/>
+      <data key="d14" xml:space="preserve"><![CDATA[read the security pledge]]></data>
       <data key="d15">
         <y:ShapeNode>
           <y:Geometry height="43.0" width="205.0" x="670.7210317460317" y="238.80198604984298"/>
@@ -493,6 +502,7 @@
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Research-Approval]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[template-user-set]]></data>
       <data key="d13" xml:space="preserve"/>
+      <data key="d14" xml:space="preserve"><![CDATA[Read, sign, and return the security pledge to your PI]]></data>
       <data key="d15">
         <y:ShapeNode>
           <y:Geometry height="43.0" width="205.0" x="435.7210317460317" y="238.80198604984298"/>
@@ -507,7 +517,7 @@
       <data key="d21">
         <y:PolyLineEdge>
           <y:Path sx="-31.66666666666663" sy="20.46875" tx="0.0" ty="-21.5">
-            <y:Point x="564.1376984126985" y="84.0"/>
+            <y:Point x="675.3043650793651" y="84.0"/>
             <y:Point x="86.0" y="84.0"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
@@ -520,7 +530,7 @@
       <data key="d21">
         <y:PolyLineEdge>
           <y:Path sx="19.0" sy="32.03125" tx="0.0" ty="-21.5">
-            <y:Point x="614.8043650793651" y="94.0"/>
+            <y:Point x="725.9710317460317" y="94.0"/>
             <y:Point x="1042.9710317460317" y="94.0"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
@@ -545,7 +555,10 @@
     <edge id="e3" source="n0" target="n14">
       <data key="d21">
         <y:PolyLineEdge>
-          <y:Path sx="-6.333333333333371" sy="36.46875" tx="0.0" ty="-21.5"/>
+          <y:Path sx="-6.333333333333371" sy="36.46875" tx="0.0" ty="-21.5">
+            <y:Point x="700.6376984126983" y="104.0"/>
+            <y:Point x="589.4710317460317" y="104.0"/>
+          </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
           <y:BendStyle smoothed="false"/>
@@ -667,12 +680,12 @@
       <data key="d21">
         <y:PolyLineEdge>
           <y:Path sx="31.66666666666663" sy="20.46875" tx="0.0" ty="-21.90099302492149">
-            <y:Point x="627.4710317460317" y="84.0"/>
+            <y:Point x="738.6376984126983" y="84.0"/>
             <y:Point x="1247.7210317460317" y="84.0"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
-          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" horizontalTextPosition="center" iconTextGap="4" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="4.0" x="618.2500234452505" y="59.53125">
+          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" horizontalTextPosition="center" iconTextGap="4" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="4.0" x="507.0833364335317" y="59.53125">
             <y:LabelModel>
               <y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/>
             </y:LabelModel>
@@ -702,7 +715,7 @@
       <data key="d21">
         <y:PolyLineEdge>
           <y:Path sx="-19.0" sy="32.03125" tx="0.0" ty="-21.5">
-            <y:Point x="576.8043650793651" y="94.0"/>
+            <y:Point x="687.9710317460317" y="94.0"/>
             <y:Point x="315.59484126984125" y="94.0"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
@@ -715,7 +728,7 @@
       <data key="d21">
         <y:PolyLineEdge>
           <y:Path sx="6.333333333333371" sy="36.46875" tx="0.0" ty="-21.5">
-            <y:Point x="602.1376984126985" y="104.0"/>
+            <y:Point x="713.3043650793651" y="104.0"/>
             <y:Point x="824.4710317460317" y="104.0"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
@@ -783,12 +796,12 @@
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
-          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" horizontalTextPosition="center" iconTextGap="4" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="4.0" x="-32.00003758990579" y="5.499999355507043">
+          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" hasText="false" height="4.0" horizontalTextPosition="center" iconTextGap="4" modelName="custom" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="4.0" x="157.9999624100942" y="29.999999355507043">
             <y:LabelModel>
               <y:SmartEdgeLabelModel autoRotationEnabled="false" defaultAngle="0.0" defaultDistance="10.0"/>
             </y:LabelModel>
             <y:ModelParameter>
-              <y:SmartEdgeLabelModelParameter angle="0.0" distance="30.0" distanceToCenter="true" position="right" ratio="0.5" segment="0"/>
+              <y:SmartEdgeLabelModelParameter angle="6.283185307179586" distance="10.0" distanceToCenter="false" position="center" ratio="0.5945945945945946" segment="-1"/>
             </y:ModelParameter>
             <y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
           </y:EdgeLabel>

@@ -104,6 +104,7 @@
       <data key="d5" xml:space="preserve"><![CDATA[WorkstationSecurityProtocols]]></data>
       <data key="d8" xml:space="preserve"><![CDATA[INP]]></data>
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Infrastructure-Approval]]></data>
+      <data key="d11" xml:space="preserve"><![CDATA[{ "fieldname": "HardcopyDiscardPledge", "type": "StringList" }]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
       <data key="d13" xml:space="preserve"/>
       <data key="d14" xml:space="preserve"><![CDATA[List workstation security protocols]]></data>
@@ -121,6 +122,7 @@
       <data key="d5" xml:space="preserve"><![CDATA[ServerSecurityProtocols]]></data>
       <data key="d8" xml:space="preserve"><![CDATA[INP]]></data>
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Infrastructure-Approval]]></data>
+      <data key="d11" xml:space="preserve"><![CDATA[{ "fieldname": "HardcopyDiscardPledge", "type": "StringList" }]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
       <data key="d13" xml:space="preserve"/>
       <data key="d14" xml:space="preserve"><![CDATA[List server security protocols]]></data>
@@ -138,6 +140,7 @@
       <data key="d5" xml:space="preserve"><![CDATA[ServerUsedInOtherProjects]]></data>
       <data key="d8" xml:space="preserve"><![CDATA[INP]]></data>
       <data key="d9" xml:space="preserve"><![CDATA[ADD-HEALTH-Infrastructure-Approval]]></data>
+      <data key="d11" xml:space="preserve"><![CDATA[{ "fieldname": "YesOrNo", "type": "SingleSelection", "values": [ { "Yes": "Yes"}, {"No": "No"} ] }]]></data>
       <data key="d12" xml:space="preserve"><![CDATA[common-set]]></data>
       <data key="d13" xml:space="preserve"/>
       <data key="d14" xml:space="preserve"><![CDATA[Is the server used in other projects?]]></data>

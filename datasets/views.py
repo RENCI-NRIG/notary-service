@@ -89,6 +89,32 @@ def dataset_access(request, uuid):
     })
 
 
+def dataset_report(request, uuid):
+    dataset = get_object_or_404(Dataset, uuid=uuid)
+    dataset_error = None
+    project_uuid = request.GET.get('project_uuid', '-1')
+    project_name = Project.objects.get(uuid=project_uuid).name
+    signed_jwt = None
+    jwt_claims = None
+    if request.method == "POST":
+        if request.POST.get("generate-jwt"):
+            signed_jwt = encode_ns_jwt(
+                project_uuid=project_uuid,
+                dataset_scid=dataset.safe_identifier_as_scid,
+                user=request.user
+            )
+            jwt_claims = decode_ns_jwt(signed_jwt)
+    return render(request, 'dataset_report.html', {
+        'datasets_page': 'active',
+        'dataset': dataset,
+        'dataset_error': dataset_error,
+        'project_uuid': project_uuid,
+        'project_name': project_name,
+        'signed_jwt': signed_jwt,
+        'jwt_claims': jwt_claims,
+    })
+
+
 def iframe_mock(request):
     return render(request, 'iframe_mock.html', {'home_page': 'active'})
 

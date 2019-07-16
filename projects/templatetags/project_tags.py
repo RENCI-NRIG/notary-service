@@ -5,6 +5,7 @@ from django import template
 from ns_workflow import Neo4jWorkflow
 
 from projects.models import ProjectWorkflowUserCompletionByRole, MembershipComanagePersonnel, Project
+from projects.workflows import get_next_set_by_role
 from users.models import Role, Affiliation
 from workflows.models import WorkflowNeo4j
 
@@ -55,13 +56,16 @@ def workflow_status_is_completed(request, workflow_uuid):
     ).exists():
         return 'Role N/A'
     else:
-        if ProjectWorkflowUserCompletionByRole.objects.get(
-                person=request.user.id,
-                workflow=WorkflowNeo4j.objects.get(uuid=workflow_uuid),
-                role=request.user.role,
-        ).is_complete:
-            return 'True'
-    return 'False'
+        return str(workflow_is_complete(request=request, workflow_uuid=workflow_uuid))
+
+
+@register.filter()
+def workflow_waiting_on_others(request, workflow_uuid):
+    next_set = get_next_set_by_role(user_obj=request.user, workflow=str(workflow_uuid))
+    if len(next_set) == 0:
+        return 'True'
+    else:
+        return 'False'
 
 
 @register.filter
@@ -111,15 +115,62 @@ def workflow_is_complete(request, workflow_uuid):
 
 
 @register.filter
+def dataset_all_workflows_complete(request, project_uuid, dataset_uuid):
+    wf_uuid_list = ProjectWorkflowUserCompletionByRole.objects.values_list('workflow__uuid', flat=True).filter(
+        project__uuid=project_uuid,
+        dataset__uuid=dataset_uuid,
+        role=request.user.role
+    )
+    if len(wf_uuid_list) == 0:
+        return False
+    for wf_uuid in wf_uuid_list:
+        if not workflow_is_complete(request=request, workflow_uuid=wf_uuid):
+            return False
+    return True
+
+
+@register.filter
 def workflow_json_safe_parameters(safe_parameters):
+    """
+    convert SAFE parameters from Neo4j property to JSON
+    :param safe_parameters:
+    :return:
+    """
     return json.loads(safe_parameters)
 
 
 @register.filter
 def workflow_safe_parameters_key_value(kv_pair):
+    """
+    Return single key/value pair for parsing at the template level from kv_pair object
+    :param kv_pair:
+    :return: key, value as JSON
+    """
     key = ''
     value = ''
     for k, v in kv_pair.items():
         key = k
         value = v
     return {'key': key, 'value': value}
+
+
+@register.filter
+def dataset_get_access_button_status(request, dataset_obj):
+    """
+    Check for dataset access by validating that the is_complete flag is set to True for all workflows related
+    to the user / role / dataset / project combination
+    :param request:
+    :param dataset_obj:
+    :return: boolean
+    """
+    project_uuid = str(request.build_absolute_uri()).rpartition('/')[-1]
+    is_complete_list = ProjectWorkflowUserCompletionByRole.objects.values_list('is_complete', flat=True).filter(
+        person=request.user,
+        role=request.user.role,
+        project=Project.objects.get(uuid=project_uuid),
+        dataset=dataset_obj
+    )
+    if False in is_complete_list:
+        return False
+    else:
+        return True

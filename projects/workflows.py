@@ -201,7 +201,7 @@ def generate_neo4j_user_workflow_status(project_obj, user_obj):
                 # print('  - Assign ' + str(num_nodes) + ' nodes to '
                 #       + user_obj.name + ' as ' + str(Role.objects.get(id=role)))
                 is_complete = n.is_workflow_complete(
-                    principalId=str(user_obj.uuid),
+                    principalId=str(user_obj.cert_subject_dn),
                     role=role,
                     graphId=str(workflow),
                 )
@@ -216,6 +216,7 @@ def generate_neo4j_user_workflow_status(project_obj, user_obj):
                     ProjectWorkflowUserCompletionByRole.objects.create(
                         project=project_obj,
                         person=user_obj,
+                        dataset=WorkflowNeo4j.objects.get(uuid=workflow).dataset,
                         workflow=WorkflowNeo4j.objects.get(uuid=workflow),
                         role=Role.objects.get(id=role),
                         is_complete=False
@@ -224,6 +225,7 @@ def generate_neo4j_user_workflow_status(project_obj, user_obj):
                     reln_obj = ProjectWorkflowUserCompletionByRole.objects.get(
                         project=project_obj,
                         person=user_obj,
+                        dataset=WorkflowNeo4j.objects.get(uuid=workflow).dataset,
                         workflow=WorkflowNeo4j.objects.get(uuid=workflow),
                         role=Role.objects.get(id=role),
                     )
@@ -265,7 +267,9 @@ def validate_active_user_role_for_project(project_obj, user_obj, role_id, workfl
     if role == 'STAFF':
         if MembershipComanagePersonnel.objects.filter(
                 project=project_obj,
-                person=user_obj,
+                person=ComanagePersonnel.objects.get(
+                    uid=NotaryServiceUser.objects.get(id=user_obj).sub
+                ),
                 comanage_staff_id__isnull=False,
         ):
             return True
@@ -293,12 +297,34 @@ def validate_active_user_role_for_project(project_obj, user_obj, role_id, workfl
     elif role == 'PI':
         if MembershipComanagePersonnel.objects.filter(
                 project=project_obj,
-                person=user_obj,
+                person=ComanagePersonnel.objects.get(
+                    uid=NotaryServiceUser.objects.get(id=user_obj).sub
+                ),
                 comanage_pi_members_id__isnull=False,
         ):
             return True
 
     return False
+
+
+def get_next_set_by_role(user_obj, workflow):
+    role = convert_comanage_role_id_to_neo4j_node_role(user_obj.role)
+    n = Neo4jWorkflow(
+        url=bolt_url,
+        user=neo_user,
+        pswd=neo_pass,
+        importHostDir=import_host_dir,
+        importDir=import_dir,
+    )
+    next_set = set()
+    n.find_reachable_not_completed_nodes(
+        principalId=str(user_obj.cert_subject_dn),
+        role=role,
+        graphId=workflow,
+        nodeId="Start",
+        incompleteNodeSet=next_set,
+    )
+    return next_set
 
 
 def take_user_through_workflow(user_obj, workflow):
@@ -311,16 +337,6 @@ def take_user_through_workflow(user_obj, workflow):
         importHostDir=import_host_dir,
         importDir=import_dir,
     )
-    is_complete = n.is_workflow_complete(
-        principalId=str(user_obj.cert_subject_dn),
-        role=role,
-        graphId=workflow,
-    )
-    # print('IS_COMPLETE: ' + str(role) + ' ' + str(is_complete))
-    if is_complete:
-        assertions.append("IS_COMPLETE")
-        return assertions
-
     next_set = set()
     n.find_reachable_not_completed_nodes(
         principalId=str(user_obj.cert_subject_dn),
@@ -330,11 +346,19 @@ def take_user_through_workflow(user_obj, workflow):
         incompleteNodeSet=next_set,
     )
     if len(next_set) == 0:
-        assertions.append('Assertions by other roles required before proceeding...')
-        return assertions
-    for node in next_set:
-        props = n.get_node_properties(graphId=workflow, nodeId=node)
-        assertions.append(props)
+        is_complete = n.is_workflow_complete(
+            principalId=str(user_obj.cert_subject_dn),
+            role=role,
+            graphId=workflow,
+        )
+        if is_complete:
+            assertions.append("IS_COMPLETE")
+        else:
+            assertions.append('Assertions by other roles required before proceeding...')
+    else:
+        for node in next_set:
+            props = n.get_node_properties(graphId=workflow, nodeId=node)
+            assertions.append(props)
     return assertions
 
 
