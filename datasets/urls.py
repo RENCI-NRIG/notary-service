@@ -11,6 +11,7 @@ urlpatterns = [
     path('datasets/<uuid:uuid>/access', views.dataset_access, name='dataset_access'),
     path('datasets/<uuid:uuid>/edit', views.dataset_edit, name='dataset_edit'),
     path('datasets/<uuid:uuid>/delete', views.dataset_delete, name='dataset_delete'),
+    path('datasets/<uuid:uuid>/report', views.dataset_report, name='dataset_report'),
     path('templates', views.templates, name='templates'),
     path('templates/new', views.template_new, name='template_new'),
     path('templates/<uuid:uuid>', views.template_detail, name='template_detail'),
