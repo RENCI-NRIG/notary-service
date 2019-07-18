@@ -4,14 +4,17 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from ns_workflow import Neo4jWorkflow, WorkflowError
 
+from datasets.models import Dataset
 from projects.models import Project, MembershipDatasets
 from safe.dataset import mock_dataset_safe_registration
+from safe.post_assertions import get_id_from_pub, post_raw_idset, post_common_completion_receipt, \
+    post_user_completion_receipt, post_link_receipt_for_dataset
 from safe.workflow import mock_workflow_safe_registration
 from workflows.workflow_neo4j import create_workflow_from_template, delete_workflow_by_uuid, \
     get_neo4j_workflow_by_uuid
 from .forms import TemplateForm, DatasetForm
 from .jwt import encode_ns_jwt, decode_ns_jwt
-from .models import NSTemplate, Dataset, MembershipNSTemplate
+from .models import NSTemplate, MembershipNSTemplate
 
 # string constant to display prior to registering in SAFE
 SAFE_SET_FLAG = 'SET_ON_VALIDATAION'
@@ -63,6 +66,20 @@ def dataset_detail(request, uuid):
     })
 
 
+def dataset_post_safe_receipts(principal, user, project, dataset, workflow1, workflow2):
+    r1 = post_raw_idset(principal=principal)
+    r2 = post_common_completion_receipt(principal=principal, project=project, workflow=workflow1)
+    r3 = post_user_completion_receipt(principal=principal, user=user, project=project, workflow=workflow1)
+    r4 = post_common_completion_receipt(principal=principal, project=project, workflow=workflow2)
+    r5 = post_user_completion_receipt(principal=principal, user=user, project=project, workflow=workflow2)
+    r6 = post_link_receipt_for_dataset(principal=principal, user=user, project=project, dataset=dataset,
+                                       workflow=workflow1)
+    r7 = post_link_receipt_for_dataset(principal=principal, user=user, project=project, dataset=dataset,
+                                       workflow=workflow2)
+
+    return [r1, r2, r3, r4, r5, r6, r7]
+
+
 def dataset_access(request, uuid):
     dataset = get_object_or_404(Dataset, uuid=uuid)
     dataset_error = None
@@ -72,6 +89,26 @@ def dataset_access(request, uuid):
     jwt_claims = None
     if request.method == "POST":
         if request.POST.get("generate-jwt"):
+            # TODO: validate that workflows are complete beforehand
+            safe_principal = get_id_from_pub(os.getenv('SAFE_PRINCIPAL_PUBKEY', './safe/keys/ns.pub'))
+            safe_user = request.user.cert_subject_dn
+            safe_project = project_uuid
+            safe_dataset = dataset.safe_identifier_as_scid
+            safe_workflow1, safe_workflow2 = Dataset.objects.values_list(
+                'workflow_dataset__template__safe_identifier_as_scid',
+                flat=True
+            ).filter(
+                uuid=dataset.uuid
+            )
+            resp = dataset_post_safe_receipts(
+                principal=safe_principal,
+                user=safe_user,
+                project=safe_project,
+                dataset=safe_dataset,
+                workflow1=safe_workflow1,
+                workflow2=safe_workflow2
+            )
+            print(resp)
             signed_jwt = encode_ns_jwt(
                 project_uuid=project_uuid,
                 dataset_scid=dataset.safe_identifier_as_scid,
