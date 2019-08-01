@@ -26,7 +26,7 @@ class UserPreferences(forms.ModelForm):
         role_choices = ()
         for role in user.roles.filter(notaryserviceuser=user):
             role_choices += ((role.id, role.get_id_display()),)
-        print(role_choices)
+        # print(role_choices)
         super(UserPreferences, self).__init__(*args, **kwargs)
         self.fields['role'] = forms.ChoiceField(
             choices=sorted(role_choices, key=itemgetter(1)),

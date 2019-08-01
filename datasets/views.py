@@ -16,9 +16,6 @@ from .forms import TemplateForm, DatasetForm
 from .jwt import encode_ns_jwt, decode_ns_jwt
 from .models import NSTemplate, MembershipNSTemplate
 
-# string constant to display prior to registering in SAFE
-SAFE_SET_FLAG = 'SET_ON_VALIDATAION'
-
 
 def datasets(request):
     context = {"datasets_page": "active"}
@@ -162,7 +159,6 @@ def dataset_new(request):
         if form.is_valid():
             dataset = form.save(commit=False)
             dataset.owner = request.user
-            dataset.safe_identifier_as_scid = SAFE_SET_FLAG
             dataset.created_by = request.user
             dataset.modified_by = request.user
             dataset.modified_date = timezone.now()
@@ -334,7 +330,6 @@ def template_new(request):
         if form.is_valid():
             template = form.save(commit=False)
             template.owner = request.user
-            template.safe_identifier_as_scid = SAFE_SET_FLAG
             template.created_by = request.user
             template.modified_by = request.user
             template.modified_date = timezone.now()

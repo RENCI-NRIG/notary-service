@@ -45,10 +45,17 @@
                         <input type="submit" name="generate-jwt" value="Generate" style="color: darkgreen"> Access Token
                     </form>
                     {% if signed_jwt %}
-                        <b>Encoded JWT: </b>{{ signed_jwt|truncatechars:80 }}
                         <br>
-                        <b>cURL request:</b> curl --header "ImPACT-JWT: {{ signed_jwt }}"
-                        --request POST "{{ dataset.dataset_identifier_as_url }}"
+                        <b>cURL request:</b><br>
+                        <pre style="background-color: #1d2124; padding-left: 10px;">
+                        <code style="color: whitesmoke;">
+curl -v -L -c cyberimpact.us \
+  --data "ImPACT-JWT={{ signed_jwt }}" \
+  --key "${KEY}" \
+  --cert "${CERT}" \
+  --cacert "${CAFILE}" \
+  "{{ dataset.dataset_identifier_as_url }}"</code>
+                        </pre>
                         <br>
                         <b>Claims:</b>
                         <br>
