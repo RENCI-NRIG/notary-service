@@ -4,6 +4,7 @@ ul.errorlist {
     margin: 0;
     padding: 0;
 }
+
 .errorlist li {
     border: 1px solid red;
     color: red;
@@ -16,13 +17,15 @@ ul.errorlist {
     text-align: center;
     border-radius: 3px;
 }
-input:not([type="submit"]), textarea, select {
+
+input:not([type="submit"], [type="checkbox"]), textarea, select {
     width: 100%;
-    padding: 5px!important;
+    padding: 5px !important;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 }
+
 .success {
     background-color: rgba(0, 128, 0, 0.15);
     padding: 10px;

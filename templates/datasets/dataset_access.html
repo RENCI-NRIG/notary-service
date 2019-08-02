@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static dataset_tags replace_tags user_tags %}
+{% load static dataset_tags replace_tags user_tags project_tags %}
 
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
@@ -42,7 +42,13 @@
                 <div>
                     <form method="POST" class="post-form">
                         {% csrf_token %}
-                        <input type="submit" name="generate-jwt" value="Generate" style="color: darkgreen"> Access Token
+                        {% if request|dataset_workflows_completed_button_status:dataset %}
+                            <input type="submit" name="generate-jwt" value="Generate" style="color: darkgreen"> Access
+                            Token
+                        {% else %}
+                            <input type="submit" name="generate-jwt" value="Generate" style="color: grey" disabled="">
+                            Access Token
+                        {% endif %}
                     </form>
                     {% if signed_jwt %}
                         <br>

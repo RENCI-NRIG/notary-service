@@ -96,7 +96,7 @@ def dataset_access(request, uuid):
                 flat=True
             ).filter(
                 uuid=dataset.uuid
-            )
+            ).distinct()
             resp = dataset_post_safe_receipts(
                 principal=safe_principal,
                 user=safe_user,

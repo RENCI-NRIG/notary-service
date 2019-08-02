@@ -238,7 +238,7 @@
                             <tr>
                             <td>
                                 {% if user.is_pi or user.is_nsstaff %}
-                                    {% if request|dataset_get_access_button_status:dataset %}
+                                    {% if request|dataset_workflows_completed_button_status:dataset %}
                                         <button
                                                 onclick="location.href = '{% url 'dataset_access' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
                                                 id="get-dataset-access"
