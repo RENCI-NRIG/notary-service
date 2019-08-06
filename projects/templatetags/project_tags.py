@@ -56,7 +56,11 @@ def workflow_status_is_completed(request, workflow_uuid):
     ).exists():
         return 'Role N/A'
     else:
-        return str(workflow_is_complete(request=request, workflow_uuid=workflow_uuid))
+        next_set = get_next_set_by_role(user_obj=request.user, workflow=str(workflow_uuid))
+        if len(next_set) != 0:
+            return 'False'
+        else:
+            return str(workflow_is_complete(request=request, workflow_uuid=workflow_uuid))
 
 
 @register.filter()
@@ -155,22 +159,30 @@ def workflow_safe_parameters_key_value(kv_pair):
 
 
 @register.filter
-def dataset_get_access_button_status(request, dataset_obj):
+def dataset_workflows_completed_button_status(request, dataset_obj):
     """
-    Check for dataset access by validating that the is_complete flag is set to True for all workflows related
-    to the user / role / dataset / project combination
+    Check for dataset access by validating all workflows related
+    to the user / role / dataset / project are completed
     :param request:
     :param dataset_obj:
-    :return: boolean
+    :return:
     """
-    project_uuid = str(request.build_absolute_uri()).rpartition('/')[-1]
-    is_complete_list = ProjectWorkflowUserCompletionByRole.objects.values_list('is_complete', flat=True).filter(
+    # project_uuid passed in GET request (data_access.html)
+    project_uuid = request.GET.get('project_uuid', '-1')
+    if project_uuid == '-1':
+        # project_uuid is part of the URI (project_details.html)
+        project_uuid = str(request.build_absolute_uri()).rpartition('/')[-1]
+
+    workflow_list = ProjectWorkflowUserCompletionByRole.objects.values_list('workflow__uuid', flat=True).filter(
         person=request.user,
         role=request.user.role,
         project=Project.objects.get(uuid=project_uuid),
         dataset=dataset_obj
     )
-    if False in is_complete_list:
+    if len(workflow_list) == 0:
         return False
-    else:
-        return True
+    for workflow_uuid in workflow_list:
+        status = workflow_status_is_completed(request, workflow_uuid)
+        if status != 'True':
+            return False
+    return True

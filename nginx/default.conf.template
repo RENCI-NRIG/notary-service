@@ -20,8 +20,10 @@ server {
     # Or if you're on the default port 443, then this should work too
     # error_page 497 https://;
 
-    ssl_certificate /etc/ssl/SSL.crt;
-    ssl_certificate_key /etc/ssl/SSL.key;
+    # Let's Encrypt format (ref: )
+    ssl_certificate           /etc/ssl/fullchain.pem;
+    ssl_certificate_key       /etc/ssl/privkey.pem;
+    ssl_trusted_certificate   /etc/ssl/chain.pem;
 
     charset     utf-8;
 

@@ -4,17 +4,24 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from ns_workflow import Neo4jWorkflow, WorkflowError
 
-from projects.models import Project, MembershipDatasets
-from safe.dataset import mock_dataset_safe_registration
+from datasets.models import Dataset
+from projects.models import Project, MembershipDatasets, ProjectWorkflowUserCompletionByRole
+from projects.workflows import get_next_set_by_role
+from safe.post_assertions import get_id_from_pub, post_raw_idset, post_common_completion_receipt, \
+    post_user_completion_receipt, post_link_receipt_for_dataset
 from safe.workflow import mock_workflow_safe_registration
+from workflows.models import WorkflowNeo4j
 from workflows.workflow_neo4j import create_workflow_from_template, delete_workflow_by_uuid, \
     get_neo4j_workflow_by_uuid
 from .forms import TemplateForm, DatasetForm
 from .jwt import encode_ns_jwt, decode_ns_jwt
-from .models import NSTemplate, Dataset, MembershipNSTemplate
+from .models import NSTemplate, MembershipNSTemplate
 
-# string constant to display prior to registering in SAFE
-SAFE_SET_FLAG = 'SET_ON_VALIDATAION'
+bolt_url = os.getenv('NEO4J_BOLT_URL')
+neo_user = os.getenv('NEO4J_USER')
+neo_pass = os.getenv('NEO4J_PASS')
+import_dir = os.getenv('NEO4J_IMPORTS_PATH_DOCKER')
+import_host_dir = os.getenv('NEO4J_IMPORTS_PATH_HOST')
 
 
 def datasets(request):
@@ -50,8 +57,6 @@ def dataset_detail(request, uuid):
     tpl_objs = NSTemplate.objects.filter(uuid__in=tpl_list).order_by('name')
     if request.method == "POST":
         dataset.is_valid, dataset_error = dataset_validate(tpl_objs, request.user.show_uuid)
-        if dataset.is_valid:
-            dataset.safe_identifier_as_scid = mock_dataset_safe_registration(dataset.uuid)
         dataset.save()
     else:
         dataset_error = None
@@ -63,21 +68,129 @@ def dataset_detail(request, uuid):
     })
 
 
+def dataset_post_safe_receipts(principal, user, project, dataset, workflow1, workflow2):
+    r1 = post_raw_idset(principal=principal)
+    r2 = post_common_completion_receipt(principal=principal, project=project, workflow=workflow1)
+    r3 = post_user_completion_receipt(principal=principal, user=user, project=project, workflow=workflow1)
+    r4 = post_common_completion_receipt(principal=principal, project=project, workflow=workflow2)
+    r5 = post_user_completion_receipt(principal=principal, user=user, project=project, workflow=workflow2)
+    r6 = post_link_receipt_for_dataset(principal=principal, user=user, project=project, dataset=dataset,
+                                       workflow=workflow1)
+    r7 = post_link_receipt_for_dataset(principal=principal, user=user, project=project, dataset=dataset,
+                                       workflow=workflow2)
+
+    return [r1, r2, r3, r4, r5, r6, r7]
+
+
+def workflow_is_complete(request, workflow_uuid):
+    """
+    :param request:
+    :param workflow_uuid:
+    :return:
+    """
+    n = Neo4jWorkflow(
+        url=bolt_url,
+        user=neo_user,
+        pswd=neo_pass,
+        importHostDir=import_host_dir,
+        importDir=import_dir,
+    )
+    is_complete = n.is_workflow_complete(
+        principalId=str(request.user.uuid),
+        role=request.user.role,
+        graphId=str(workflow_uuid),
+    )
+    return is_complete
+
+
+def workflow_status_is_completed(request, workflow_uuid):
+    """
+    :param request:
+    :param workflow_uuid:
+    :return:
+    """
+    if not ProjectWorkflowUserCompletionByRole.objects.filter(
+            person=request.user.id,
+            workflow=WorkflowNeo4j.objects.get(uuid=workflow_uuid),
+    ).exists():
+        return 'Unknown'
+    if not ProjectWorkflowUserCompletionByRole.objects.filter(
+            person=request.user.id,
+            workflow=WorkflowNeo4j.objects.get(uuid=workflow_uuid),
+            role=request.user.role,
+    ).exists():
+        return 'Role N/A'
+    else:
+        next_set = get_next_set_by_role(user_obj=request.user, workflow=str(workflow_uuid))
+        if len(next_set) != 0:
+            return 'False'
+        else:
+            return str(workflow_is_complete(request=request, workflow_uuid=workflow_uuid))
+
+
+def dataset_are_workflows_completed(request, dataset_obj):
+    """
+    Check for dataset access by validating all workflows related
+    to the user / role / dataset / project are completed
+    :param request:
+    :param dataset_obj:
+    :return:
+    """
+    # project_uuid passed in GET request (data_access.html)
+    project_uuid = request.GET.get('project_uuid', '-1')
+    if project_uuid == '-1':
+        # project_uuid is part of the URI (project_details.html)
+        project_uuid = str(request.build_absolute_uri()).rpartition('/')[-1]
+
+    workflow_list = ProjectWorkflowUserCompletionByRole.objects.values_list('workflow__uuid', flat=True).filter(
+        person=request.user,
+        role=request.user.role,
+        project=Project.objects.get(uuid=project_uuid),
+        dataset=dataset_obj
+    )
+    if len(workflow_list) == 0:
+        return False
+    for workflow_uuid in workflow_list:
+        status = workflow_status_is_completed(request, workflow_uuid)
+        if status != 'True':
+            return False
+    return True
+
+
 def dataset_access(request, uuid):
     dataset = get_object_or_404(Dataset, uuid=uuid)
     dataset_error = None
     project_uuid = request.GET.get('project_uuid', '-1')
     project_name = Project.objects.get(uuid=project_uuid).name
-    signed_jwt = None
-    jwt_claims = None
-    if request.method == "POST":
-        if request.POST.get("generate-jwt"):
-            signed_jwt = encode_ns_jwt(
-                project_uuid=project_uuid,
-                dataset_scid=dataset.safe_identifier_as_scid,
-                user=request.user
-            )
-            jwt_claims = decode_ns_jwt(signed_jwt)
+    if dataset_are_workflows_completed(request, dataset):
+        safe_principal = get_id_from_pub(os.getenv('SAFE_PRINCIPAL_PUBKEY', './safe/keys/ns.pub'))
+        safe_user = request.user.cert_subject_dn
+        safe_project = project_uuid
+        safe_dataset = dataset.safe_identifier_as_scid
+        safe_workflow1, safe_workflow2 = Dataset.objects.values_list(
+            'workflow_dataset__template__safe_identifier_as_scid',
+            flat=True
+        ).filter(
+            uuid=dataset.uuid
+        ).distinct()
+        resp = dataset_post_safe_receipts(
+            principal=safe_principal,
+            user=safe_user,
+            project=safe_project,
+            dataset=safe_dataset,
+            workflow1=safe_workflow1,
+            workflow2=safe_workflow2
+        )
+        print(resp)
+        signed_jwt = encode_ns_jwt(
+            project_uuid=project_uuid,
+            dataset_scid=dataset.safe_identifier_as_scid,
+            user=request.user
+        )
+        jwt_claims = decode_ns_jwt(signed_jwt)
+    else:
+        signed_jwt = ''
+        jwt_claims = ''
     return render(request, 'dataset_access.html', {
         'datasets_page': 'active',
         'dataset': dataset,
@@ -125,7 +238,6 @@ def dataset_new(request):
         if form.is_valid():
             dataset = form.save(commit=False)
             dataset.owner = request.user
-            dataset.safe_identifier_as_scid = SAFE_SET_FLAG
             dataset.created_by = request.user
             dataset.modified_by = request.user
             dataset.modified_date = timezone.now()
@@ -297,7 +409,6 @@ def template_new(request):
         if form.is_valid():
             template = form.save(commit=False)
             template.owner = request.user
-            template.safe_identifier_as_scid = SAFE_SET_FLAG
             template.created_by = request.user
             template.modified_by = request.user
             template.modified_date = timezone.now()

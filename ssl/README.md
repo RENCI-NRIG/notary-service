@@ -1,17 +1,34 @@
 # SSL - certificates for development
 
-Since [COmanage](https://www.cilogon.org/comanage) requires a secure connection as an OIDC Relying Party, a development SSL certificate pair is included in this repository.
+Since [COmanage](https://www.cilogon.org/comanage) requires a secure connection as an OIDC Relying Party, development certificates are included in this repository.
 
-- `ssl_dev.crt` - public certificate
-- `ssl_dev.key` - private key
+- `privkey.pem`  : the private key for your certificate.
+- `fullchain.pem`: the certificate file used in most server software (copy of chain.pem for development purposes).
+- `chain.pem`    : used for OCSP stapling in Nginx >=1.3.7.
+- `pubkey.pem`   : public key derived from privkey.pem for JWT work
 
-Since this certificate is not reckognized by any CA, do not use this for anything beyond local development (Never use in production)
+These certificates are self signed, and as such not reckognized by any CA. Do not use this for anything beyond local development (Never use in production)
 
-The certificate pair was generated as follows:
+### Generate `privkey.pem`, `fullchain.pem`, `chain.pem`
+
+Certificate generation based on Let's Encrypt [certificates for localhost](https://letsencrypt.org/docs/certificates-for-localhost/).
 
 ```
-openssl req -newkey rsa:4096 -days 3650 -nodes -x509 \
-  -subj "/C=US/ST=North Carolina/L=Chapel Hill/O=Local/OU=Development/CN=local.dev/emailAddress=email@local.dev" \
-  -keyout ssl_dev.key \
-  -out ssl_dev.crt
+openssl req -x509 -outform pem -out chain.pem -keyout privkey.pem \
+  -newkey rsa:4096 -nodes -sha256 -days 3650 \
+  -subj '/CN=localhost' -extensions EXT -config <( \
+   printf "[dn]\nCN=localhost\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:localhost\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
+cat chain.pem > fullchain.pem
 ```
+
+### Generate `pubkey.pem`
+
+JWT's are signed using the private key `privkey.pem`. The public key `pubkey.pem` is used to verify the signature.
+
+```
+openssl rsa -in privkey.pem -outform pem -pubout -out pubkey.pem
+```
+
+### Reference
+
+Nginx configuration reference: [https://www.nginx.com/blog/using-free-ssltls-certificates-from-lets-encrypt-with-nginx/](https://www.nginx.com/blog/using-free-ssltls-certificates-from-lets-encrypt-with-nginx/)
