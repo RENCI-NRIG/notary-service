@@ -1,12 +1,13 @@
 import os
+import webbrowser
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from ns_workflow import Neo4jWorkflow, WorkflowError
+from urllib.parse import urlencode
 
 from datasets.models import Dataset
 from projects.models import Project, MembershipDatasets
-from safe.dataset import mock_dataset_safe_registration
 from safe.post_assertions import get_id_from_pub, post_raw_idset, post_common_completion_receipt, \
     post_user_completion_receipt, post_link_receipt_for_dataset
 from safe.workflow import mock_workflow_safe_registration
@@ -50,8 +51,6 @@ def dataset_detail(request, uuid):
     tpl_objs = NSTemplate.objects.filter(uuid__in=tpl_list).order_by('name')
     if request.method == "POST":
         dataset.is_valid, dataset_error = dataset_validate(tpl_objs, request.user.show_uuid)
-        if dataset.is_valid:
-            dataset.safe_identifier_as_scid = mock_dataset_safe_registration(dataset.uuid)
         dataset.save()
     else:
         dataset_error = None
@@ -85,6 +84,38 @@ def dataset_access(request, uuid):
     signed_jwt = None
     jwt_claims = None
     if request.method == "POST":
+        if request.POST.get("post-to-presidio"):
+            # TODO: validate that workflows are complete beforehand
+            safe_principal = get_id_from_pub(os.getenv('SAFE_PRINCIPAL_PUBKEY', './safe/keys/ns.pub'))
+            safe_user = request.user.cert_subject_dn
+            safe_project = project_uuid
+            safe_dataset = dataset.safe_identifier_as_scid
+            safe_workflow1, safe_workflow2 = Dataset.objects.values_list(
+                'workflow_dataset__template__safe_identifier_as_scid',
+                flat=True
+            ).filter(
+                uuid=dataset.uuid
+            ).distinct()
+            resp = dataset_post_safe_receipts(
+                principal=safe_principal,
+                user=safe_user,
+                project=safe_project,
+                dataset=safe_dataset,
+                workflow1=safe_workflow1,
+                workflow2=safe_workflow2
+            )
+            print(resp)
+            signed_jwt = encode_ns_jwt(
+                project_uuid=project_uuid,
+                dataset_scid=dataset.safe_identifier_as_scid,
+                user=request.user
+            )
+            jwt_claims = decode_ns_jwt(signed_jwt)
+            url = dataset.dataset_identifier_as_url + '?ImPACT-JWT=' + str(signed_jwt)
+            print(url)
+            w = webbrowser.open_new_tab(url)
+            print(w)
+
         if request.POST.get("generate-jwt"):
             # TODO: validate that workflows are complete beforehand
             safe_principal = get_id_from_pub(os.getenv('SAFE_PRINCIPAL_PUBKEY', './safe/keys/ns.pub'))

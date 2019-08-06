@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+
 {% load static dataset_tags replace_tags user_tags project_tags %}
 
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
@@ -7,53 +8,59 @@
     {% if user.is_authenticated %}
         {% if not user.is_norole %}
             <div class="container" style="background-color: #F7F7F7">
-                <div class="post">
-                    <h2>{{ dataset.name }}</h2>
-                    <p>{{ dataset.description|linebreaksbr }}</p>
-                    <table width="100%">
-                        <tr>
-                            <td><b>DOI or Metadata URL:</b></td>
-                            <td>
-                                <a href="{{ dataset.dataset_identifier_as_doi_or_meta }}" target="_blank">
-                                    {{ dataset.dataset_identifier_as_doi_or_meta }}</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><b>Presidio URL:</b></td>
-                            <td>
-                                <a href="{{ dataset.dataset_identifier_as_url }}" target="_blank">
+            <div class="post">
+                <h2>{{ dataset.name }}</h2>
+                <p>{{ dataset.description|linebreaksbr }}</p>
+                <table width="100%">
+                    <tr>
+                        <td><b>DOI or Metadata URL:</b></td>
+                        <td>
+                            <a href="{{ dataset.dataset_identifier_as_doi_or_meta }}" target="_blank">
+                                {{ dataset.dataset_identifier_as_doi_or_meta }}</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>Presidio URL:</b></td>
+                        <td>
+                            <form method="POST" class="post-form">
+                                {% csrf_token %}
+                                {% if request|dataset_workflows_completed_button_status:dataset %}
+                                    <input type="submit" name="post-to-presidio"
+                                           value="{{ dataset.dataset_identifier_as_url }}">
+                                {% else %}
                                     {{ dataset.dataset_identifier_as_url }}
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><b>SAFE SCID:</b></td>
-                            <td>{{ dataset.safe_identifier_as_scid }}</td>
-                        </tr>
-                        <tr>
-                            <td><b>Project:</b></td>
-                            <td>
-                                <a href="{% url 'project_detail' project_uuid %}">{{ project_name }}</a>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-                <br>
-                <div>
-                    <form method="POST" class="post-form">
-                        {% csrf_token %}
-                        {% if request|dataset_workflows_completed_button_status:dataset %}
-                            <input type="submit" name="generate-jwt" value="Generate" style="color: darkgreen"> Access
-                            Token
-                        {% else %}
-                            <input type="submit" name="generate-jwt" value="Generate" style="color: grey" disabled="">
-                            Access Token
-                        {% endif %}
-                    </form>
-                    {% if signed_jwt %}
-                        <br>
-                        <b>cURL request:</b><br>
-                        <pre style="background-color: #1d2124; padding-left: 10px;">
+                                {% endif %}
+                            </form>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>SAFE SCID:</b></td>
+                        <td>{{ dataset.safe_identifier_as_scid }}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Project:</b></td>
+                        <td>
+                            <a href="{% url 'project_detail' project_uuid %}">{{ project_name }}</a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <br>
+            <div>
+                <form method="POST" class="post-form">
+                    {% csrf_token %}
+                    {% if request|dataset_workflows_completed_button_status:dataset %}
+                        <input type="submit" name="generate-jwt" value="Generate" style="color: darkgreen"> Access
+                        Token
+                    {% else %}
+                        <input type="submit" name="generate-jwt" value="Generate" style="color: grey" disabled="">
+                        Access Token
+                    {% endif %}
+                </form>
+                {% if signed_jwt %}
+                    <br>
+                    <b>cURL request:</b><br>
+                    <pre style="background-color: #1d2124; padding-left: 10px;">
                         <code style="color: whitesmoke;">
 curl -v -L -c cyberimpact.us \
   --data "ImPACT-JWT={{ signed_jwt }}" \
@@ -62,76 +69,76 @@ curl -v -L -c cyberimpact.us \
   --cacert "${CAFILE}" \
   "{{ dataset.dataset_identifier_as_url }}"</code>
                         </pre>
-                        <br>
-                        <b>Claims:</b>
-                        <br>
-                        <pre>{{ jwt_claims|pprint }}</pre>
-                    {% endif %}
-                </div>
-                <br>
-                <div>
-                    <p>
-                        <button
-                                id="message_button"
-                                style="color: darkgreen;"
-                        >Send
-                        </button>
-                        to Presidio
-                    </p>
-                    <p>Receive Message:</p>
-                    <div id="results"></div>
-                    <br/>
-                    <div id="iframe"></div>
-                    <script>
-                        // addEventListener support for IE8
-                        function bindEvent(element, eventName, eventHandler) {
-                            if (element.addEventListener) {
-                                element.addEventListener(eventName, eventHandler, false);
-                            } else if (element.attachEvent) {
-                                element.attachEvent('on' + eventName, eventHandler);
-                            }
-                        }
-
-                        var iframeSource = "{{ dataset.dataset_identifier_as_url }}";
-
-                        // Create the iframe
-                        var iframe = document.createElement('iframe');
-                        iframe.setAttribute('src', iframeSource);
-                        iframe.setAttribute('id', 'the_iframe');
-                        iframe.style.width = 100 + '%';
-                        {#iframe.style.width = 450 + 'px';#}
-                        iframe.style.height = 200 + 'px';
-                        document.body.appendChild(iframe);
-
-                        var getRef = document.getElementById("iframe");
-                        var parentDiv = getRef.parentNode;
-                        parentDiv.insertBefore(iframe, getRef);
-
-                        // Send a message to the child iframe
-                        var iframeEl = document.getElementById('the_iframe'),
-                            messageButton = document.getElementById('message_button'),
-                            results = document.getElementById('results');
-
-
-                        // Send a message to the child iframe
-                        var sendMessage = function (msg) {
-                            // Make sure you are sending a string, and to stringify JSON
-                            iframeEl.contentWindow.postMessage(msg, '{{ dataset.dataset_identifier_as_url }}');
-                        };
-
-                        // Send random messge data on every button click
-                        bindEvent(messageButton, 'click', function (e) {
-                            {#var random = Math.random();#}
-                            {#sendMessage('from notary service: ' + '' + random);#}
-                            sendMessage('{{ signed_jwt }}');
-                        });
-
-                        // Listen to message from child window
-                        bindEvent(window, 'message', function (e) {
-                            results.innerHTML = e.data;
-                        });
-                    </script>
-                </div>
+                    <br>
+                    <b>Claims:</b>
+                    <br>
+                    <pre>{{ jwt_claims|pprint }}</pre>
+                {% endif %}
+            </div>
+            <br>
+            <div>
+                <p>
+                    <button
+                            id="message_button"
+                            style="color: darkgreen;"
+                    >Send
+                    </button>
+                    to Presidio
+                </p>
+                <p>Receive Message:</p>
+                <div id="results"></div>
+                {#                    <br/>#}
+                {#                    <div id="iframe"></div>#}
+                {#                    <script>#}
+                {#                        // addEventListener support for IE8#}
+                {#                        function bindEvent(element, eventName, eventHandler) {#}
+                {#                            if (element.addEventListener) {#}
+                {#                                element.addEventListener(eventName, eventHandler, false);#}
+                {#                            } else if (element.attachEvent) {#}
+                {#                                element.attachEvent('on' + eventName, eventHandler);#}
+                {#                            }#}
+                {#                        }#}
+                {##}
+                {#                        var iframeSource = "{{ dataset.dataset_identifier_as_url }}";#}
+                {##}
+                {#                        // Create the iframe#}
+                {#                        var iframe = document.createElement('iframe');#}
+                {#                        iframe.setAttribute('src', iframeSource);#}
+                {#                        iframe.setAttribute('id', 'the_iframe');#}
+                {#                        iframe.style.width = 100 + '%';#}
+                {#iframe.style.width = 450 + 'px';#}
+                {#                        iframe.style.height = 200 + 'px';#}
+                {#                        document.body.appendChild(iframe);#}
+                {##}
+                {#                        var getRef = document.getElementById("iframe");#}
+                {#                        var parentDiv = getRef.parentNode;#}
+                {#                        parentDiv.insertBefore(iframe, getRef);#}
+                {##}
+                {#                        // Send a message to the child iframe#}
+                {#                        var iframeEl = document.getElementById('the_iframe'),#}
+                {#                            messageButton = document.getElementById('message_button'),#}
+                {#                            results = document.getElementById('results');#}
+                {##}
+                {##}
+                {#                        // Send a message to the child iframe#}
+                {#                        var sendMessage = function (msg) {#}
+                {#                            // Make sure you are sending a string, and to stringify JSON#}
+                {#                            iframeEl.contentWindow.postMessage(msg, '{{ dataset.dataset_identifier_as_url }}');#}
+                {#                        };#}
+                {##}
+                {#                        // Send random messge data on every button click#}
+                {#                        bindEvent(messageButton, 'click', function (e) {#}
+                {#var random = Math.random();#}
+                {#sendMessage('from notary service: ' + '' + random);#}
+                {#                            sendMessage('{{ signed_jwt }}');#}
+                {#                        });#}
+                {##}
+                {#                        // Listen to message from child window#}
+                {#                        bindEvent(window, 'message', function (e) {#}
+                {#                            results.innerHTML = e.data;#}
+                {#                        });#}
+                {#                    </script>#}
+                {#                </div>#}
                 <br>
                 <table width="100%" style="font-size: small">
                     <tr>
