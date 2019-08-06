@@ -179,6 +179,8 @@ def dataset_workflows_completed_button_status(request, dataset_obj):
         project=Project.objects.get(uuid=project_uuid),
         dataset=dataset_obj
     )
+    if len(workflow_list) == 0:
+        return False
     for workflow_uuid in workflow_list:
         status = workflow_status_is_completed(request, workflow_uuid)
         if status != 'True':
