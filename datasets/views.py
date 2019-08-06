@@ -81,68 +81,31 @@ def dataset_access(request, uuid):
     dataset_error = None
     project_uuid = request.GET.get('project_uuid', '-1')
     project_name = Project.objects.get(uuid=project_uuid).name
-    signed_jwt = None
-    jwt_claims = None
-    if request.method == "POST":
-        if request.POST.get("post-to-presidio"):
-            # TODO: validate that workflows are complete beforehand
-            safe_principal = get_id_from_pub(os.getenv('SAFE_PRINCIPAL_PUBKEY', './safe/keys/ns.pub'))
-            safe_user = request.user.cert_subject_dn
-            safe_project = project_uuid
-            safe_dataset = dataset.safe_identifier_as_scid
-            safe_workflow1, safe_workflow2 = Dataset.objects.values_list(
-                'workflow_dataset__template__safe_identifier_as_scid',
-                flat=True
-            ).filter(
-                uuid=dataset.uuid
-            ).distinct()
-            resp = dataset_post_safe_receipts(
-                principal=safe_principal,
-                user=safe_user,
-                project=safe_project,
-                dataset=safe_dataset,
-                workflow1=safe_workflow1,
-                workflow2=safe_workflow2
-            )
-            print(resp)
-            signed_jwt = encode_ns_jwt(
-                project_uuid=project_uuid,
-                dataset_scid=dataset.safe_identifier_as_scid,
-                user=request.user
-            )
-            jwt_claims = decode_ns_jwt(signed_jwt)
-            url = dataset.dataset_identifier_as_url + '?ImPACT-JWT=' + str(signed_jwt)
-            print(url)
-            w = webbrowser.open_new_tab(url)
-            print(w)
-
-        if request.POST.get("generate-jwt"):
-            # TODO: validate that workflows are complete beforehand
-            safe_principal = get_id_from_pub(os.getenv('SAFE_PRINCIPAL_PUBKEY', './safe/keys/ns.pub'))
-            safe_user = request.user.cert_subject_dn
-            safe_project = project_uuid
-            safe_dataset = dataset.safe_identifier_as_scid
-            safe_workflow1, safe_workflow2 = Dataset.objects.values_list(
-                'workflow_dataset__template__safe_identifier_as_scid',
-                flat=True
-            ).filter(
-                uuid=dataset.uuid
-            ).distinct()
-            resp = dataset_post_safe_receipts(
-                principal=safe_principal,
-                user=safe_user,
-                project=safe_project,
-                dataset=safe_dataset,
-                workflow1=safe_workflow1,
-                workflow2=safe_workflow2
-            )
-            print(resp)
-            signed_jwt = encode_ns_jwt(
-                project_uuid=project_uuid,
-                dataset_scid=dataset.safe_identifier_as_scid,
-                user=request.user
-            )
-            jwt_claims = decode_ns_jwt(signed_jwt)
+    safe_principal = get_id_from_pub(os.getenv('SAFE_PRINCIPAL_PUBKEY', './safe/keys/ns.pub'))
+    safe_user = request.user.cert_subject_dn
+    safe_project = project_uuid
+    safe_dataset = dataset.safe_identifier_as_scid
+    safe_workflow1, safe_workflow2 = Dataset.objects.values_list(
+        'workflow_dataset__template__safe_identifier_as_scid',
+        flat=True
+    ).filter(
+        uuid=dataset.uuid
+    ).distinct()
+    resp = dataset_post_safe_receipts(
+        principal=safe_principal,
+        user=safe_user,
+        project=safe_project,
+        dataset=safe_dataset,
+        workflow1=safe_workflow1,
+        workflow2=safe_workflow2
+    )
+    print(resp)
+    signed_jwt = encode_ns_jwt(
+        project_uuid=project_uuid,
+        dataset_scid=dataset.safe_identifier_as_scid,
+        user=request.user
+    )
+    jwt_claims = decode_ns_jwt(signed_jwt)
     return render(request, 'dataset_access.html', {
         'datasets_page': 'active',
         'dataset': dataset,
