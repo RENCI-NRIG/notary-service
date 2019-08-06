@@ -1,9 +1,9 @@
 --editable ./lib/ns_workflow # ns-workflow==0.1
-coverage==4.5.3
+coverage==4.5.4
 django-cleanup
 django-crispy-forms==1.7.2
 django-nose==1.4.6
-Django==2.2.3
+Django==2.2.4
 kafka-python==1.4.6
 ldap3==2.6
 mozilla-django-oidc==1.2.2
@@ -16,6 +16,6 @@ pytest-django==3.5.1
 pytest==5.0.1
 python-dateutil==2.8.0
 python-dotenv==0.10.3
-pytz==2019.1
+pytz==2019.2
 simplejson==3.16.0
 uWSGI==2.0.18
