@@ -20,7 +20,7 @@
                         {% if not project.is_valid %}
                             <form method="POST" class="post-form">
                                 {% csrf_token %}
-                                <input type="submit" name="validate" value="Generate/Refresh Workflow(s)"
+                                <input type="submit" name="validate" value="Validate and Generate/Refresh Workflow(s)"
                                        style="color: darkgreen">
                             </form>
                         {% endif %}

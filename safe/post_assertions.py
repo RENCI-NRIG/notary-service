@@ -2,33 +2,12 @@
 SAFE post assertions
 """
 
-# mock SAFE calls
-
 import base64
 import hashlib
 import os
 
 import requests
 from Crypto.PublicKey import RSA
-
-
-def mock_get_id_from_pub(public_key):
-    """
-    getIdFromPub("$KD/strong-1.pub")
-    as WP, DSO, NSV
-    :param public_key:
-    :return:
-    """
-    with open(public_key, 'r') as pubkey:
-        r = RSA.import_key(pubkey.read(), passphrase='')
-    s = hashlib.sha256()
-    s.update(r.exportKey(format='DER'))
-    encoded = base64.urlsafe_b64encode(s.digest())
-
-    return encoded.decode('utf-8')
-
-
-# end mock SAFE calls
 
 
 def get_id_from_pub(public_key):
