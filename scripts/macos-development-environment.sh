@@ -59,6 +59,12 @@ if [[ ! -d kafka ]]; then
   mkdir -p kafka
 fi
 
+# check for safe/imports directory
+echo "INFO: create kafka directory if it does not exist"
+if [[ ! -d safe/imports ]]; then
+  mkdir -p safe/imports
+fi
+
 # check for nginx configuration
 echo "INFO: create nginx/default.conf if it does not exist"
 if [[ ! -e nginx/default.conf ]]; then
@@ -107,6 +113,10 @@ fi
 echo "INFO: start kafka container"
 if [[ ! $(docker-compose ps | grep kafka) ]]; then
   docker-compose up -d kafka
+fi
+echo "INFO: start safe container"
+if [[ ! $(docker-compose ps | grep safe) ]]; then
+  docker-compose up -d safe
 fi
 echo "END: macos-development-environment.sh is done"
 

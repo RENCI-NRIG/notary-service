@@ -26,6 +26,7 @@ rm -rf \
   pg_data \
   neo4j \
   kafka \
+  safe/imports \
   venv \
   .venv
 while read line; do

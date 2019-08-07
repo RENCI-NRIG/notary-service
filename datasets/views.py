@@ -9,7 +9,6 @@ from projects.models import Project, MembershipDatasets, ProjectWorkflowUserComp
 from projects.workflows import get_next_set_by_role
 from safe.post_assertions import get_id_from_pub, post_raw_idset, post_common_completion_receipt, \
     post_user_completion_receipt, post_link_receipt_for_dataset
-from safe.workflow import mock_workflow_safe_registration
 from workflows.models import WorkflowNeo4j
 from workflows.workflow_neo4j import create_workflow_from_template, delete_workflow_by_uuid, \
     get_neo4j_workflow_by_uuid
@@ -37,7 +36,24 @@ def dataset_list(request):
     return render(request, 'datasets.html', {'datasets_page': 'active', 'datasets': ds_objs})
 
 
-def dataset_validate(tpl_objs, show_uuid):
+def dataset_validate(dataset_obj, show_uuid):
+    tpl_objs = NSTemplate.objects.filter(
+        uuid__in=Dataset.objects.values_list(
+            'templates__uuid',
+            flat=True
+        ).filter(
+            uuid=dataset_obj.uuid
+        )
+    )
+    if len(tpl_objs) != 2:
+        return False, 'Dataset must contain exactly two templates (research_approval and infrastructure_approval)'
+    type_list = []
+    for type in tpl_objs.values_list('type', flat=True):
+        type_list.append(type)
+    if 'research_approval' not in type_list:
+        return False, 'Dataset must contain a template of type "research_approval"'
+    if 'infrastructure_approval' not in type_list:
+        return False, 'Dataset must contain a template of type "infrastructure_approval"'
     for template in tpl_objs:
         if not template.is_valid:
             if show_uuid:
@@ -56,7 +72,7 @@ def dataset_detail(request, uuid):
     )
     tpl_objs = NSTemplate.objects.filter(uuid__in=tpl_list).order_by('name')
     if request.method == "POST":
-        dataset.is_valid, dataset_error = dataset_validate(tpl_objs, request.user.show_uuid)
+        dataset.is_valid, dataset_error = dataset_validate(dataset, request.user.show_uuid)
         dataset.save()
     else:
         dataset_error = None
@@ -391,7 +407,6 @@ def template_detail(request, uuid):
             template.is_valid, template_error = template_validate(template.graphml_definition.name, str(template.uuid))
             template.save()
             if template.is_valid:
-                template.safe_identifier_as_scid = mock_workflow_safe_registration(template.uuid)
                 template.save()
                 return redirect('template_detail', uuid=template.uuid)
     return render(request, 'template_detail.html', {

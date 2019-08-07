@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from ns_jwt import NSJWT
 
-from safe.post_assertions import get_id_from_pub, mock_get_id_from_pub
+from safe.post_assertions import get_id_from_pub
 
 
 def encode_ns_jwt(project_uuid, dataset_scid, user):
