@@ -67,6 +67,7 @@ class ComanagePersonnel(models.Model):
 class Project(models.Model):
     name = models.CharField(max_length=255)
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
+    comanage_name = models.CharField(max_length=255)
     description = models.TextField()
     is_valid = models.BooleanField(default=False)
     affiliations = models.ManyToManyField(Affiliation, through="MembershipAffiliations")
@@ -77,9 +78,11 @@ class Project(models.Model):
     comanage_personnel = models.ManyToManyField(ComanagePersonnel, through="MembershipComanagePersonnel")
     datasets = models.ManyToManyField(Dataset, through="MembershipDatasets")
     workflows = models.ManyToManyField(WorkflowNeo4j, through="MembershipProjectWorkflow")
-    created_by = models.ForeignKey(User, related_name='project_created_by', on_delete=models.CASCADE)
+    created_by = models.ForeignKey(User, related_name='project_created_by', on_delete=models.CASCADE, null=True,
+                                   blank=True)
     created_date = models.DateTimeField(default=timezone.now)
-    modified_by = models.ForeignKey(User, related_name='project_modified_by', on_delete=models.CASCADE)
+    modified_by = models.ForeignKey(User, related_name='project_modified_by', on_delete=models.CASCADE, null=True,
+                                    blank=True)
     modified_date = models.DateTimeField(blank=True, null=True)
 
     class Meta:

@@ -6,7 +6,7 @@ from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 from apache_kafka.producer import send_ns_message
 from users.models import Role, Affiliation
 from users.views import set_role_boolean
-from .ldapsearch import get_ldap_attributes
+from .ldap import get_ldap_attributes
 from .models import IsMemberOf, MembershipIsMemberOf, LdapOther, MembershipLdapOther
 
 

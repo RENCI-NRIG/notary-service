@@ -16,11 +16,18 @@
                     Notary Service tools.
                 </p>
                 <h2>My Projects
-                    {% if user.is_piadmin or user.is_nsadmin %}
+                    {% if user.is_nsadmin %}
                         <a href="{% url 'project_new' %}"
                            title="Create New Project" class="fa fa-fw fa-plus-square" style="color: green;"></a>
                     {% endif %}
                 </h2>
+                {% if user.is_piadmin or user.is_nsadmin %}
+                    <form method="POST" class="post-form">
+                        {% csrf_token %}
+                        <input type="submit" name="check-comanage-projects" value="Check COmanage for new projects"
+                               style="color: darkgreen">
+                    </form>
+                {% endif %}
                 <table width="100%" border="1px solid black" cellpadding="5px">
                     <tr>
                         {% if user.is_ig %}

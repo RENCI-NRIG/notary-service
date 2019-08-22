@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 
+from comanage.ldap import get_comanage_project_names
 from datasets.models import Dataset, NSTemplate
 from infrastructure.models import Infrastructure
 from users.models import Affiliation
@@ -13,13 +14,20 @@ from .models import Project, ComanageStaff, ComanagePIAdmin, ComanagePIMember, M
     MembershipComanageStaff, MembershipComanagePIAdmin, MembershipComanagePersonnel, MembershipComanagePIMember, \
     MembershipDatasets, MembershipProjectWorkflow, \
     MembershipInfrastructure, ComanagePersonnel
-from .projects import update_comanage_group, personnel_by_comanage_group, update_comanage_personnel
+from .projects import update_comanage_group, personnel_by_comanage_group, update_comanage_personnel, \
+    create_new_project, update_project_personnel, update_project_affiliations
 from .workflows import create_base_project_workflows, generate_neo4j_user_workflow_status
 
 
 def projects(request):
     context = {"projects_page": "active"}
     if request.user.is_authenticated:
+        if request.POST.get("check-comanage-projects"):
+            local_projects = Project.objects.values_list('comanage_name', flat=True).distinct()
+            comanage_projects = get_comanage_project_names()
+            for project in comanage_projects:
+                if project not in local_projects:
+                    create_new_project(project)
         return project_list(request)
     else:
         return render(request, 'projects.html', context)
@@ -38,6 +46,8 @@ def project_validate(ds_objs, show_uuid, project_uuid, user):
 
 def project_detail(request, uuid):
     project = get_object_or_404(Project, uuid=uuid)
+    update_project_personnel(project_obj=project)
+    update_project_affiliations(project_obj=project, user=request.user)
     if request.method == "POST":
         if request.POST.get("refresh-personnel"):
             update_comanage_group()
@@ -204,6 +214,12 @@ def create_new_workflow(project_obj: Project,
 
 
 def project_list(request):
+    try:
+        person = ComanagePersonnel.objects.get(
+            uid=request.user.sub,
+        )
+    except ComanagePersonnel.DoesNotExist:
+        person = None
     if request.user.is_nsadmin:
         proj_objs = Project.objects.filter(created_date__lte=timezone.now()).order_by('name')
     elif request.user.is_ig:
@@ -211,9 +227,7 @@ def project_list(request):
             if request.POST.get("ig-self-assign-project"):
                 if not MembershipComanagePersonnel.objects.filter(
                         project__uuid=request.POST.get("project_uuid"),
-                        person=ComanagePersonnel.objects.get(
-                            uid=request.user.sub,
-                        ),
+                        person=person,
                         affiliation_ig=Affiliation.objects.get(uuid=request.user.ns_affiliation),
                 ).exists():
                     MembershipComanagePersonnel.objects.create(
@@ -230,7 +244,7 @@ def project_list(request):
                     )
         proj_objs = Project.objects.filter(
             affiliations__idp__contains=request.user.idp,
-        ).order_by('name')
+        ).order_by('name').distinct()
     elif request.user.is_dp:
         proj_objs = Project.objects.filter(
             id__in=MembershipDatasets.objects.values('project_id').filter(
@@ -246,27 +260,21 @@ def project_list(request):
     elif request.user.is_piadmin:
         proj_objs = Project.objects.filter(
             id__in=MembershipComanagePersonnel.objects.values('project_id').filter(
-                person=ComanagePersonnel.objects.get(
-                    uid=request.user.sub,
-                ),
+                person=person,
                 comanage_pi_admins__isnull=False,
             ).distinct('project_id')
         ).order_by('name')
     elif request.user.is_pi:
         proj_objs = Project.objects.filter(
             id__in=MembershipComanagePersonnel.objects.values('project_id').filter(
-                person=ComanagePersonnel.objects.get(
-                    uid=request.user.sub,
-                ),
+                person=person,
                 comanage_pi_members__isnull=False,
             ).distinct('project_id')
         ).order_by('name')
     elif request.user.is_staff:
         proj_objs = Project.objects.filter(
             id__in=MembershipComanagePersonnel.objects.values('project_id').filter(
-                person=ComanagePersonnel.objects.get(
-                    uid=request.user.sub,
-                ),
+                person=person,
                 comanage_staff__isnull=False,
             ).distinct('project_id')
         ).order_by('name')
