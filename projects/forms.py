@@ -1,50 +1,60 @@
+from operator import itemgetter
+
 from django import forms
 
+from comanage.ldap import get_comanage_project_names
 from datasets.models import Dataset
 from infrastructure.models import Infrastructure
-from users.models import Affiliation
-from .models import Project, ComanagePIAdmin, ComanagePIMember, ComanageStaff
+from .models import Project
 
 
-class ProjectForm(forms.ModelForm):
+class ProjectCreateForm(forms.ModelForm):
+    comanage_projects = get_comanage_project_names()
+    project_choices = ()
+    for project in comanage_projects:
+        project_choices += ((project, project),)
 
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user')
-        super(ProjectForm, self).__init__(*args, **kwargs)
-        self.fields['affiliations'] = forms.ModelMultipleChoiceField(
-            queryset=Affiliation.objects.order_by('display_name'),
-            widget=forms.SelectMultiple,
-            label='Project Affiliations',
-            initial=Affiliation.objects.get(idp_name=user.idp_name),
-        )
+    project = forms.ChoiceField(
+        choices=sorted(project_choices, key=itemgetter(1)),
+        widget=forms.Select,
+        label='COmanage Project',
+        required=True
+    )
 
     name = forms.CharField(
+        widget=forms.TextInput(attrs={'size': 60}),
+        required=False
+    )
+
+    description = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 6, 'cols': 60}),
+        required=False
+    )
+
+    class Meta:
+        model = Project
+        fields = (
+            'project',
+            'name',
+            'description',
+        )
+
+
+class ProjectEditForm(forms.ModelForm):
+    name = forms.CharField(
         widget=forms.TextInput(attrs={'size': 60})
-    )
-    comanage_pi_admins = forms.ModelMultipleChoiceField(
-        queryset=ComanagePIAdmin.objects.filter(cn__contains='-PI:admins', active=True).order_by('cn'),
-        widget=forms.SelectMultiple(),
-        label='Project PI Admins',
-    )
-    comanage_pi_members = forms.ModelMultipleChoiceField(
-        queryset=ComanagePIMember.objects.filter(cn__contains='-PI:members:active', active=True).order_by('cn'),
-        widget=forms.SelectMultiple(),
-        label='Project PI Members',
-    )
-    comanage_staff = forms.ModelMultipleChoiceField(
-        queryset=ComanageStaff.objects.filter(cn__contains='-STAFF:members:active', active=True).order_by('cn'),
-        widget=forms.SelectMultiple(),
-        label='Project Members/Staff',
     )
     datasets = forms.ModelMultipleChoiceField(
         queryset=Dataset.objects.order_by('name'),
         widget=forms.SelectMultiple(),
         label="Datasets",
+        required=False
     )
     infrastructure = forms.ModelMultipleChoiceField(
         queryset=Infrastructure.objects.order_by('name'),
         widget=forms.SelectMultiple(),
         label="Infrastructure",
+        required=False
     )
 
     class Meta:
@@ -55,10 +65,6 @@ class ProjectForm(forms.ModelForm):
         fields = (
             'name',
             'description',
-            'affiliations',
-            'comanage_pi_admins',
-            'comanage_pi_members',
-            'comanage_staff',
             'datasets',
             'infrastructure',
         )

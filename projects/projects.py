@@ -6,7 +6,8 @@ from ldap3 import Connection, Server, ALL
 from users.models import Affiliation
 from .models import ComanageStaff, ComanagePIAdmin, ComanagePIMember, ComanagePersonnel, Project, \
     MembershipComanagePIAdmin, MembershipComanagePIMember, MembershipComanageStaff, \
-    MembershipComanagePersonnel, MembershipAffiliations
+    MembershipComanagePersonnel, MembershipAffiliations, MembershipProjectWorkflow
+from .workflows import create_base_project_workflows
 
 ldap_host = os.getenv('LDAP_HOST', '')
 ldap_user = os.getenv('LDAP_USER', '')
@@ -16,8 +17,31 @@ ldap_search_base = os.getenv('LDAP_SEARCH_BASE', '')
 server = Server(ldap_host, use_ssl=True, get_info=ALL)
 
 
+def project_workflow_dataset_affiliation_check(project_obj, user):
+    affiliation_list = Project.objects.values_list('affiliations__uuid', flat=True).filter(
+        uuid=project_obj.uuid
+    )
+    ds_list = Project.objects.values_list('datasets__uuid', flat=True).filter(
+        uuid=project_obj.uuid
+    )
+    for ds in ds_list:
+        for affiliation in affiliation_list:
+            if not MembershipProjectWorkflow.objects.filter(
+                    project=project_obj,
+                    dataset=ds,
+                    affiliation=affiliation
+            ).exists():
+                create_base_project_workflows(project_obj.uuid, user)
+
+
 def update_project_affiliations(project_obj, user):
-    if user.is_pi or user.is_staff:
+    """
+    Update affiliation based on project personnel
+    :param project_obj:
+    :param user:
+    :return:
+    """
+    if user.is_pi or user.is_nsstaff:
         local_affiliations = Affiliation.objects.filter(
             uuid__in=MembershipAffiliations.objects.values_list('affiliation__uuid', flat=True).filter(
                 project=project_obj
@@ -36,11 +60,16 @@ def update_project_affiliations(project_obj, user):
 
 
 def update_comanage_personnel_membership(project_obj, comanage_groups):
+    """
+    Update comanage personnel membership tables based on role
+    :param project_obj:
+    :param comanage_groups:
+    :return:
+    """
     role_type = re.findall(
         re.escape(project_obj.comanage_name) + r'[-\w]*-(\w+:(?:admins|members:active))',
         str(comanage_groups[0].cn)
     )
-    # print(f'----- role_type: {role_type[0]} -----')
     # get comanage group personnel
     comanage_personnel = []
     for group in comanage_groups:
@@ -49,25 +78,26 @@ def update_comanage_personnel_membership(project_obj, comanage_groups):
     local_personnel = []
     if role_type[0] == 'STAFF:members:active':
         local_personnel = ComanagePersonnel.objects.filter(
-            id__in=MembershipComanagePersonnel.objects.filter(
+            id__in=list(MembershipComanagePersonnel.objects.values_list('person_id', flat=True).filter(
                 project=project_obj,
                 comanage_staff__isnull=False
-            )
+            ))
         )
     elif role_type[0] == 'PI:members:active':
         local_personnel = ComanagePersonnel.objects.filter(
-            id__in=MembershipComanagePersonnel.objects.filter(
+            id__in=list(MembershipComanagePersonnel.objects.values_list('person_id', flat=True).filter(
                 project=project_obj,
                 comanage_pi_members__isnull=False
-            )
+            ))
         )
     elif role_type[0] == 'PI:admins':
         local_personnel = ComanagePersonnel.objects.filter(
-            id__in=MembershipComanagePersonnel.objects.filter(
+            id__in=list(MembershipComanagePersonnel.objects.values_list('person_id', flat=True).filter(
                 project=project_obj,
                 comanage_pi_admins__isnull=False
-            )
+            ))
         )
+
     # remove entry when local personnel not in comanage personnel
     for person in local_personnel:
         if role_type[0] == 'STAFF:members:active':
@@ -297,20 +327,41 @@ def update_project_pi_admin(project_obj):
 
 
 def update_project_personnel(project_obj):
+    """
+    Update project personnel (PI_ADMIN, PI, STAFF)
+    :param project_obj:
+    :return:
+    """
+    update_comanage_group()
+    update_comanage_personnel()
     update_project_pi_admin(project_obj=project_obj)
     update_project_pi(project_obj=project_obj)
     update_project_staff(project_obj=project_obj)
     project_obj.save()
 
 
-def create_new_project(comanage_project):
+def create_new_project(comanage_project, project_name=None, project_description=None):
+    """
+    Create new project based on COmanage COU group name
+    Optional project name and description
+    :param comanage_project:
+    :param project_name:
+    :param project_description:
+    :return:
+    """
     project = Project()
-    project.name = f"Untitled ({comanage_project})"
-    project.description = f"Untitled ({comanage_project})"
+    if project_name:
+        project.name = project_name
+    else:
+        project.name = f"Untitled ({comanage_project})"
+    if project_description:
+        project.description = project_description
+    else:
+        project.description = f"Untitled ({comanage_project})"
     project.comanage_name = str(comanage_project)
     project.save()
     update_project_personnel(project_obj=project)
-    # project.save()
+    return str(project.uuid)
 
 
 def get_ldap_comanage_staff():

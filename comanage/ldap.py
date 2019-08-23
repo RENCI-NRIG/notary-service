@@ -25,7 +25,7 @@ def get_comanage_project_names():
             comanage_output = comanage_output + str(entry)
     conn.unbind()
     comanage_projects = re.findall(r'\B\s*cn:\s{1}[COU?:]+(\w+)-PI:admins', comanage_output)
-    print(comanage_projects)
+    # print(comanage_projects)
     return comanage_projects
 
 
