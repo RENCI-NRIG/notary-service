@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static dataset_tags replace_tags project_tags %}
+{% load static dataset_tags replace_tags project_tags user_tags %}
 
 {% block head %}
     <meta charset="utf-8">
@@ -26,14 +26,20 @@
         {% if not user.is_norole %}
             <div class="container">
                 <div class="post">
-                    <h2>{{ workflow.name }}
-                        {% if user.is_piadmin or user.is_nsadmin %}
-                            <a href="{% url 'workflow_reset' uuid=workflow.uuid %}"
-                               title="Reset workflow" class="fa fa-fw fa-refresh" style="color: green;"></a>
-                            <a href="{% url 'workflow_delete' uuid=workflow.uuid %}"
-                               title="Delete workflow" class="fa fa-fw fa-trash" style="color: #B22222;"></a>
-                        {% endif %}
-                    </h2>
+                    Project:
+                    <a href="{% url 'project_detail' uuid=project.project.uuid %}">
+                        {{ project.project.name }}
+                    </a>
+                    > Dataset:
+                    <a href="{% url 'dataset_detail' uuid=project.dataset.uuid %}">
+                        {{ project.dataset.name }}
+                    </a>
+                    > Workflow:
+                    <a href="{% url 'workflow_detail' uuid=workflow.uuid %}">
+                        {{ workflow.name }}
+                    </a>
+                    <br><br>
+{#                    <h2>{{ workflow.name }}</h2>#}
                     <h3>Workflow Assertions</h3>
                     Make assertion by checking the related box and pressing the submit button following each statement
                     <br><br>
@@ -195,7 +201,7 @@
                                 {% endif %}
                             {% else %}
                                 {% if assertion == 'IS_COMPLETE' %}
-                                    <h3 style="color: darkgreen;">Workflow is complete!</h3>
+                                    <h3 style="color: darkgreen;">{{ user.role|rolename }}: Workflow is complete!</h3>
                                 {% else %}
                                     <h3 style="color: firebrick;">Assertions by other roles required before
                                         proceeding...</h3>
@@ -204,46 +210,46 @@
                             <br><br>
                         {% endfor %}
                     </form>
-                    <h3>Workflow Graph</h3>
                 </div>
-                <table width="100%">
-                    <tr>
-                        <td width="20%"></td>
-                        <td width="20%"></td>
-                        <td width="20%"></td>
-                        <td width="20%"></td>
-                        <td width="20%"></td>
-                    </tr>
-                    <tr>
-                        <td align="left">
-                            <i class="fa fa-circle" aria-hidden="true" style="color: darkgreen;"></i>
-                            Start Node
-                        </td>
-                        <td align="left">
-                            <i class="fa fa-circle" aria-hidden="true" style="color: firebrick;"></i>
-                            Stop Node
-                        </td>
-                        <td align="left">
-                            <i class="fa fa-circle" aria-hidden="true" style="color: goldenrod;"></i>
-                            User Set Node
-                        </td>
-                        <td align="left">
-                            <i class="fa fa-circle" aria-hidden="true" style="color: lightblue;"></i>
-                            Common Set Node
-                        </td>
-                        <td align="left">
-                            <i class="fa fa-circle" aria-hidden="true" style="color: lightgrey;"></i>
-                            Not on user path
-                        </td>
-                    </tr>
-                </table>
-                <div style="border:1px solid #434343;width:100%;height:600px;overflow:scroll;">
-                    <script type="text/javascript">
-                        sub_graph = {{ workflow_graph | safe }};
-                    </script>
-                    {% include "workflow_graph_path.html" %}
-                </div>
-                <br>
+                {#                <h3>Workflow Graph</h3>#}
+                {#                <table width="100%">#}
+                {#                    <tr>#}
+                {#                        <td width="20%"></td>#}
+                {#                        <td width="20%"></td>#}
+                {#                        <td width="20%"></td>#}
+                {#                        <td width="20%"></td>#}
+                {#                        <td width="20%"></td>#}
+                {#                    </tr>#}
+                {#                    <tr>#}
+                {#                        <td align="left">#}
+                {#                            <i class="fa fa-circle" aria-hidden="true" style="color: darkgreen;"></i>#}
+                {#                            Start Node#}
+                {#                        </td>#}
+                {#                        <td align="left">#}
+                {#                            <i class="fa fa-circle" aria-hidden="true" style="color: firebrick;"></i>#}
+                {#                            Stop Node#}
+                {#                        </td>#}
+                {#                        <td align="left">#}
+                {#                            <i class="fa fa-circle" aria-hidden="true" style="color: goldenrod;"></i>#}
+                {#                            User Set Node#}
+                {#                        </td>#}
+                {#                        <td align="left">#}
+                {#                            <i class="fa fa-circle" aria-hidden="true" style="color: lightblue;"></i>#}
+                {#                            Common Set Node#}
+                {#                        </td>#}
+                {#                        <td align="left">#}
+                {#                            <i class="fa fa-circle" aria-hidden="true" style="color: lightgrey;"></i>#}
+                {#                            Not on user path#}
+                {#                        </td>#}
+                {#                    </tr>#}
+                {#                </table>#}
+                {#                <div style="border:1px solid #434343;width:100%;height:600px;overflow:scroll;">#}
+                {#                    <script type="text/javascript">#}
+                {#                        sub_graph = {{ workflow_graph | safe }};#}
+                {#                    </script>#}
+                {#                    {% include "workflow_graph_path.html" %}#}
+                {#                </div>#}
+                {#                <br>#}
                 <table width="100%" style="font-size: small">
 
                     <tr>

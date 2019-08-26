@@ -392,7 +392,7 @@ def project_delete(request, uuid):
         MembershipComanagePIMember.objects.filter(project=project.id).delete()
         MembershipComanageStaff.objects.filter(project=project.id).delete()
         project.delete()
-        return project_list(request)
+        return redirect('projects')
     return render(request, 'project_delete.html', {
         'projects_page': 'active',
         'project': project,
