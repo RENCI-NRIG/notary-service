@@ -72,34 +72,6 @@ def project_detail(request, uuid):
     update_project_personnel(project_obj=project)
     update_project_affiliations(project_obj=project, user=request.user)
     project_workflow_dataset_affiliation_check(project_obj=project, user=request.user)
-    if request.method == "POST":
-        if request.POST.get("refresh-personnel"):
-            update_comanage_group()
-            update_comanage_personnel()
-            for group_pk in MembershipComanageStaff.objects.values_list('comanage_group_id').filter(
-                    project=project.id
-            ):
-                if not MembershipComanageStaff.objects.filter(
-                        project=project.id,
-                        comanage_group=group_pk
-                ).exists():
-                    MembershipComanageStaff.objects.create(
-                        project=project,
-                        comanage_group=ComanageStaff.objects.get(id=group_pk)
-                    )
-                    personnel = personnel_by_comanage_group(ComanageStaff.objects.get(id=group_pk).cn)
-                    for person in personnel:
-                        if not MembershipComanagePersonnel.objects.filter(
-                                person=person,
-                                project=project,
-                                comanage_staff=ComanageStaff.objects.get(id=group_pk)):
-                            MembershipComanagePersonnel.objects.create(
-                                person=person,
-                                project=project,
-                                comanage_pi_admins=None,
-                                comanage_pi_members=None,
-                                comanage_staff=ComanageStaff.objects.get(id=group_pk)
-                            )
     affiliations = MembershipAffiliations.objects.values_list('affiliation__uuid', flat=True).filter(
         project__uuid=project.uuid,
     )
@@ -166,8 +138,6 @@ def project_detail(request, uuid):
         if request.POST.get("validate"):
             project.is_valid, project_error = project_validate(ds_objs, request.user.show_uuid, project.uuid,
                                                                request.user)
-        elif request.POST.get("generate_workflow"):
-            generate_neo4j_user_workflow_status(project, request.user)
     if request.user.is_nsadmin or request.user.is_piadmin or request.user.is_dp or request.user.is_inp:
         wf_list = MembershipProjectWorkflow.objects.values_list('workflow__uuid').filter(
             project__uuid=project.uuid,
@@ -191,9 +161,6 @@ def project_detail(request, uuid):
         'projects_page': 'active',
         'project': project,
         'affiliations': affiliations,
-        'comanage_pi_admins': comanage_pi_admins,
-        'comanage_pi_members': comanage_pi_members,
-        'comanage_staff': comanage_staff,
         'project_pi_admins': project_pi_admins,
         'project_pi_members': project_pi_members,
         'project_staff': project_staff,

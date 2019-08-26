@@ -35,9 +35,13 @@ def create_base_project_workflows(project_uuid, user):
     affiliation_list = Project.objects.values_list('affiliations__uuid', flat=True).filter(
         uuid=project_uuid
     )
+    if affiliation_list[0] is None:
+        return
     ds_list = Project.objects.values_list('datasets__uuid', flat=True).filter(
         uuid=project_uuid
     )
+    if ds_list[0] is None:
+        return
     for affiliation_uuid in affiliation_list:
         for ds_uuid in ds_list:
             tplt_list = NSTemplate.objects.values_list('uuid', 'graphml_definition').filter(
