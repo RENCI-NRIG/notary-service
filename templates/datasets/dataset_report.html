@@ -6,150 +6,65 @@
 {% block content %}
     {% if user.is_authenticated %}
         {% if not user.is_norole %}
-            <div class="container" style="background-color: #F7F7F7">
-                <div class="post">
-                    <h2>{{ dataset.name }}</h2>
-                    <p>{{ dataset.description|linebreaksbr }}</p>
-                    <table width="100%">
-                        <tr>
-                            <td><b>DOI or Metadata URL:</b></td>
-                            <td>
-                                <a href="{{ dataset.dataset_identifier_as_doi_or_meta }}" target="_blank">
-                                    {{ dataset.dataset_identifier_as_doi_or_meta }}</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><b>Presidio URL:</b></td>
-                            <td>
-                                <a href="{{ dataset.dataset_identifier_as_url }}" target="_blank">
-                                    {{ dataset.dataset_identifier_as_url }}
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><b>SAFE SCID:</b></td>
-                            <td>{{ dataset.safe_identifier_as_scid }}</td>
-                        </tr>
-                        <tr>
-                            <td><b>Project:</b></td>
-                            <td>
-                                <a href="{% url 'project_detail' project_uuid %}">{{ project_name }}</a>
-                            </td>
-                        </tr>
-                    </table>
+            <div class="container">
+            <h3>Dataset / Workflow Report: {{ dataset.name }}</h3>
+
+            Project:
+            <a href="{% url 'project_detail' uuid=project.uuid %}">
+                {{ project.name }}
+            </a>
+            > Dataset:
+            <a href="{% url 'dataset_detail' uuid=dataset.uuid %}">
+                {{ dataset.name }}
+            </a>
+            <br><br>
+
+            {% for report in workflow_reports %}
+                <b>Workflow: </b>{{ report.workflow.name }} - {{ report.workflow.affiliation }}<br>
+                <div style="background-color: #DCDCDC;color:darkblue;font-family:Courier;
+                font-size: 14px; overflow-x: scroll; height: 300px; overflow-y: scroll; white-space: nowrap">
+                    {% for node in report.nodes %}
+                        [{{ node.ts|date:"Y-m-d H:i:s.u e" }}] - person="{{ node.person }}"
+                        role="{{ node.role }}"
+                        node(type)="{{ node.label }}({{ node.tp }})"
+                        value="{{ node.pv }}"
+                        <br>
+                    {% endfor %}
                 </div>
                 <br>
-                <div>
-                    <form method="POST" class="post-form">
-                        {% csrf_token %}
-                        <input type="submit" name="generate-jwt" value="Generate" style="color: darkgreen"> Access Token
-                    </form>
-                    {% if signed_jwt %}
-                        <b>Encoded JWT: </b>{{ signed_jwt|truncatechars:80 }}
-                        <br>
-                        <b>cURL request:</b> curl --header "ImPACT-JWT: {{ signed_jwt }}"
-                        --request POST "{{ dataset.dataset_identifier_as_url }}"
-                        <br>
-                        <b>Claims:</b>
-                        <br>
-                        <pre>{{ jwt_claims|pprint }}</pre>
-                    {% endif %}
-                </div>
-                <br>
-                <div>
-                    <p>
-                        <button
-                                id="message_button"
-                                style="color: darkgreen;"
-                        >Send
-                        </button>
-                        to Presidio
-                    </p>
-                    <p>Receive Message:</p>
-                    <div id="results"></div>
-                    <br/>
-                    <div id="iframe"></div>
-                    <script>
-                        // addEventListener support for IE8
-                        function bindEvent(element, eventName, eventHandler) {
-                            if (element.addEventListener) {
-                                element.addEventListener(eventName, eventHandler, false);
-                            } else if (element.attachEvent) {
-                                element.attachEvent('on' + eventName, eventHandler);
-                            }
-                        }
-
-                        var iframeSource = "{{ dataset.dataset_identifier_as_url }}";
-
-                        // Create the iframe
-                        var iframe = document.createElement('iframe');
-                        iframe.setAttribute('src', iframeSource);
-                        iframe.setAttribute('id', 'the_iframe');
-                        iframe.style.width = 100 + '%';
-                        {#iframe.style.width = 450 + 'px';#}
-                        iframe.style.height = 200 + 'px';
-                        document.body.appendChild(iframe);
-
-                        var getRef = document.getElementById("iframe");
-                        var parentDiv = getRef.parentNode;
-                        parentDiv.insertBefore(iframe, getRef);
-
-                        // Send a message to the child iframe
-                        var iframeEl = document.getElementById('the_iframe'),
-                            messageButton = document.getElementById('message_button'),
-                            results = document.getElementById('results');
-
-
-                        // Send a message to the child iframe
-                        var sendMessage = function (msg) {
-                            // Make sure you are sending a string, and to stringify JSON
-                            iframeEl.contentWindow.postMessage(msg, '{{ dataset.dataset_identifier_as_url }}');
-                        };
-
-                        // Send random messge data on every button click
-                        bindEvent(messageButton, 'click', function (e) {
-                            {#var random = Math.random();#}
-                            {#sendMessage('from notary service: ' + '' + random);#}
-                            sendMessage('{{ signed_jwt }}');
-                        });
-
-                        // Listen to message from child window
-                        bindEvent(window, 'message', function (e) {
-                            results.innerHTML = e.data;
-                        });
-                    </script>
-                </div>
-                <br>
-                <table width="100%" style="font-size: small">
-                    <tr>
-                        <td width="60%">
-                            <b>Created By:</b> {{ dataset.created_by }}
-                        </td>
-                        <td>
-                            <b>Modified By:</b> {{ dataset.modified_by }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <b>Created Date:</b> {{ dataset.created_date|date:"m/d/Y g:i a" }}
-                        </td>
-                        <td>
-                            <b>Modified Date:</b> {{ dataset.modified_date|date:"m/d/Y g:i a" }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <b>Validated:</b> {{ dataset.is_valid }}
-                            {% if dataset.is_valid %}
-                                (<i class="fa fa-fw fa-check" style="color: green;"></i>)
-                            {% else %}
-                                (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
-                            {% endif %}
-                        </td>
-                    </tr>
-                </table>
-            </div>
+            {% endfor %}
+            <br>
+            <br>
+            <table width="100%" style="font-size: small">
+                <tr>
+                    <td width="60%">
+                        <b>Created By:</b> {{ dataset.created_by }}
+                    </td>
+                    <td>
+                        <b>Modified By:</b> {{ dataset.modified_by }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Created Date:</b> {{ dataset.created_date|date:"m/d/Y g:i a" }}
+                    </td>
+                    <td>
+                        <b>Modified Date:</b> {{ dataset.modified_date|date:"m/d/Y g:i a" }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Validated:</b> {{ dataset.is_valid }}
+                        {% if dataset.is_valid %}
+                            (<i class="fa fa-fw fa-check" style="color: green;"></i>)
+                        {% else %}
+                            (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
         {% endif %}
+    </div>
     {% else %}
         <div class="container">
             <p>You are not currently logged in or not authorized to view this page</p>

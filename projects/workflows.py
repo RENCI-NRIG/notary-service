@@ -1,4 +1,6 @@
 import os
+import re
+from datetime import datetime
 
 from neo4j import GraphDatabase, basic_auth
 from ns_workflow import Neo4jWorkflow
@@ -16,6 +18,45 @@ neo_user = os.getenv('NEO4J_USER')
 neo_pass = os.getenv('NEO4J_PASS')
 import_dir = os.getenv('NEO4J_IMPORTS_PATH_DOCKER')
 import_host_dir = os.getenv('NEO4J_IMPORTS_PATH_HOST')
+
+
+def workflow_report_from_neo4j(workflow_uuid):
+    """
+    Harvest workflow information from Neo4j for completed tasks
+    :param workflow_uuid:
+    :return:
+    """
+    print(str(workflow_uuid))
+    bolt_driver = GraphDatabase.driver(bolt_url, auth=basic_auth(neo_user, neo_pass))
+    db = bolt_driver.session()
+    statement = "MATCH path = (n)-[r]->(m) WHERE n.GraphID = '" + str(workflow_uuid) + "' RETURN path"
+    results = db.run(statement).graph()
+    db.close()
+    nodes = []
+    for node in results.nodes:
+        entry = {}
+        entry['ts'] = str(node['ts'])
+        if entry['ts'] != 'None':
+            entry['ts'] = datetime.strptime(entry['ts'], "%Y-%m-%dT%H:%M:%S.%f%z")
+            search = re.search(r"CN={1}(\w+\s*\w+\s*\w+)", str(node['principal']))
+            if search is not None:
+                entry['person'] = str(search.group(1))
+            else:
+                entry['person'] = ''
+            entry['role'] = str(node['Role'])
+            entry['tp'] = str(node['Type'])
+            entry['label'] = str(node['label'])
+            entry['sp'] = str(node['SAFEParameters'])
+            pv = node['ParameterValue']
+            if pv is None:
+                entry['pv'] = str(None)
+            elif len(pv[0]) == 1:
+                entry['pv'] = str(pv)
+            else:
+                entry['pv'] = str(', '.join(list(pv)))
+            nodes.append(entry)
+    nodes = sorted(nodes, key=lambda i: i['ts'], reverse=True)
+    return nodes
 
 
 def create_base_project_workflows(project_uuid, user):
