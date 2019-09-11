@@ -20,7 +20,7 @@
                         {% if not project.is_valid %}
                             <form method="POST" class="post-form">
                                 {% csrf_token %}
-                                <input type="submit" name="validate" value="Validate and Generate/Refresh Workflow(s)"
+                                <input type="submit" name="validate" value="Validate"
                                        style="color: darkgreen">
                             </form>
                         {% endif %}
@@ -40,14 +40,7 @@
                         {% endfor %}
                     </ul>
                     <form method="POST" class="post-form">
-                        <h3>Personnel
-                            {% if user.is_piadmin or user.is_nsadmin %}
-                                {% csrf_token %}
-                                <input style="font-family: FontAwesome;color: green;
-                                border: none; background: none" name="refresh-personnel"
-                                       title="Refresh personnel" value="&#xf021;" type="submit">
-                            {% endif %}
-                        </h3>
+                        <h3>Personnel </h3>
                     </form>
                     {% if user.is_piadmin or user.is_nsadmin %}
                         <b>Project PI Admins</b>

@@ -5,8 +5,9 @@ from django.utils import timezone
 from ns_workflow import Neo4jWorkflow, WorkflowError
 
 from datasets.models import Dataset
-from projects.models import Project, MembershipDatasets, ProjectWorkflowUserCompletionByRole
-from projects.workflows import get_next_set_by_role
+from projects.models import Project, MembershipDatasets, ProjectWorkflowUserCompletionByRole, \
+    MembershipProjectWorkflow
+from projects.workflows import get_next_set_by_role, workflow_report_from_neo4j
 from safe.post_assertions import get_id_from_pub, post_raw_idset, post_common_completion_receipt, \
     post_user_completion_receipt, post_link_receipt_for_dataset
 from workflows.models import WorkflowNeo4j
@@ -222,25 +223,29 @@ def dataset_report(request, uuid):
     dataset = get_object_or_404(Dataset, uuid=uuid)
     dataset_error = None
     project_uuid = request.GET.get('project_uuid', '-1')
-    project_name = Project.objects.get(uuid=project_uuid).name
-    signed_jwt = None
-    jwt_claims = None
-    if request.method == "POST":
-        if request.POST.get("generate-jwt"):
-            signed_jwt = encode_ns_jwt(
-                project_uuid=project_uuid,
-                dataset_scid=dataset.safe_identifier_as_scid,
-                user=request.user
-            )
-            jwt_claims = decode_ns_jwt(signed_jwt)
+    project = Project.objects.get(uuid=project_uuid)
+    workflow_uuid_list = WorkflowNeo4j.objects.values_list('uuid', flat=True).filter(
+        uuid__in=MembershipProjectWorkflow.objects.values('workflow__uuid').filter(
+            project=Project.objects.get(uuid=project_uuid),
+            dataset=dataset
+        )
+    )
+    workflow_reports = []
+    for workflow_uuid in workflow_uuid_list:
+        worflow_report = {}
+        worflow_report['workflow'] = WorkflowNeo4j.objects.get(
+            uuid=workflow_uuid
+        )
+        worflow_report['nodes'] = workflow_report_from_neo4j(workflow_uuid)
+        workflow_reports.append(worflow_report)
+
     return render(request, 'dataset_report.html', {
         'datasets_page': 'active',
         'dataset': dataset,
         'dataset_error': dataset_error,
-        'project_uuid': project_uuid,
-        'project_name': project_name,
-        'signed_jwt': signed_jwt,
-        'jwt_claims': jwt_claims,
+        'project': project,
+        'workflow_reports': workflow_reports,
+        'user': request.user
     })
 
 
