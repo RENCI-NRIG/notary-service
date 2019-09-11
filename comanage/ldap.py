@@ -24,8 +24,7 @@ def get_comanage_project_names():
         for entry in conn.entries:
             comanage_output = comanage_output + str(entry)
     conn.unbind()
-    comanage_projects = re.findall(r'\B\s*cn:\s{1}[COU?:]+(\w+)-PI:admins', comanage_output)
-    # print(comanage_projects)
+    comanage_projects = re.findall(r'\B\s*cn:\s{1}CO:COU:(\w+)-PI:admins', comanage_output)
     return comanage_projects
 
 
@@ -34,8 +33,6 @@ def get_ldap_attributes(user):
         ldap_search_filter = '(eduPersonPrincipalName=' + user.eppn + ')'
     else:
         ldap_search_filter = '(mail=' + user.email + ')'
-    # COmanage LDAP appears inconsistent when including eduPersonPrincipalName (eppn), so using user.email only
-    # ldap_search_filter = '(mail=' + user.email + ')'
     conn = Connection(server, ldap_user, ldap_password, auto_bind=True)
     profile_found = conn.search(ldap_search_base,
                                 ldap_search_filter,

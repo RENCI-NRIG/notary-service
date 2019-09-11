@@ -23,8 +23,9 @@
                 <b>Workflow: </b>{{ report.workflow.name }} - {{ report.workflow.affiliation }}<br>
                 <div style="background-color: #DCDCDC;color:darkblue;font-family:Courier;
                 font-size: 14px; overflow-x: scroll; height: 300px; overflow-y: scroll; white-space: nowrap">
+                    {# Ref: https://docs.djangoproject.com/en/2.2/ref/templates/builtins/#date#}
                     {% for node in report.nodes %}
-                        [{{ node.ts|date:"Y-m-d H:i:s.u e" }}] - person="{{ node.person }}"
+                        [{{ node.ts|date:"D, M d, Y, H:i:s T" }}] - person="{{ node.person }}"
                         role="{{ node.role }}"
                         node(type)="{{ node.label }}({{ node.tp }})"
                         value="{{ node.pv }}"
@@ -38,28 +39,10 @@
             <table width="100%" style="font-size: small">
                 <tr>
                     <td width="60%">
-                        <b>Created By:</b> {{ dataset.created_by }}
+                        <b>Created By:</b> {{ user.username }}
                     </td>
                     <td>
-                        <b>Modified By:</b> {{ dataset.modified_by }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>Created Date:</b> {{ dataset.created_date|date:"m/d/Y g:i a" }}
-                    </td>
-                    <td>
-                        <b>Modified Date:</b> {{ dataset.modified_date|date:"m/d/Y g:i a" }}
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <b>Validated:</b> {{ dataset.is_valid }}
-                        {% if dataset.is_valid %}
-                            (<i class="fa fa-fw fa-check" style="color: green;"></i>)
-                        {% else %}
-                            (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
-                        {% endif %}
+                        <b>Created Date:</b> {% now "D, M d, Y, H:i:s T" %}
                     </td>
                 </tr>
             </table>

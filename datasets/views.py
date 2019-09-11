@@ -245,8 +245,7 @@ def dataset_report(request, uuid):
         'dataset_error': dataset_error,
         'project': project,
         'workflow_reports': workflow_reports,
-        # 'workflow_report_1': workflow_report_1,
-        # 'workflow_report_2': workflow_report_2,
+        'user': request.user
     })
 
 
