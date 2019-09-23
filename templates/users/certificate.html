@@ -15,10 +15,10 @@
             <br><br>
             {% if certificate_files == '' %}
                 1. Certificate generation requires you to
-                <a href="{{ auth_url }}" target="_blank"> make a new authorization request</a><br>
-                2. Copy the Response Code returned to you into the Authorization response box below<br>
-                3. Set a password for the p12 certificate<br>
-                4. Press the "Generate My Certificate" button<br>
+                <a href="{{ auth_url }}" target="_blank"> make a new authorization request</a> <- Click the link<br>
+                2. Copy the <b>Response Code</b> returned to you from part 1. into the <b>Authorization response</b> box below<br>
+                3. Set a password for the p12 certificate (certificate type used by browsers)<br>
+                4. Press the "<b>Generate My Certificate</b>" button<br>
                 <br>
                 <form method="POST" class="post-form">
                     {% csrf_token %}
