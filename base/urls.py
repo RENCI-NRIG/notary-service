@@ -34,5 +34,6 @@ urlpatterns = [
 ]
 
 # Configure custom error pages
+handler400 = 'base.views.handler400'
 handler404 = 'base.views.handler404'
 handler500 = 'base.views.handler500'

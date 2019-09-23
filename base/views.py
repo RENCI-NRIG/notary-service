@@ -3,6 +3,18 @@ import os
 from django.shortcuts import render
 
 
+def handler400(request, exception):
+    response = render(
+        request, '400.html',
+        {
+            'code': request.GET["code"],
+            'state': request.GET["state"]
+        }
+    )
+    response.status_code = 400
+    return response
+
+
 def handler404(request, exception):
     response = render(request, '404.html', {})
     response.status_code = 404

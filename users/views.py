@@ -1,10 +1,12 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.utils import timezone
 
 from apache_kafka.models import Message
 from apache_kafka.views import index_page_messages, check_for_new_messages
 from comanage.models import IsMemberOf, LdapOther, NotaryServiceUser
-from .forms import UserPreferences
-from .models import Role, Affiliation
+from .cilogon import generate_cilogon_certificates, get_authorization_url, download
+from .forms import UserPreferences, CILogonCertificateForm
+from .models import Role
 
 
 def index(request):
@@ -42,6 +44,58 @@ def login(request):
 def faq(request):
     context = {"faq_page": "active"}
     return render(request, 'faq.html', context)
+
+
+def authresponse(request):
+    auth_response = request.GET.get('code', '-1')
+    return render(
+        request, 'authresponse.html',
+        {
+            "profile_page": "active",
+            "auth_response": auth_response,
+        }
+    )
+
+
+def certificate(request):
+    if request.user.is_authenticated:
+        user = get_object_or_404(NotaryServiceUser, id=request.user.id)
+        auth_url = get_authorization_url()
+        certificate_files = ''
+        if request.method == 'POST':
+            if request.POST.get("download"):
+                path = request.POST.get("path")
+                return download(request, path=path)
+            form = CILogonCertificateForm(request.POST)
+            if form.is_valid():
+                if request.POST.get("generate-certificate"):
+                    # print("### Generate certificate ###")
+                    if str(request.POST.get('use_my_key')) == "True":
+                        # TODO allow user to upload private key for CSR generation
+                        # print("Upload your private key file")
+                        pass
+                    else:
+                        # print("Generating a private key for you")
+                        certificate_files = generate_cilogon_certificates(
+                            user=user,
+                            authorization_response=str(request.POST.get("authorization_response")),
+                            p12_password=str(request.POST.get("p12_password")),
+                        )
+                        user.cilogon_certificate_date = timezone.now()
+                        user.save()
+        else:
+            form = CILogonCertificateForm()
+        return render(
+            request, 'certificate.html',
+            {
+                'profile_page': 'active',
+                'form': form,
+                'auth_url': auth_url,
+                'certificate_files': certificate_files
+            }
+        )
+    else:
+        return render(request, 'certificate.html', {'profile_page': 'active'})
 
 
 def set_role_boolean(user):

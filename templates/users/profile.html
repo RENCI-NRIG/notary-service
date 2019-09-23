@@ -22,7 +22,28 @@
                 </tr>
             </table>
             <hr>
+            <table width="100%" cellpadding="5px">
+                <tr>
+                    <td style="width: 50%">
+                        <b style="font-size: larger">CILogon Certificate</b>
+                        {% if user.cilogon_certificate_date %}
+                            (Generated on: {{ user.cilogon_certificate_date }})
+                        {% else %}
+                            (Generated on: Not yet generated)
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button
+                                onclick="location.href = 'profile/certificate';"
+                                id="profile-certificate"
+                                style="color: darkgreen;"
+                        >Generate New Certificate
+                        </button>
+                    </td>
+                </tr>
+            </table>
 
+            <hr>
             <form method="POST" class="post-form">
                 {% csrf_token %}
                 <table width="100%" cellpadding="5px">

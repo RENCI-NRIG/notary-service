@@ -140,6 +140,8 @@ class MyOIDCAB(OIDCAuthenticationBackend):
         user.affiliation = claims.get('affiliation', '')
         user.name = claims.get('name', '')
         user.show_uuid = False
+        user.cilogon_auth_code = str(self.request.GET['code'])
+        user.cilogon_auth_state = str(self.request.GET['state'])
         user.save()
 
         ldap_attributes = get_ldap_attributes(user)
@@ -190,6 +192,8 @@ class MyOIDCAB(OIDCAuthenticationBackend):
         user.acr = claims.get('acr', '')
         user.affiliation = claims.get('affiliation', '')
         user.name = claims.get('name', '')
+        user.cilogon_auth_code = str(self.request.GET['code'])
+        user.cilogon_auth_state = str(self.request.GET['state'])
         user.save()
 
         ldap_attributes = get_ldap_attributes(user)

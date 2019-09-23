@@ -3,7 +3,7 @@ from operator import itemgetter
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
-from users.models import Affiliation
+from users.models import Affiliation, CILogonCertificate
 from .models import NotaryServiceUser
 
 
@@ -65,3 +65,20 @@ class AffiliationChangeForm(forms.ModelForm):
     class Meta:
         model = Affiliation
         fields = ('display_name', 'idp_name', 'idp')
+
+
+class CILogonCertificateForm(forms.Form):
+    # VIEW_CHOICE = (
+    #     (True, 'I will upload my private key'),
+    #     (False, 'Generate a private key for me (default)'),
+    # )
+    #
+    # use_my_key = forms.ChoiceField(
+    #     choices=VIEW_CHOICE,
+    #     widget=forms.Select,
+    #     label='Private Key File',
+    #     initial=False,
+    # )
+
+    authorization_response = forms.CharField(max_length=1024)
+    p12_password = forms.CharField(max_length=255)
