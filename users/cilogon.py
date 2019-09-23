@@ -23,11 +23,21 @@ auth_url = 'https://cilogon.org/authorize'
 
 
 def user_cilogon_certificates_directory_path(instance, filename):
+    """
+    Return full path to filename based on User UUID value
+    :param instance:
+    :param filename:
+    :return:
+    """
     # file will be uploaded to MEDIA_ROOT/cilogon_certificates/user_<uuid>/<filename>
     return os.path.join(MEDIA_ROOT, 'cilogon_certificates/user_{0}/{1}'.format(instance.uuid, filename))
 
 
 def get_authorization_url():
+    """
+    return Authorization URL for CILogon
+    :return:
+    """
     oauth = OAuth2Session(
         client_id,
         redirect_uri=redirect_uri,
@@ -71,6 +81,13 @@ def get_csr():
 
 
 def generate_cilogon_certificates(user, authorization_response, p12_password):
+    """
+    Generate CILogon certificate pair and pcks12 file
+    :param user:
+    :param authorization_response:
+    :param p12_password:
+    :return:
+    """
     oauth = OAuth2Session(
         client_id,
         redirect_uri=redirect_uri,
@@ -94,6 +111,9 @@ def generate_cilogon_certificates(user, authorization_response, p12_password):
     )
     oauth.close()
     # print(cilogon_cert.content)
+    file_path = os.path.dirname(user_cilogon_certificates_directory_path(user, 'cilogon.crt'))
+    if not os.path.exists(file_path):
+        os.makedirs(file_path)
     open(user_cilogon_certificates_directory_path(user, 'cilogon.crt'), 'wb').write(cilogon_cert.content)
     open(user_cilogon_certificates_directory_path(user, 'cilogon.key'), 'wb').write(key)
     cmd = [
@@ -126,6 +146,12 @@ def generate_cilogon_certificates(user, authorization_response, p12_password):
 
 
 def download(request, path):
+    """
+    Create download response for requested file
+    :param request:
+    :param path:
+    :return:
+    """
     if os.path.exists(path):
         with open(path, 'rb') as fh:
             response = HttpResponse(fh.read(), content_type="application/vnd.ms-excel")

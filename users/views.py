@@ -64,7 +64,16 @@ def certificate(request):
         certificate_files = ''
         if request.method == 'POST':
             if request.POST.get("download"):
-                path = request.POST.get("path")
+                for key in request.POST:
+                    print(key)
+                    value = request.POST[key]
+                    print(value)
+                if request.POST.get("path-cilogon.crt"):
+                    path = request.POST.get("path-cilogon.crt")
+                elif request.POST.get("path-cilogon.key"):
+                    path = request.POST.get("path-cilogon.key")
+                else:
+                    path = request.POST.get("path-cilogon.p12")
                 return download(request, path=path)
             form = CILogonCertificateForm(request.POST)
             if form.is_valid():
