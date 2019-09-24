@@ -4,13 +4,16 @@ from django.shortcuts import render
 
 
 def handler400(request, exception):
-    response = render(
-        request, '400.html',
-        {
-            'code': request.GET["code"],
-            'state': request.GET["state"]
-        }
-    )
+    if request.GET["code"] is None:
+        response = render(request, '400.html', {})
+    else:
+        response = render(
+            request, 'authresponse.html',
+            {
+                'code': request.GET["code"],
+                'state': request.GET["state"]
+            }
+        )
     response.status_code = 400
     return response
 

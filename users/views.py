@@ -64,10 +64,6 @@ def certificate(request):
         certificate_files = ''
         if request.method == 'POST':
             if request.POST.get("download"):
-                for key in request.POST:
-                    print(key)
-                    value = request.POST[key]
-                    print(value)
                 if request.POST.get("path-cilogon.crt"):
                     path = request.POST.get("path-cilogon.crt")
                 elif request.POST.get("path-cilogon.key"):
