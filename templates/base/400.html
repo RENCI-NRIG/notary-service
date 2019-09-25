@@ -3,8 +3,11 @@
 <html>
 <body>
 <div class="container" style="text-align: center">
-    <h1 style="color:#999">404: Uh oh... Page Not Found!</h1>
+    <h1 style="color:#999">400 - Suspicious Operation (Response Code Below)</h1>
     <img width="300px" src="{% static "img/AngryUnicorn.png" %}">
+    <br>
+    <b>Response Code:</b>{{ code }}<br>
+    <b>State:</b>{{ state }}<br>
 </div>
 </body>
 </html>

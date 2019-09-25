@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+        <div class="container">
+            <h1>CILogon Certificate</h1>
+            {% if user.cilogon_certificate_date %}
+                Certificate last generated on: {{ user.cilogon_certificate_date }}
+            {% else %}
+                Certificate last generated on: Not yet generated
+            {% endif %}
+            <br><br>
+            {% if certificate_files == '' %}
+                1. Certificate generation requires you to
+                <a href="{{ auth_url }}" target="_blank"> make a new authorization request</a> <- Click the link<br>
+                2. Copy the <b>Response Code</b> returned to you from part 1. into the <b>Authorization response</b> box below<br>
+                3. Set a password for the p12 certificate (certificate type used by browsers)<br>
+                4. Press the "<b>Generate My Certificate</b>" button<br>
+                <br>
+                <form method="POST" class="post-form">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <input type="submit" name="generate-certificate" value="Generate My Certificate"
+                           style="color: darkgreen">
+                    <input type="hidden" name="use_my_key" value="False">
+                </form>
+            {% else %}
+                <h3>Download your certificates</h3>
+
+                {% for file_ref in certificate_files %}
+                    <form method="POST" class="post-form">
+                        {% csrf_token %}
+                        <input type="submit" name="download" value="download"
+                               style="color: darkgreen">
+                        <input type="hidden" name="path-{{ file_ref.name }}" value={{ file_ref.path }}>
+                        {{ file_ref.name }} ({{ file_ref.description }})
+                    </form>
+                {% endfor %}
+
+                <br>
+                <h3 style="color: firebrick">Download all desired certificates before leaving this page</h3>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="container">
+            <p>You are not currently logged in or not authorized to view this page</p>
+        </div>
+    {% endif %}
+{% endblock %}

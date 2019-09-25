@@ -49,6 +49,14 @@ class Affiliation(models.Model):
         return len(self.display_name)
 
 
+class CILogonCertificate(models.Model):
+    use_my_key = models.BooleanField(default=False)
+    public_key_path = models.FilePathField(null=True, blank=True, default=None)
+    private_key_path = models.FilePathField(null=True, blank=True, default=None)
+    pkcs12_file_path = models.FilePathField(null=True, blank=True, default=None)
+    authorization_response = models.CharField(max_length=1024)
+
+
 class NotaryServiceUser(AbstractUser):
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
     given_name = models.CharField(max_length=255)
@@ -77,7 +85,9 @@ class NotaryServiceUser(AbstractUser):
     is_inp = models.BooleanField(default=False)
     is_ig = models.BooleanField(default=False)
     is_norole = models.BooleanField(default=False)
+    cilogon_certificate_date = models.DateTimeField(null=True, blank=True, default=None)
+    cilogon_auth_code = models.CharField(max_length=1024)
+    cilogon_auth_state = models.CharField(max_length=255)
 
     def __str__(self):
         return self.email
-

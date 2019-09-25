@@ -10,4 +10,5 @@ urlpatterns = [
     path('profile', views.profile, name='profile'),
     path('login', views.login, name='login'),
     path('faq', views.faq, name='faq'),
+    path('profile/certificate', views.certificate, name='certificate'),
 ]

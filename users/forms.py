@@ -65,3 +65,13 @@ class AffiliationChangeForm(forms.ModelForm):
     class Meta:
         model = Affiliation
         fields = ('display_name', 'idp_name', 'idp')
+
+
+class CILogonCertificateForm(forms.Form):
+    """
+    Certificate information form
+    :var authorization_response - URL returned by CILogon authorization check
+    :var p12_password - User entered password for p12 certificate generation
+    """
+    authorization_response = forms.CharField(max_length=1024)
+    p12_password = forms.CharField(max_length=255)
