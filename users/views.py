@@ -58,6 +58,13 @@ def authresponse(request):
 
 
 def certificate(request):
+    """
+    Generate and retrieve certificate files from CILogon
+    If certificate files are generated, give the user one chance to download them, otherwise present the
+    certificate creation options
+    :param request:
+    :return:
+    """
     if request.user.is_authenticated:
         user = get_object_or_404(NotaryServiceUser, id=request.user.id)
         auth_url = get_authorization_url()
@@ -74,13 +81,10 @@ def certificate(request):
             form = CILogonCertificateForm(request.POST)
             if form.is_valid():
                 if request.POST.get("generate-certificate"):
-                    # print("### Generate certificate ###")
                     if str(request.POST.get('use_my_key')) == "True":
                         # TODO allow user to upload private key for CSR generation
-                        # print("Upload your private key file")
                         pass
                     else:
-                        # print("Generating a private key for you")
                         certificate_files = generate_cilogon_certificates(
                             user=user,
                             authorization_response=str(request.POST.get("authorization_response")),

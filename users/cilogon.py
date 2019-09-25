@@ -16,8 +16,6 @@ from base.settings import MEDIA_ROOT
 client_id = os.getenv('OIDC_RP_CLIENT_ID', None)
 client_secret = os.getenv('OIDC_RP_CLIENT_SECRET', None)
 redirect_uri = os.getenv('OIDC_RP_CALLBACK', None)
-# redirect_uri = 'https://ns-dev-1.cyberimpact.us/oidc/callback/'
-# redirect_uri = 'https://127.0.0.1:8443/oidc/callback/'
 scope = ['openid', 'email', 'profile', 'org.cilogon.userinfo', 'edu.uiuc.ncsa.myproxy.getcert']
 auth_url = 'https://cilogon.org/authorize'
 
@@ -110,7 +108,6 @@ def generate_cilogon_certificates(user, authorization_response, p12_password):
         }
     )
     oauth.close()
-    # print(cilogon_cert.content)
     file_path = os.path.dirname(user_cilogon_certificates_directory_path(user, 'cilogon.crt'))
     if not os.path.exists(file_path):
         os.makedirs(file_path)
@@ -129,8 +126,6 @@ def generate_cilogon_certificates(user, authorization_response, p12_password):
     ]
     p12_out = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     p12_stdout, p12_stderr = p12_out.communicate()
-    # print(p12_stdout)
-    # print(p12_stderr)
     open(user_cilogon_certificates_directory_path(user, 'cilogon.p12'), 'wb').write(p12_stdout)
     certificate_files = []
     certificate_files.append({"name": "cilogon.crt",
