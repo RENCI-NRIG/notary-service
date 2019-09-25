@@ -2,10 +2,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 
 from projects.models import MembershipInfrastructure
-from projects.models import Project
+from projects.models import Project, ComanagePersonnel, ProjectWorkflowUserCompletionByRole
 from .forms import InfrastructureForm
 from .models import Infrastructure
 from users.models import Affiliation
+from users.models import Role
 
 
 def infrastructure_validate(infra_uuid):
@@ -23,7 +24,47 @@ def infrastructure_in_use(infra_uuid):
 
 
 def infrastructure_list(request):
-    infra_objs = Infrastructure.objects.filter(created_date__lte=timezone.now()).order_by('name')
+    try:
+        person = ComanagePersonnel.objects.get(
+            uid=request.user.sub,
+        )
+    except ComanagePersonnel.DoesNotExist:
+        person = None
+
+    if request.user.is_nsadmin:
+        infra_objs = Infrastructure.objects.filter(created_date__lte=timezone.now()).order_by('name')
+    elif request.user.is_ig:
+        infra_objs = []
+    elif request.user.is_dp:
+        infra_objs = []
+    elif request.user.is_inp:
+        infra_objs = Infrastructure.objects.filter(
+            owner=request.user
+        ).order_by('name')
+    elif request.user.is_piadmin:
+        infra_objs = Infrastructure.objects.filter(created_date__lte=timezone.now()).order_by('name')
+    elif request.user.is_pi:
+        infra_objs = Infrastructure.objects.filter(
+            uuid__in=MembershipInfrastructure.objects.values_list('infrastructure__uuid').filter(
+                project__uuid__in=ProjectWorkflowUserCompletionByRole.objects.values_list('project__uuid').filter(
+                    person=request.user,
+                    role=Role.objects.get(id=request.user.role)
+                )
+            ).distinct()
+        ).order_by('name')
+    elif request.user.is_nsstaff:
+        infra_objs = Infrastructure.objects.filter(
+            uuid__in=MembershipInfrastructure.objects.values_list('infrastructure__uuid').filter(
+                project__uuid__in=ProjectWorkflowUserCompletionByRole.objects.values_list('project__uuid').filter(
+                    person=request.user,
+                    role=Role.objects.get(id=request.user.role)
+                )
+            ).distinct()
+        ).order_by('name')
+    else:
+        print('---- shouldn\'t get here ----')
+        infra_objs = Infrastructure.objects.filter(created_date__lte=timezone.now()).order_by('name')
+
     return infra_objs
 
 

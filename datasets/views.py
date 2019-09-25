@@ -6,7 +6,7 @@ from ns_workflow import Neo4jWorkflow, WorkflowError
 
 from datasets.models import Dataset
 from projects.models import Project, MembershipDatasets, ProjectWorkflowUserCompletionByRole, \
-    MembershipProjectWorkflow
+    MembershipProjectWorkflow, ComanagePersonnel, MembershipComanagePersonnel
 from projects.workflows import get_next_set_by_role, workflow_report_from_neo4j
 from safe.post_assertions import get_id_from_pub, post_raw_idset, post_common_completion_receipt, \
     post_user_completion_receipt, post_link_receipt_for_dataset
@@ -16,6 +16,7 @@ from workflows.workflow_neo4j import create_workflow_from_template, delete_workf
 from .forms import TemplateForm, DatasetForm
 from .jwt import encode_ns_jwt, decode_ns_jwt
 from .models import NSTemplate, MembershipNSTemplate
+from users.models import Role
 
 bolt_url = os.getenv('NEO4J_BOLT_URL')
 neo_user = os.getenv('NEO4J_USER')
@@ -33,7 +34,40 @@ def datasets(request):
 
 
 def dataset_list(request):
-    ds_objs = Dataset.objects.filter(created_date__lte=timezone.now()).order_by('name')
+    if request.user.is_nsadmin:
+        ds_objs = Dataset.objects.filter(created_date__lte=timezone.now()).order_by('name')
+    elif request.user.is_ig:
+        ds_objs = Dataset.objects.filter(
+            uuid__in=ProjectWorkflowUserCompletionByRole.objects.values_list('dataset__uuid').filter(
+                person=request.user,
+                role=Role.objects.get(id=request.user.role)
+            ).distinct()
+        ).order_by('name')
+    elif request.user.is_dp:
+        ds_objs = Dataset.objects.filter(
+            created_by=request.user,
+        ).order_by('name')
+    elif request.user.is_inp:
+        ds_objs = []
+    elif request.user.is_piadmin:
+        ds_objs = Dataset.objects.filter(created_date__lte=timezone.now()).order_by('name')
+    elif request.user.is_pi:
+        ds_objs = Dataset.objects.filter(
+            uuid__in=ProjectWorkflowUserCompletionByRole.objects.values_list('dataset__uuid').filter(
+                person=request.user,
+                role=Role.objects.get(id=request.user.role)
+            ).distinct()
+        ).order_by('name')
+    elif request.user.is_nsstaff:
+        ds_objs = Dataset.objects.filter(
+            uuid__in=ProjectWorkflowUserCompletionByRole.objects.values_list('dataset__uuid').filter(
+                person=request.user,
+                role=Role.objects.get(id=request.user.role)
+            ).distinct()
+        ).order_by('name')
+    else:
+        print('---- shouldn\'t get here ----')
+        ds_objs = Dataset.objects.filter(created_date__lte=timezone.now()).order_by('name')
     return render(request, 'datasets.html', {'datasets_page': 'active', 'datasets': ds_objs})
 
 
@@ -396,7 +430,41 @@ def templates(request):
 
 
 def template_list(request):
-    tpl_objs = NSTemplate.objects.filter(created_date__lte=timezone.now()).order_by('name')
+    try:
+        person = ComanagePersonnel.objects.get(
+            uid=request.user.sub,
+        )
+    except ComanagePersonnel.DoesNotExist:
+        person = None
+
+    if request.user.is_nsadmin:
+        tpl_objs = NSTemplate.objects.filter(created_date__lte=timezone.now()).order_by('name')
+    elif request.user.is_ig:
+        tpl_objs = []
+    elif request.user.is_dp:
+        tpl_objs = NSTemplate.objects.filter(
+            owner=request.user
+        ).order_by('name')
+    elif request.user.is_inp:
+        tpl_objs = []
+    elif request.user.is_piadmin:
+        tpl_objs = NSTemplate.objects.filter(
+            uuid__in=MembershipNSTemplate.objects.values_list('template__uuid').filter(
+                dataset__uuid__in=MembershipDatasets.objects.values_list('dataset__uuid').filter(
+                    project__uuid__in=MembershipComanagePersonnel.objects.values_list('project__uuid').filter(
+                        person=person
+                    )
+                )
+            ).distinct()
+        ).order_by('name')
+    elif request.user.is_pi:
+        tpl_objs = []
+    elif request.user.is_nsstaff:
+        tpl_objs = []
+    else:
+        print('---- shouldn\'t get here ----')
+        tpl_objs = NSTemplate.objects.filter(created_date__lte=timezone.now()).order_by('name')
+
     return render(request, 'templates.html', {'templates_page': 'active', 'templates': tpl_objs})
 
 
