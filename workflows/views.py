@@ -1,13 +1,14 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 
-from projects.models import MembershipProjectWorkflow
+from projects.models import MembershipProjectWorkflow, ComanagePersonnel, ProjectWorkflowUserCompletionByRole
 from projects.workflows import take_user_through_workflow, \
     workflow_save_safe_token_and_complete, workflow_update_node_property, \
     workflow_make_conditional_selection_and_disable_branches
 from workflows import workflow_neo4j as wf
 from .context_processors import export_neo4j_vars
 from .models import WorkflowNeo4j
+from users.models import Role
 
 
 def workflows(request):
@@ -20,7 +21,56 @@ def workflows(request):
 
 
 def workflow_list(request):
-    wf_objs = WorkflowNeo4j.objects.filter(created_date__lte=timezone.now()).order_by('name')
+    try:
+        person = ComanagePersonnel.objects.get(
+            uid=request.user.sub,
+        )
+    except ComanagePersonnel.DoesNotExist:
+        person = None
+
+    if request.user.is_nsadmin:
+        wf_objs = WorkflowNeo4j.objects.filter(created_date__lte=timezone.now()).order_by('name')
+    elif request.user.is_ig:
+        wf_objs = WorkflowNeo4j.objects.filter(
+            uuid__in=ProjectWorkflowUserCompletionByRole.objects.values_list('workflow__uuid').filter(
+                person=request.user,
+                role=Role.objects.get(id=request.user.role)
+            )
+        ).order_by('name')
+    elif request.user.is_dp:
+        wf_objs = WorkflowNeo4j.objects.filter(
+            uuid__in=ProjectWorkflowUserCompletionByRole.objects.values_list('workflow__uuid').filter(
+                person=request.user,
+                role=Role.objects.get(id=request.user.role)
+            )
+        ).order_by('name')
+    elif request.user.is_inp:
+        wf_objs = WorkflowNeo4j.objects.filter(
+            uuid__in=ProjectWorkflowUserCompletionByRole.objects.values_list('workflow__uuid').filter(
+                person=request.user,
+                role=Role.objects.get(id=request.user.role)
+            )
+        ).order_by('name')
+    elif request.user.is_piadmin:
+        wf_objs = []
+    elif request.user.is_pi:
+        wf_objs = WorkflowNeo4j.objects.filter(
+            uuid__in=ProjectWorkflowUserCompletionByRole.objects.values_list('workflow__uuid').filter(
+                person=request.user,
+                role=Role.objects.get(id=request.user.role)
+            )
+        ).order_by('name')
+    elif request.user.is_nsstaff:
+        wf_objs = WorkflowNeo4j.objects.filter(
+            uuid__in=ProjectWorkflowUserCompletionByRole.objects.values_list('workflow__uuid').filter(
+                person=request.user,
+                role=Role.objects.get(id=request.user.role)
+            )
+        ).order_by('name')
+    else:
+        print('---- shouldn\'t get here ----')
+        wf_objs = WorkflowNeo4j.objects.filter(created_date__lte=timezone.now()).order_by('name')
+
     return wf_objs
 
 

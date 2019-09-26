@@ -25,11 +25,12 @@
             <table width="100%" cellpadding="5px">
                 <tr>
                     <td style="width: 50%">
-                        <b style="font-size: larger">CILogon Certificate</b>
+                        <b style="font-size: larger">CILogon Certificate</b><br>
                         {% if user.cilogon_certificate_date %}
-                            (Generated on: {{ user.cilogon_certificate_date }})
+                            - Generated: {{ user.cilogon_certificate_date }}<br>
+                            - Valid until: {{ user.cilogon_certificate_date|cert_exp_datetime }}
                         {% else %}
-                            (Generated on: Not yet generated)
+                            - Generated: Not yet generated
                         {% endif %}
                     </td>
                     <td>

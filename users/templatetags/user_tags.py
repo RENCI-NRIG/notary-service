@@ -1,6 +1,7 @@
 from django import template
 
 from users.models import Role, Affiliation
+from datetime import datetime, timedelta
 
 register = template.Library()
 
@@ -8,6 +9,11 @@ register = template.Library()
 @register.filter
 def rolename(value):
     return str(Role.objects.get(id=value))
+
+
+@register.filter
+def cert_exp_datetime(start_time):
+    return start_time + timedelta(days=10)
 
 
 @register.filter

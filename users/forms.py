@@ -74,4 +74,4 @@ class CILogonCertificateForm(forms.Form):
     :var p12_password - User entered password for p12 certificate generation
     """
     authorization_response = forms.CharField(max_length=1024)
-    p12_password = forms.CharField(max_length=255)
+    p12_password = forms.CharField(widget=forms.PasswordInput(), max_length=255)
