@@ -39,7 +39,6 @@
                         {{ workflow.name }}
                     </a>
                     <br><br>
-{#                    <h2>{{ workflow.name }}</h2>#}
                     <h3>Workflow Assertions</h3>
                     Make assertion by checking the related box and pressing the submit button following each statement
                     <br><br>
@@ -68,6 +67,7 @@
                                                 <br>
                                             {% endif %}
                                             <input type="submit" name="assert_{{ assertion.ID }}"
+                                                   onclick="return confirm('Are you sure?')"
                                                    value="Submit"
                                                    style="color: darkgreen">
                                         {% endwith %}
@@ -96,6 +96,7 @@
                                                         <br>
                                                     {% endif %}
                                                     <input type="submit" name="assert_{{ assertion.ID }}"
+                                                           onclick="return confirm('Are you sure?')"
                                                            value="Submit"
                                                            style="color: darkgreen">
                                                 {% endwith %}
@@ -119,6 +120,7 @@
                                                     <br>
                                                 {% endif %}
                                                 <input type="submit" name="assert_{{ assertion.ID }}"
+                                                       onclick="return confirm('Are you sure?')"
                                                        value="Submit"
                                                        style="color: darkgreen">
                                             {% elif safe_parameters.type == 'String' %}
@@ -135,6 +137,7 @@
                                                     <br>
                                                 {% endif %}
                                                 <input type="submit" name="assert_{{ assertion.ID }}"
+                                                       onclick="return confirm('Are you sure?')"
                                                        value="Submit"
                                                        style="color: darkgreen">
                                             {% elif safe_parameters.type == 'StringList' %}
@@ -151,6 +154,7 @@
                                                     <br>
                                                 {% endif %}
                                                 <input type="submit" name="assert_{{ assertion.ID }}"
+                                                       onclick="return confirm('Are you sure?')"
                                                        value="Submit"
                                                        style="color: darkgreen">
                                             {% elif safe_parameters.type == 'IPv4List' %}
@@ -167,6 +171,7 @@
                                                     <br>
                                                 {% endif %}
                                                 <input type="submit" name="assert_{{ assertion.ID }}"
+                                                       onclick="return confirm('Are you sure?')"
                                                        value="Submit"
                                                        style="color: darkgreen">
                                             {% endif %}
@@ -182,6 +187,7 @@
                                             <br>
                                         {% endif %}
                                         <input type="submit" name="assert_{{ assertion.ID }}"
+                                               onclick="return confirm('Are you sure?')"
                                                value="I Agree"
                                                style="color: darkgreen">
                                     {% endif %}
@@ -196,6 +202,7 @@
                                         <br>
                                     {% endif %}
                                     <input type="submit" name="assert_{{ assertion.ID }}"
+                                           onclick="return confirm('Are you sure?')"
                                            value="I Agree"
                                            style="color: darkgreen">
                                 {% endif %}
@@ -211,45 +218,6 @@
                         {% endfor %}
                     </form>
                 </div>
-                {#                <h3>Workflow Graph</h3>#}
-                {#                <table width="100%">#}
-                {#                    <tr>#}
-                {#                        <td width="20%"></td>#}
-                {#                        <td width="20%"></td>#}
-                {#                        <td width="20%"></td>#}
-                {#                        <td width="20%"></td>#}
-                {#                        <td width="20%"></td>#}
-                {#                    </tr>#}
-                {#                    <tr>#}
-                {#                        <td align="left">#}
-                {#                            <i class="fa fa-circle" aria-hidden="true" style="color: darkgreen;"></i>#}
-                {#                            Start Node#}
-                {#                        </td>#}
-                {#                        <td align="left">#}
-                {#                            <i class="fa fa-circle" aria-hidden="true" style="color: firebrick;"></i>#}
-                {#                            Stop Node#}
-                {#                        </td>#}
-                {#                        <td align="left">#}
-                {#                            <i class="fa fa-circle" aria-hidden="true" style="color: goldenrod;"></i>#}
-                {#                            User Set Node#}
-                {#                        </td>#}
-                {#                        <td align="left">#}
-                {#                            <i class="fa fa-circle" aria-hidden="true" style="color: lightblue;"></i>#}
-                {#                            Common Set Node#}
-                {#                        </td>#}
-                {#                        <td align="left">#}
-                {#                            <i class="fa fa-circle" aria-hidden="true" style="color: lightgrey;"></i>#}
-                {#                            Not on user path#}
-                {#                        </td>#}
-                {#                    </tr>#}
-                {#                </table>#}
-                {#                <div style="border:1px solid #434343;width:100%;height:600px;overflow:scroll;">#}
-                {#                    <script type="text/javascript">#}
-                {#                        sub_graph = {{ workflow_graph | safe }};#}
-                {#                    </script>#}
-                {#                    {% include "workflow_graph_path.html" %}#}
-                {#                </div>#}
-                {#                <br>#}
                 <table width="100%" style="font-size: small">
 
                     <tr>
