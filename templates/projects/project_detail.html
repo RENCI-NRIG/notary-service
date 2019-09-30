@@ -47,6 +47,7 @@
                         <table width="100%" border="1px solid black" cellpadding="5px">
                             <tr>
                                 <td align="center"><b>Name</b></td>
+                                <td align="center"><b>Affiliation</b></td>
                                 <td align="center"><b>COmanage Group</b></td>
                                 <td align="center"><b>Email</b></td>
                             </tr>
@@ -59,6 +60,7 @@
                                         {% endif %}
                                 >
                                     <td>{{ name }}</td>
+                                    <td>{{ uid|affiliation_from_comanage_uid }}</td>
                                     <td>{{ group|slice:"7:" }}</td>
                                     <td>{{ email }}</td>
                                 </tr>
@@ -70,6 +72,7 @@
                     <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
                             <td align="center"><b>Name</b></td>
+                            <td align="center"><b>Affiliation</b></td>
                             <td align="center"><b>COmanage Group</b></td>
                             <td align="center"><b>Email</b></td>
                         </tr>
@@ -82,6 +85,7 @@
                                     {% endif %}
                             >
                                 <td>{{ name }}</td>
+                                <td>{{ uid|affiliation_from_comanage_uid }}</td>
                                 <td>{{ group|slice:"7:" }}</td>
                                 <td>{{ email }}</td>
                             </tr>
@@ -92,6 +96,7 @@
                     <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
                             <td align="center"><b>Name</b></td>
+                            <td align="center"><b>Affiliation</b></td>
                             <td align="center"><b>COmanage Group</b></td>
                             <td align="center"><b>Email</b></td>
                         </tr>
@@ -104,6 +109,7 @@
                                     {% endif %}
                             >
                                 <td>{{ name }}</td>
+                                <td>{{ uid|affiliation_from_comanage_uid }}</td>
                                 <td>{{ group|slice:"7:" }}</td>
                                 <td>{{ email }}</td>
                             </tr>
@@ -113,8 +119,8 @@
                     <b>Infrastructure Providers</b>
                     <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
-                            <td align="center"><b>Infrastructure</b></td>
                             <td align="center"><b>Owner</b></td>
+                            <td align="center"><b>Infrastructure</b></td>
                             <td align="center"><b>Email</b></td>
                         </tr>
                         {% for infra in infrastructure %}
@@ -125,8 +131,8 @@
                                         style="color: darkgray"
                                     {% endif %}
                             >
-                                <td>{{ infra.name }}</td>
                                 <td>{{ infra.owner.name }}</td>
+                                <td>{{ infra.name }}</td>
                                 <td>{{ infra.owner }}</td>
                             </tr>
                         {% endfor %}
@@ -135,8 +141,8 @@
                     <b>Institutional Governance</b>
                     <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
-                            <td align="center"><b>Affiliation</b></td>
                             <td align="center"><b>Name</b></td>
+                            <td align="center"><b>Affiliation</b></td>
                             <td align="center"><b>Email</b></td>
                         </tr>
                         {% for affiliation_ig in institutional_governance %}
@@ -147,8 +153,8 @@
                                         style="color: darkgray"
                                     {% endif %}
                             >
-                                <td>{{ affiliation_ig.ns_affiliation|affiliation_uuid_to_name }}</td>
                                 <td>{{ affiliation_ig.name }}</td>
+                                <td>{{ affiliation_ig.ns_affiliation|affiliation_uuid_to_name }}</td>
                                 <td>{{ affiliation_ig.email }}</td>
                             </tr>
                         {% endfor %}
@@ -157,8 +163,8 @@
                     <b>Data Providers</b>
                     <table width="100%" border="1px solid black" cellpadding="5px">
                         <tr>
-                            <td align="center"><b>Dataset</b></td>
                             <td align="center"><b>Owner</b></td>
+                            <td align="center"><b>Dataset</b></td>
                             <td align="center"><b>Email</b></td>
                         </tr>
                         {% for dataset in datasets %}
@@ -169,8 +175,8 @@
                                         style="color: darkgray"
                                     {% endif %}
                             >
-                                <td>{{ dataset.name }}</td>
                                 <td>{{ dataset.owner.name }}</td>
+                                <td>{{ dataset.name }}</td>
                                 <td>{{ dataset.owner }}</td>
                             </tr>
                         {% endfor %}

@@ -1,6 +1,7 @@
 from django import template
+from django.core.exceptions import ObjectDoesNotExist
 
-from users.models import Role, Affiliation
+from users.models import Role, Affiliation, NotaryServiceUser
 from datetime import datetime, timedelta
 
 register = template.Library()
@@ -14,6 +15,17 @@ def rolename(value):
 @register.filter
 def cert_exp_datetime(start_time):
     return start_time + timedelta(days=10)
+
+
+@register.filter
+def affiliation_from_comanage_uid(user_uid):
+    try:
+        user_aff = NotaryServiceUser.objects.get(
+            sub=user_uid
+        ).idp_name
+    except NotaryServiceUser.DoesNotExist:
+        user_aff = 'User has not interacted with system yet'
+    return user_aff
 
 
 @register.filter
