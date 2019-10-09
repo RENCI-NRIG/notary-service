@@ -4,9 +4,25 @@
 
 [![Requirements Status](https://requires.io/github/RENCI-NRIG/notary-service/requirements.svg?branch=master)](https://requires.io/github/RENCI-NRIG/notary-service/requirements/?branch=master)
 
-**What is the Notary Service?** - TODO
+## What is Notary Service?
 
-**Requirements**: There are a small set of system requirements in order to run this code. If you're planning on doing additional development to this codebase, then additional requirements may be applicable.
+Notary Service (NS) consists of a web server interacting with different principals (Researchers, representatives of Institutional Governance, Infrastructure Providers and Data Providers) via their User Agent. It accepts policy descriptions and associated document forms from Data Providers (DPs) and then presents different views of those documents to other principals to allow them to make digitally signed statements (attestations) about the requirements spelled out in the documents. NS also provides a communications channel between DPs and other principals that allows for direct negotiation of access via threaded conversations linked to a particular context. The attestations are recorded using SAFE in the remote Data Policy Store. The attestations are then used by Data Provider agents guarding access to data to make decisions regarding granting access to the data by the principals. 
+
+![NS Principals](https://user-images.githubusercontent.com/5332509/66511934-e4c30400-eaa5-11e9-8a52-87e8baba1454.png)
+
+Principals authenticate to NS using their institutional credentials via NS integration with [CILogon](https://www.cilogon.org). NS can rely on a combination of InCommon, CILogon claims and local configuration to assign roles to principals. Based on those roles the NS presents different views of the DUA process to principals allowing them to make attestations recorded as SAFE assertions mapped onto different steps of the DUA.  
+
+The DUA is specified as a series of DAGs (Directed Acyclic Graphs) describing the different phases and facets of the DUA. The nodes are individual attestations required by the DUA workflow, while the directed edges describe dependencies between nodes. The nodes in the DUA workflow graphs are tagged with the type of principal or the principal role that must make the respected attestation within the workflow. For example, the figure below demonstrates several separate DAGs - one describing the DUA workflow for research approval, comprised of two branches - one intended for researchers (PIs and individual project staff) and the other for the representatives of the institutional governance (e.g. IRB). 
+
+![Workflows](https://user-images.githubusercontent.com/5332509/66511935-e4c30400-eaa5-11e9-88dd-84f6a6a73a2a.png)
+
+The second graph shows the DUA workflow for the infrastructure provider. As shown, individual project members may be required to provide attestations in both types of graphs. Examples of these situations may be: requiring project staff to provide data privacy pledges for the research approval and staff providing attestations of passing the required infrastructure training for the infrastructure approval. 
+
+Additionally, infrastructure providers may require acknowledgements from PIs or staff for their internal bookkeeping, as reflected in the third ‘Infrastructure Acknowledgement’ graph. SAFE statements generated from this graph are not expected to be used in data access approval, but may be used for other purposes. These types of acknowledgements are a common requirement by institutional infrastructure providers.
+
+## System Requirements
+
+There are a small set of system requirements in order to run Notary Service code. If you're planning on doing additional development to this codebase, then additional requirements may be applicable.
 
 - To Run
   - Docker
