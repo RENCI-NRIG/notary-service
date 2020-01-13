@@ -1,13 +1,13 @@
 --editable ./lib/ns_workflow # ns-workflow==0.1
-coverage==5.0
+coverage==5.0.3
 cryptography==2.8
 django-cleanup
 django-crispy-forms==1.8.1
 django-nose==1.4.6
-Django==3.0
+Django==3.0.2
 kafka-python==1.4.7
 ldap3==2.6
-mozilla-django-oidc==1.2.2
+mozilla-django-oidc==1.2.3
 ns-jwt==0.1.2
 psycopg2-binary==2.8.4
 pycryptodome==3.9.4

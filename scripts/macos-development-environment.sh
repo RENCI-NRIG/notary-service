@@ -3,6 +3,7 @@
 # deployment variables
 NS_HOST=127.0.0.1
 NS_PORT=8443
+LOCAL_PYTHON3=/usr/local/bin/python3
 
 echo "### Deploy Notary Service to: ${NS_HOST}:${NS_PORT} ###"
 echo "### NOTE: This script is specific to macOS development using virtualenv ###"
@@ -86,7 +87,7 @@ sed -i 's/chmod-socket        = 666/;chmod-socket        = 666/' ns_uwsgi.ini
 # check for virtualenv
 echo "INFO: create virtualenv as venv if it does not exist"
 if [[ ! -d venv ]]; then
-  virtualenv -p $(which python3) venv
+  virtualenv -p ${LOCAL_PYTHON3} venv
   source venv/bin/activate
   pip install --upgrade pip
   pip install -r requirements.txt

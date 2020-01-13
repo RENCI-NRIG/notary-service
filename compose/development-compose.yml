@@ -2,7 +2,7 @@ version: '3.6'
 services:
 
   database:
-    image: postgres:11
+    image: postgres:12
     container_name: database
     ports:
       - ${POSTGRES_PORT:-5432}:5432
@@ -41,7 +41,7 @@ services:
       - UWSGI_GID=${UWSGI_GID:-1000}
 
   nginx:
-    image: nginx:latest
+    image: nginx:1
     container_name: nginx
     ports:
       - 8080:80
@@ -57,7 +57,7 @@ services:
       - ${NGINX_SSL_KEY:-./ssl/ssl_dev.key}:/etc/ssl/SSL.key:ro   # SSL development key
 
   neo4j:
-    image: rencinrig/neo4j-apoc:latest
+    image: rencinrig/neo4j-apoc:3.5.0
     container_name: neo4j
     user: ${NEO4J_UID:-1000}:${NEO4J_GID:-1000}
     ports:
