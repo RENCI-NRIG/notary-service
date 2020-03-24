@@ -4,6 +4,8 @@
 
 [![Requirements Status](https://requires.io/github/RENCI-NRIG/notary-service/requirements.svg?branch=master)](https://requires.io/github/RENCI-NRIG/notary-service/requirements/?branch=master)
 
+- [kafka-python](https://kafka-python.readthedocs.io/en/master/) to remain at v1.4.7 due to dependencies
+
 ## What is Notary Service?
 
 Notary Service (NS) consists of a web server interacting with different principals (Researchers, representatives of Institutional Governance, Infrastructure Providers and Data Providers) via their User Agent. It accepts policy descriptions and associated document forms from Data Providers (DPs) and then presents different views of those documents to other principals to allow them to make digitally signed statements (attestations) about the requirements spelled out in the documents. NS also provides a communications channel between DPs and other principals that allows for direct negotiation of access via threaded conversations linked to a particular context. The attestations are recorded using SAFE in the remote Data Policy Store. The attestations are then used by Data Provider agents guarding access to data to make decisions regarding granting access to the data by the principals. 
