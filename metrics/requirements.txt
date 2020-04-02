@@ -1,0 +1,2 @@
+--editable ../lib/ns_workflow # ns-workflow==0.1
+python-dotenv==0.12.0
