@@ -1,9 +1,9 @@
 import os
+from time import time
 
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 from ns_workflow import Neo4jWorkflow
-from time import time
 
 load_dotenv('env.python')
 
@@ -57,8 +57,6 @@ def set_workflow_nodes_as_completed(graph_uuid):
     query = "MATCH (n) WHERE n.GraphID = '" + graph_uuid + "' AND NOT (n.Type = 'Start' OR n.Type = 'Stop') SET n.completed='True' return (n)"
     with driver.session() as session:
         val = session.run(query)
-
-# match (n) where n.GraphID = 'c39cde22-7840-45e0-866d-4c8c792c22cd' and NOT (n.Type = 'Start' OR n.Type = 'Stop') return (n)#
 
 
 def delete_workflow_by_uuid(graph_uuid):

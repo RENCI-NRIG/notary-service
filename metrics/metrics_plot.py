@@ -1,5 +1,6 @@
-import matplotlib.pyplot as plt
 import json
+
+import matplotlib.pyplot as plt
 import numpy as np
 
 # create empty data object for 4 graphs, 1000 samples, 4 measurements each
@@ -75,7 +76,7 @@ d3 = data[graphname['seven-by-seven'], :, datatype['check-empty']]
 d4 = data[graphname['seven-by-seven'], :, datatype['check-complete']]
 
 # Summary Table
-print("{:<15} {:<15} {:<15} {:<15} {:<15}".format('Workflow','Load','Validate','Check empty', 'Check complete'))
+print("{:<15} {:<15} {:<15} {:<15} {:<15}".format('Workflow', 'Load', 'Validate', 'Check empty', 'Check complete'))
 for gn in graphname:
     print("{:<15} ".format(gn), end='', flush=True)
     for dt in datatype:
