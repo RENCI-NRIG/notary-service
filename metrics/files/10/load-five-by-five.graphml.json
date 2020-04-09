@@ -1,0 +1,86 @@
+{
+    "graph": "five-by-five.graphml",
+    "count": 10,
+    "metrics_load": {
+        "total": 0.33771347999572754,
+        "average": 0.03377134799957275,
+        "units": "seconds"
+    },
+    "metrics_validate": {
+        "total": 2.1553831100463867,
+        "average": 0.21553831100463866,
+        "units": "seconds"
+    },
+    "measurement": [
+        {
+            "uuid": "30342a31-d802-458a-b6e9-f3e7ea17210a",
+            "time_load": 0.12016797065734863,
+            "time_validate": 0.3968048095703125,
+            "time_units": "seconds",
+            "is_valid": true
+        },
+        {
+            "uuid": "e32b89cb-da12-4ea3-9471-6a5ce5f1faa1",
+            "time_load": 0.025588512420654297,
+            "time_validate": 0.1816716194152832,
+            "time_units": "seconds",
+            "is_valid": true
+        },
+        {
+            "uuid": "d12ccb98-9791-4688-97ee-ded60f9580eb",
+            "time_load": 0.024239778518676758,
+            "time_validate": 0.21643924713134766,
+            "time_units": "seconds",
+            "is_valid": true
+        },
+        {
+            "uuid": "040980da-6fef-4b4b-9504-d7d5f4af9ce0",
+            "time_load": 0.02583765983581543,
+            "time_validate": 0.17815732955932617,
+            "time_units": "seconds",
+            "is_valid": true
+        },
+        {
+            "uuid": "f8400796-ce7b-4f80-bd86-0a8ac853f002",
+            "time_load": 0.02140331268310547,
+            "time_validate": 0.17796087265014648,
+            "time_units": "seconds",
+            "is_valid": true
+        },
+        {
+            "uuid": "fb872287-0ad2-46e4-9aae-6e9dcdab8231",
+            "time_load": 0.02783060073852539,
+            "time_validate": 0.19196510314941406,
+            "time_units": "seconds",
+            "is_valid": true
+        },
+        {
+            "uuid": "71bdb266-3772-4dcb-9fff-147c9e10a078",
+            "time_load": 0.02664780616760254,
+            "time_validate": 0.19535088539123535,
+            "time_units": "seconds",
+            "is_valid": true
+        },
+        {
+            "uuid": "8825bbbe-2279-4171-8fc1-d302b5472af3",
+            "time_load": 0.020792722702026367,
+            "time_validate": 0.19786691665649414,
+            "time_units": "seconds",
+            "is_valid": true
+        },
+        {
+            "uuid": "ccec42b1-8b6f-4f4f-a44f-2302b0e766bd",
+            "time_load": 0.02328324317932129,
+            "time_validate": 0.20328950881958008,
+            "time_units": "seconds",
+            "is_valid": true
+        },
+        {
+            "uuid": "edb0d246-27ad-4c53-8943-10b1f8273efd",
+            "time_load": 0.021921873092651367,
+            "time_validate": 0.21587681770324707,
+            "time_units": "seconds",
+            "is_valid": true
+        }
+    ]
+}

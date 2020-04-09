@@ -36,7 +36,6 @@ def load_neo4j_graph(path_to_graph: str):
     print("Generate import metrics for:", path_to_graph)
     with open('files/uuid.json', encoding='utf-8') as f:
         json_data = json.loads(f.read())
-    f.close()
     data = {
         'graph': os.path.basename(path_to_graph),
         'count': len(json_data['uuid'])
@@ -55,7 +54,7 @@ def load_neo4j_graph(path_to_graph: str):
             'time_load': tc,
             'time_validate': tv,
             'time_units': 'seconds',
-            'is_complete': is_complete
+            'is_valid': is_complete
         })
 
     print('')
@@ -76,7 +75,6 @@ def check_graph_for_workflow_completeness(path_to_graph: str):
     print("Check for workflow completeness using graph:", path_to_graph)
     with open('files/uuid.json', encoding='utf-8') as f:
         json_data = json.loads(f.read())
-    f.close()
     data = {
         'graph': os.path.basename(path_to_graph),
         'count': len(json_data['uuid'])
@@ -114,8 +112,6 @@ def set_workflow_as_completed():
     print("Set all workflow nodes as completed")
     with open('files/uuid.json', encoding='utf-8') as f:
         json_data = json.loads(f.read())
-    f.close()
-
     for item in json_data['uuid']:
         print(item)
         set_workflow_nodes_as_completed(item)
@@ -126,8 +122,6 @@ def remove_all_neo4j_graph():
     print("Remove all Neo4j graphs")
     with open('files/uuid.json', encoding='utf-8') as f:
         json_data = json.loads(f.read())
-    f.close()
-
     for item in json_data['uuid']:
         print(item)
         delete_workflow_by_uuid(item)

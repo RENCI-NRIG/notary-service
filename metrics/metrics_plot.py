@@ -3,6 +3,10 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 
+# set path prefix to json data files
+# path_prefix = 'files/10'
+path_prefix = 'files/1000'
+
 # create empty data object for 4 graphs, 1000 samples, 4 measurements each
 data = np.zeros((4, 1000, 4))
 
@@ -24,7 +28,7 @@ for gn in graphname:
     print('-----', gn, '-----')
     filename = 'load-' + gn + '.graphml.json'
     print('Data from:', filename)
-    with open('files/' + filename) as json_file:
+    with open(path_prefix + '/' + filename) as json_file:
         json_data = json.load(json_file)
     json_file.close()
     for i in range(len(json_data['measurement'])):
@@ -37,7 +41,7 @@ for gn in graphname:
 
     filename = 'check-false-' + gn + '.graphml.json'
     print('Data from:', filename)
-    with open('files/' + filename) as json_file:
+    with open(path_prefix + '/' + filename) as json_file:
         json_data = json.load(json_file)
     json_file.close()
     for i in range(len(json_data['measurement'])):
@@ -47,7 +51,7 @@ for gn in graphname:
 
     filename = 'check-true-' + gn + '.graphml.json'
     print('Data from:', filename)
-    with open('files/' + filename) as json_file:
+    with open(path_prefix + '/' + filename) as json_file:
         json_data = json.load(json_file)
     json_file.close()
     for i in range(len(json_data['measurement'])):

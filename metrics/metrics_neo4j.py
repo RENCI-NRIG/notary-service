@@ -13,18 +13,18 @@ neo_pass = os.getenv('NEO4J_PASS')
 import_dir = os.getenv('NEO4J_IMPORTS_PATH_DOCKER')
 import_host_dir = os.getenv('NEO4J_IMPORTS_PATH_HOST')
 
+neo4j = Neo4jWorkflow(
+    url=bolt_url,
+    user=neo_user,
+    pswd=neo_pass,
+    importDir=import_dir,
+    importHostDir=import_host_dir
+)
+
 
 def create_graph_from_file(graphml_file, graph_uuid):
-    graphmlFile = open(graphml_file, "r")
-    graphml = graphmlFile.read()
-    graphmlFile.close()
-    neo4j = Neo4jWorkflow(
-        url=bolt_url,
-        user=neo_user,
-        pswd=neo_pass,
-        importDir=import_dir,
-        importHostDir=import_host_dir
-    )
+    with open(graphml_file, 'r') as graphmlFile:
+        graphml = graphmlFile.read()
     tc_0 = time()
     gid = neo4j.import_workflow(graphml=graphml, graphId=str(graph_uuid))
     tc_1 = time()
@@ -39,13 +39,6 @@ def create_graph_from_file(graphml_file, graph_uuid):
 
 
 def is_workflow_complete(graph_uuid):
-    neo4j = Neo4jWorkflow(
-        url=bolt_url,
-        user=neo_user,
-        pswd=neo_pass,
-        importDir=import_dir,
-        importHostDir=import_host_dir
-    )
     tc_0 = time()
     is_complete = neo4j.is_workflow_complete(principalId='metrics', role='PI', graphId=str(graph_uuid))
     tc_1 = time()
@@ -60,13 +53,6 @@ def set_workflow_nodes_as_completed(graph_uuid):
 
 
 def delete_workflow_by_uuid(graph_uuid):
-    neo4j = Neo4jWorkflow(
-        url=bolt_url,
-        user=neo_user,
-        pswd=neo_pass,
-        importDir=import_dir,
-        importHostDir=import_host_dir
-    )
     neo4j.delete_workflow(str(graph_uuid))
 
 

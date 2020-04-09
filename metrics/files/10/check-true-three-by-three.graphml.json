@@ -1,0 +1,71 @@
+{
+    "graph": "three-by-three.graphml",
+    "count": 10,
+    "metrics_check": {
+        "total": 1.2953135967254639,
+        "average": 0.1295313596725464,
+        "units": "seconds"
+    },
+    "measurement": [
+        {
+            "uuid": "30342a31-d802-458a-b6e9-f3e7ea17210a",
+            "time_check": 0.21342825889587402,
+            "time_units": "seconds",
+            "is_complete": true
+        },
+        {
+            "uuid": "e32b89cb-da12-4ea3-9471-6a5ce5f1faa1",
+            "time_check": 0.11595630645751953,
+            "time_units": "seconds",
+            "is_complete": true
+        },
+        {
+            "uuid": "d12ccb98-9791-4688-97ee-ded60f9580eb",
+            "time_check": 0.11412334442138672,
+            "time_units": "seconds",
+            "is_complete": true
+        },
+        {
+            "uuid": "040980da-6fef-4b4b-9504-d7d5f4af9ce0",
+            "time_check": 0.11240172386169434,
+            "time_units": "seconds",
+            "is_complete": true
+        },
+        {
+            "uuid": "f8400796-ce7b-4f80-bd86-0a8ac853f002",
+            "time_check": 0.11555933952331543,
+            "time_units": "seconds",
+            "is_complete": true
+        },
+        {
+            "uuid": "fb872287-0ad2-46e4-9aae-6e9dcdab8231",
+            "time_check": 0.10926985740661621,
+            "time_units": "seconds",
+            "is_complete": true
+        },
+        {
+            "uuid": "71bdb266-3772-4dcb-9fff-147c9e10a078",
+            "time_check": 0.1432185173034668,
+            "time_units": "seconds",
+            "is_complete": true
+        },
+        {
+            "uuid": "8825bbbe-2279-4171-8fc1-d302b5472af3",
+            "time_check": 0.11445069313049316,
+            "time_units": "seconds",
+            "is_complete": true
+        },
+        {
+            "uuid": "ccec42b1-8b6f-4f4f-a44f-2302b0e766bd",
+            "time_check": 0.13167357444763184,
+            "time_units": "seconds",
+            "is_complete": true
+        },
+        {
+            "uuid": "edb0d246-27ad-4c53-8943-10b1f8273efd",
+            "time_check": 0.12523198127746582,
+            "time_units": "seconds",
+            "is_complete": true
+        }
+    ]
+}
