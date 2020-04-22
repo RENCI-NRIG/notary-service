@@ -313,3 +313,21 @@ Newly validated workflows are considered to be "empty" in that none of the user 
 Workflows are considered complete once all viable paths from the start node to the stop node have been completed for all user roles associated with each graph. Using the provided sample graphs the completed number of nodes checked prior to return will correlate to the number of rows x columns in each graph, so 2, 9, 25, and 49 nodes respectively.
 
 ![](figures/figure-check-complete.png)
+
+### About the setup
+
+The above tests were performed on a virtual machine hosted in a VMWare cluster
+
+- vSphere Client version 6.7.0.30000
+- VMware Tools: Running, version:10309 (Guest Managed)
+-  Compatibility: ESXi 6.0 and later (VM version 11)
+
+The VM itself was configured as:
+
+- 4 CPU
+- 16 GB RAM
+- 80 GB Disk
+- CentOS 7
+
+![](figures/vm-configuration.png)
+
