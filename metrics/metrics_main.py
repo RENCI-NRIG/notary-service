@@ -5,7 +5,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from metrics_neo4j import create_graph_from_file, delete_workflow_by_uuid, \
-    delete_all_nodes, is_workflow_complete, set_workflow_nodes_as_completed
+    delete_all_nodes, is_workflow_complete, set_workflow_nodes_as_completed, create_neo4j_indices
 
 load_dotenv('env.python')
 
@@ -129,13 +129,15 @@ def remove_all_neo4j_graph():
 
 
 # main
-def main(generateids: int, importgraph: str, removegraph: bool, checkworkflow: str, completeall: str):
+def main(generateids: int, importgraph: str, removegraph: bool, checkworkflow: str, completeall: str, createindices: bool):
     if isinstance(generateids, int):
         generate_uuid_list(generateids)
     if isinstance(importgraph, str):
         load_neo4j_graph(importgraph)
     if removegraph:
         remove_all_neo4j_graph()
+    if createindices:
+        create_neo4j_indices()
     if checkworkflow:
         check_graph_for_workflow_completeness(checkworkflow)
     if completeall:
@@ -156,6 +158,8 @@ if __name__ == '__main__':
                         help='Set all workflow nodes to completed=True')
     parser.add_argument('--removegraph', action='store_true',
                         help='Remove all existing graphs from Neo4j')
+    parser.add_argument('--createindices', action='store_true',
+                        help='Create graph indices in Neo4j')
     args = parser.parse_args()
 
     # validate input
@@ -193,5 +197,6 @@ if __name__ == '__main__':
         importgraph=args.importgraph,
         removegraph=args.removegraph,
         checkworkflow=args.checkworkflow,
-        completeall=args.completeall
+        completeall=args.completeall,
+        createindices=args.createindices,
     )
