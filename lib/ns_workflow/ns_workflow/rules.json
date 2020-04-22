@@ -1,62 +1,62 @@
 [
   {
-    "rule": "MATCH (s {GraphID: $graphId, Type: \"Start\"}) RETURN count(*)=1",
+    "rule": "MATCH (s:Node {GraphID: $graphId, Type: \"Start\"}) RETURN count(*)=1",
     "msg": "There must be a single Start node."
   },
   {
-    "rule": "MATCH (s {GraphID: $graphId, Type: \"Stop\"}) RETURN count(*)=1",
+    "rule": "MATCH (s:Node {GraphID: $graphId, Type: \"Stop\"}) RETURN count(*)=1",
     "msg": "There must be a single Stop node."
   },
   {
-    "rule": "MATCH (s {GraphID: $graphId}), p= (s) -[*]-> (s) RETURN size(collect(p))=0",
+    "rule": "MATCH (s:Node {GraphID: $graphId}), p= (s) -[*]-> (s) RETURN size(collect(p))=0",
     "msg": "Workflow graph must not contain cycles."
   },
   {
-    "rule": "MATCH (s {GraphID: $graphId}), (d {GraphID: $graphId}), (e {GraphID: $graphId}) WHERE s.Type=\"Start\" AND NOT d.Type=\"Start\" and NOT e.Type=\"Start\" WITH s, d, count(e) AS TotalDest MATCH p= (s) -[*]-> (d) WITH d, count(p) AS cp, TotalDest RETURN TotalDest=size(collect(cp))",
+    "rule": "MATCH (s:Node {GraphID: $graphId}), (d:Node {GraphID: $graphId}), (e:Node {GraphID: $graphId}) WHERE s.Type=\"Start\" AND NOT d.Type=\"Start\" and NOT e.Type=\"Start\" WITH s, d, count(e) AS TotalDest MATCH p= (s) -[*]-> (d) WITH d, count(p) AS cp, TotalDest RETURN TotalDest=size(collect(cp))",
     "msg": "Any node must be reachable from the Start node."
   },
   {
-    "rule": "MATCH (s {GraphID: $graphId}), (d {GraphID: $graphId}), (e {GraphID: $graphId}) WHERE NOT s.Type=\"Stop\" AND d.Type=\"Stop\" and NOT e.Type=\"Stop\" WITH s, d, count(e) AS TotalSrc MATCH p= (s) -[*]-> (d) WITH s, count(p) AS cp, TotalSrc RETURN TotalSrc=size(collect(cp))",
+    "rule": "MATCH (s:Node {GraphID: $graphId}), (d:Node {GraphID: $graphId}), (e:Node {GraphID: $graphId}) WHERE NOT s.Type=\"Stop\" AND d.Type=\"Stop\" and NOT e.Type=\"Stop\" WITH s, d, count(e) AS TotalSrc MATCH p= (s) -[*]-> (d) WITH s, count(p) AS cp, TotalSrc RETURN TotalSrc=size(collect(cp))",
     "msg": "Stop node must be reachable from any node."
   },
   {
-    "rule": "MATCH(n {GraphID: $graphId}) RETURN ALL(r IN collect(n) WHERE exists(r.Type) AND exists(r.Role) AND exists(r.ID) AND exists(r.SAFEType))",
+    "rule": "MATCH(n:Node {GraphID: $graphId}) RETURN ALL(r IN collect(n) WHERE exists(r.Type) AND exists(r.Role) AND exists(r.ID) AND exists(r.SAFEType))",
     "msg": "Type, Role, ID, SAFEType properties must be present on each node"
   },
   {
-    "rule": "MATCH (n {GraphID: $graphId}) -[r]-> (m {GraphID: $graphId}) RETURN ALL(r IN collect(r) WHERE COALESCE(r.ParameterValue, 'None') IS NOT NULL)",
+    "rule": "MATCH (n:Node {GraphID: $graphId}) -[r]-> (m {GraphID: $graphId}) RETURN ALL(r IN collect(r) WHERE COALESCE(r.ParameterValue, 'None') IS NOT NULL)",
     "msg": "All relationships must have ParameterValue properties"
   },
   {
-    "rule": "MATCH(n {GraphID: $graphId, Type: \"ConditionalAssertionItem\"}) -[r:isPrerequisiteFor]-> (m {GraphID: $graphId}) with n, count(DISTINCT r.ParameterValue) AS pc, count(r) AS c WHERE pc > 1 AND c <> pc RETURN count(n) = 0",
+    "rule": "MATCH(n:Node {GraphID: $graphId, Type: \"ConditionalAssertionItem\"}) -[r:isPrerequisiteFor]-> (m:Node {GraphID: $graphId}) with n, count(DISTINCT r.ParameterValue) AS pc, count(r) AS c WHERE pc > 1 AND c <> pc RETURN count(n) = 0",
     "msg": "Branches of conditional nodes must have distinct values"
   },
   {
-    "rule": "MATCH (n {GraphID: $graphId}) -[r:isPrerequisiteFor]-> () WHERE r.ParameterValue = \"None\" and n.Type = \"ConditionalAssertionItem\" RETURN count(n) = 0",
+    "rule": "MATCH (n:Node {GraphID: $graphId}) -[r:isPrerequisiteFor]-> () WHERE r.ParameterValue = \"None\" and n.Type = \"ConditionalAssertionItem\" RETURN count(n) = 0",
     "msg": "Branches of conditional nodes must not have None values associated with them"
   },
   {
-    "rule": "MATCH (n {GraphID: $graphId}), (m {GraphID: $graphId}) WHERE n.ID=m.ID AND NOT id(n)=id(m) RETURN count(n) = 0",
+    "rule": "MATCH (n:Node {GraphID: $graphId}), (m {GraphID: $graphId}) WHERE n.ID=m.ID AND NOT id(n)=id(m) RETURN count(n) = 0",
     "msg": "All node IDs must be distinct."
   },
   {
-    "rule": "MATCH (n {GraphID: $graphId}) RETURN ALL(m IN collect(n) WHERE ALL(r IN split(m.Role, ',') WHERE r IN [\"None\", \"STAFF\", \"DP\", \"INP\", \"PI\", \"IG\"]))",
+    "rule": "MATCH (n:Node {GraphID: $graphId}) RETURN ALL(m IN collect(n) WHERE ALL(r IN split(m.Role, ',') WHERE r IN [\"None\", \"STAFF\", \"DP\", \"INP\", \"PI\", \"IG\"]))",
     "msg": "Node roles should be None, STAFF, DP, INP, IG, or PI."
   },
   {
-    "rule": "MATCH (n {GraphID: $graphId}) RETURN ALL(r IN collect(n) WHERE r.Type IN [\"Start\", \"Stop\", \"AssertionItem\", \"ConditionalAssertionItem\"])",
+    "rule": "MATCH (n:Node {GraphID: $graphId}) RETURN ALL(r IN collect(n) WHERE r.Type IN [\"Start\", \"Stop\", \"AssertionItem\", \"ConditionalAssertionItem\"])",
     "msg": "Node types must be Start, Stop and AssertionItem"
   },
   {
-    "rule": "MATCH (n {GraphID: $graphId}) WHERE NOT n.SAFEType IN ['common-set', 'template-user-set', 'None'] RETURN count(n) = 0",
+    "rule": "MATCH (n:Node {GraphID: $graphId}) WHERE NOT n.SAFEType IN ['common-set', 'template-user-set', 'None'] RETURN count(n) = 0",
     "msg": "SAFEType can only by common-set or template-user-set"
   },
   {
-    "rule": "MATCH (n {GraphID: $graphId}) WHERE NOT n.ID IN ['Start', 'Stop'] AND NOT 'PI' IN split(n.Role, ',') AND NOT 'STAFF' IN split(n.Role,',') AND n.SAFEType <> 'common-set' RETURN count(n) = 0",
+    "rule": "MATCH (n:Node {GraphID: $graphId}) WHERE NOT n.ID IN ['Start', 'Stop'] AND NOT 'PI' IN split(n.Role, ',') AND NOT 'STAFF' IN split(n.Role,',') AND n.SAFEType <> 'common-set' RETURN count(n) = 0",
     "msg": "Non-PI, non-STAFF nodes must always have 'common-set' type"
   },
   {
-    "rule": "MATCH path=(o {GraphID: $graphId}) <-[:isPrerequisiteFor]- (n {GraphID: $graphId, SAFEType: 'template-user-set'}) -[:isPrerequisiteFor]-> (m {GraphID: $graphId}) RETURN count(path) = 0",
+    "rule": "MATCH path=(o:Node {GraphID: $graphId}) <-[:isPrerequisiteFor]- (n:Node {GraphID: $graphId, SAFEType: 'template-user-set'}) -[:isPrerequisiteFor]-> (m:Node {GraphID: $graphId}) RETURN count(path) = 0",
     "msg": "template-user-set nodes must not have fanouts"
   }
 ]

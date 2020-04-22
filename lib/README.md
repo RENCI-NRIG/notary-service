@@ -67,6 +67,16 @@ pip install --editable ns_workflow/
 pip install pytest
 ```
 
+For performance reasons it is critical to create Neo4j indexes as follows (using the console or by scripting):
+```
+CREATE INDEX ON :Node(GraphID)
+CREATE INDEX ON :Node(GraphID, ID)
+CREATE INDEX ON :Node(GraphID, Type)
+CREATE INDEX ON :Node(GraphID, ID, Type)
+```
+
+Available indexes can be checked via console by using the `:schema` comand.
+
 ### Testing
 
 The unit tests can be run using `pytest` as follows:

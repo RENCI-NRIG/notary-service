@@ -24,6 +24,7 @@ Python is run from a virtual environment using `virtualenv`
 ```
 virtualenv -p ${PATH_TO_PYTHON3} venv
 source venv/bin/activate
+pip install -r requirements.txt
 ```
 
 Execution time is measured using the built-in python [`time`](https://docs.python.org/3/library/time.html) function.
@@ -114,6 +115,7 @@ A small set of scripts have been provided to run the measurement tests as well a
 $ python metrics_main.py --help
 usage: metrics_main.py [-h] [--generateids INT] [--importgraph PATH]
                        [--checkworkflow PATH] [--completeall] [--removegraph]
+                       [--createindices]
 
 Notary Service Neo4j metrics
 
@@ -124,9 +126,31 @@ optional arguments:
   --checkworkflow PATH  Check all workflows for completeness
   --completeall         Set all workflow nodes to completed=True
   --removegraph         Remove all existing graphs from Neo4j
+  --createindices       Create graph indices in Neo4j
 ```
 
 **Example**: Generate metrics for the [one-by-two.graphml]() over 1000 iterations
+
+Create the indices for Neo4j to use when performing graph search
+
+```
+$ python metrics_main.py --createindices
+Namespace(checkworkflow=None, completeall=False, createindices=True, generateids=None, importgraph=None, removegraph=False)
+```
+
+This only needs to be done once, and when completed the new Indexes should be denoted as being `ONLINE` when perforing the `:schema` call from the Neo4j Browser
+
+```
+$ :schema
+---
+Indexes
+   ON :Node(GraphID) ONLINE 
+   ON :Node(GraphID, ID) ONLINE 
+   ON :Node(GraphID, ID, Type) ONLINE 
+   ON :Node(GraphID, Type) ONLINE 
+
+No constraints
+```
 
 Create 1000 unique IDs
 
@@ -140,7 +164,7 @@ Load / Validate the `one-by-two.graphml` file and resulting workflow over 1000 i
 
 ```console
 $ python metrics_main.py --importgraph sample-graphs/one-by-two.graphml
-Namespace(checkworkflow=None, completeall=False, generateids=None, importgraph='sample-graphs/one-by-two.graphml', removegraph=False)
+Namespace(checkworkflow=None, completeall=False, createindices=False, generateids=None, importgraph='sample-graphs/one-by-two.graphml', removegraph=False)
 Generate import metrics for: sample-graphs/one-by-two.graphml
   - Running with 1000 iterations:
 ...
@@ -148,23 +172,24 @@ Generate import metrics for: sample-graphs/one-by-two.graphml
     "graph": "one-by-two.graphml",
     "count": 1000,
     "metrics_load": {
-        "total": 8.998037099838257,
-        "average": 0.008998037099838256,
+        "total": 13.755941152572632,
+        "average": 0.013755941152572632,
         "units": "seconds"
     },
     "metrics_validate": {
-        "total": 73.32247829437256,
-        "average": 0.07332247829437256,
+        "total": 18.83089303970337,
+        "average": 0.01883089303970337,
         "units": "seconds"
     }
 }
+File with load/validate metrics saved as: files/load-one-by-two.graphml.json
 ```
 
 Measure check time for the clean workflow over 1000 iterations
 
 ```console
-$ python metrics_main.py --checkworkflow sample-graphs/one-by-two.graphml
-Namespace(checkworkflow='sample-graphs/one-by-two.graphml', completeall=False, generateids=None, importgraph=None, removegraph=False)
+ python metrics_main.py --checkworkflow sample-graphs/one-by-two.graphml
+Namespace(checkworkflow='sample-graphs/one-by-two.graphml', completeall=False, createindices=False, generateids=None, importgraph=None, removegraph=False)
 Check for workflow completeness using graph: sample-graphs/one-by-two.graphml
   - Running with 1000 iterations:
 ...
@@ -172,8 +197,8 @@ Check for workflow completeness using graph: sample-graphs/one-by-two.graphml
     "graph": "one-by-two.graphml",
     "count": 1000,
     "metrics_check": {
-        "total": 16.19970154762268,
-        "average": 0.01619970154762268,
+        "total": 1.8472473621368408,
+        "average": 0.001847247362136841,
         "units": "seconds"
     }
 }
@@ -184,11 +209,11 @@ Set complete = True for all nodes over the 1000 workflows
 
 ```console
 $ python metrics_main.py --completeall
-Namespace(checkworkflow=None, completeall=True, generateids=None, importgraph=None, removegraph=False)
+Namespace(checkworkflow=None, completeall=True, createindices=False, generateids=None, importgraph=None, removegraph=False)
 Set all workflow nodes as completed
-07dede9a-4556-4ddb-8441-3e9501a011e9
-cf2e8572-d185-4bf3-8b03-17135f8bf1e2
-c517b7ed-0afa-46e6-aaf2-7639bd0d6eb9
+3371705a-8aad-4f72-996f-13be73f8f70a
+2b47c160-fc2f-4c58-9339-284ac73822e3
+80fc340a-dcd4-465c-8968-9b1b06b3e522
 ...
 ```
 
@@ -196,7 +221,7 @@ Measure check time for the completed workflow over 1000 iterations
 
 ```console
 $ python metrics_main.py --checkworkflow sample-graphs/one-by-two.graphml
-Namespace(checkworkflow='sample-graphs/one-by-two.graphml', completeall=False, generateids=None, importgraph=None, removegraph=False)
+Namespace(checkworkflow='sample-graphs/one-by-two.graphml', completeall=False, createindices=False, generateids=None, importgraph=None, removegraph=False)
 Check for workflow completeness using graph: sample-graphs/one-by-two.graphml
   - Running with 1000 iterations:
 ...
@@ -204,8 +229,8 @@ Check for workflow completeness using graph: sample-graphs/one-by-two.graphml
     "graph": "one-by-two.graphml",
     "count": 1000,
     "metrics_check": {
-        "total": 73.4806580543518,
-        "average": 0.0734806580543518,
+        "total": 7.993805885314941,
+        "average": 0.00799380588531494,
         "units": "seconds"
     }
 }
@@ -254,26 +279,26 @@ Average time in seconds to run 1000 iterations at each stage.
 
 | Graph/Workflow | Load | Validate | Check Empty | Check Complete |
 |:--------:|:----:|:--------:|:-----------:|:--------------:|
-|one-by-two|0.008998|0.073322|0.0162|0.073481|
-|three-by-three|0.010916|0.317525|0.06173|0.541621|
-|five-by-five|0.017158|1.29505|0.136191|3.020561|
-|seven-by-seven|0.027238|4.015619|0.251301|10.425097|
+|one-by-two|0.013756|0.018831|0.001847|0.007994|
+|three-by-three|0.019866|0.021609|0.001628|0.023616|
+|five-by-five|0.038592|0.049538|0.001689|0.058089|
+|seven-by-seven|0.065623|0.112632|0.001846|0.108225|
 
 See below for a more detailed explanation of each stage
 
 ### Load workflow from GraphML file
 
-Using the yEd [sample graphs](sample-graphs/) as representative Notary Service workflow templates, measure the import time over 1000 iterations and plot the distribution. NOTE: they x/y limits of the graph may be foreshortened to best fit the bulk of the distribution data.
+Using the yEd [sample graphs](sample-graphs/) as representative Notary Service workflow templates, measure the import time over 1000 iterations and plot the distribution.
 
 ![](figures/figure-load-workflow.png)
 
 ### Validate workflow integrity
 
-After the 1000 graphs have been imported into Neo4j, run the Notary Service validation checks over them. This process can be memory intensive and has been performed in a single threaded `for` loop. NOTE: they x/y limits of the graph may be foreshortened to best fit the bulk of the distribution data.
+After the 1000 graphs have been imported into Neo4j, run the Notary Service validation checks over them. This process can be memory intensive and has been performed in a single threaded `for` loop.
 
 ![](figures/figure-validate-workflow.png)
 
-When the 7x7 workflow validation results are plotted in the order which measurements were taken, it can be observed that there is and additive trend towards each iteration taking slightly more time than the preceding check. This is the only test that has consistently demonstrated this trend.
+When the 7x7 workflow validation results are plotted in the order which measurements were taken, it can be observed that there is a slight additive trend towards each iteration taking more time than the preceding check. There is also an abrupt jump in time which we suspect is due to change in index memory management once the number of subgraphs reach a certain size.
 
 ![](figures/figure-validate-sequential.png)
 

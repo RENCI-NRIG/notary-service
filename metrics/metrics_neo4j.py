@@ -61,3 +61,16 @@ def delete_all_nodes():
     query = "MATCH(n) DETACH DELETE n;"
     with driver.session() as session:
         val = session.run(query)
+
+
+def create_neo4j_indices():
+    driver = GraphDatabase.driver(bolt_url, auth=(neo_user, neo_pass))
+    query1 = "CREATE INDEX ON :Node(GraphID);"
+    query2 = "CREATE INDEX ON :Node(GraphID, ID);"
+    query3 = "CREATE INDEX ON :Node(GraphID, Type);"
+    query4 = "CREATE INDEX ON :Node(GraphID, ID, Type);"
+    with driver.session() as session:
+        val = session.run(query1)
+        val = session.run(query2)
+        val = session.run(query3)
+        val = session.run(query4)

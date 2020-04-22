@@ -64,7 +64,7 @@ class Neo4jWorkflow(AbstractWorkflow):
 
         return graphId, hostFileName, mappedFileName
 
-    def _import_workflow(self, graphmlFile: str) -> None:
+    def _import_workflow(self, graphmlFile: str, graphId: str) -> None:
         """ import graph into Neo4j from a file"""
 
         try:
@@ -72,6 +72,9 @@ class Neo4jWorkflow(AbstractWorkflow):
                 session.run(
                     'call apoc.import.graphml( $fileName, {batchSize: 10000, readLabels: true, storeNodeIds: true, defaultRelationshipType: "isPrerequisiteFor" } ) ',
                     fileName=graphmlFile)
+                # force label on all imported nodes
+                self.log.debug(f"Adding Node label to graph {graphId}")
+                session.run('match (n {GraphID: $graphId }) set n:Node', graphId=graphId)
         except Exception as e:
             msg = "Neo4j APOC import error %s", str(e)
             raise WorkflowImportError(None, msg)
@@ -95,7 +98,7 @@ class Neo4jWorkflow(AbstractWorkflow):
             try:
                 """ something in APOC prevents loading sometimes """
                 self.log.debug("Trying to load the file")
-                self._import_workflow(mappedFileName)
+                self._import_workflow(mappedFileName, id)
                 retry = -1
             except WorkflowImportError:
                 self.log.warn("Transient error, unable to load, deleting and reimporting graph %s", id)
@@ -138,7 +141,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert graphId is not None
         self.log.debug('Deleting workflow %s', graphId)
         with self.driver.session() as session:
-            session.run('match (n {GraphID: $graphId })detach delete n', graphId=graphId)
+            session.run('match (n:Node {GraphID: $graphId })detach delete n', graphId=graphId)
 
     def count_nodes(self, graphId: str, nodeRole: str = None) -> int:
         """ count the nodes of particular role in workflow"""
@@ -146,10 +149,10 @@ class Neo4jWorkflow(AbstractWorkflow):
         self.log.debug('Counting nodes in graph %s', graphId)
         with self.driver.session() as session:
             if nodeRole is None:
-                return session.run('MATCH (n {GraphID: $graphId }) RETURN count(n)',
+                return session.run('MATCH (n:Node {GraphID: $graphId }) RETURN count(n)',
                                    graphId=graphId).single().value()
             else:
-                return session.run('MATCH (n {GraphID: $graphId} ) WHERE $nodeRole IN split(n.Role, ",") RETURN count(n)',
+                return session.run('MATCH (n:Node {GraphID: $graphId} ) WHERE $nodeRole IN split(n.Role, ",") RETURN count(n)',
                                    graphId=graphId, nodeRole=nodeRole).single().value()
 
     def _run_node_dict_query(self, graphId: str, nodeId: str, query: str) -> Dict[str, str]:
@@ -166,7 +169,7 @@ class Neo4jWorkflow(AbstractWorkflow):
 
     def find_start_node(self, graphId: str) -> Dict[str, str]:
         """ find start node in a graph and return its properties """
-        query = "MATCH (n {GraphID: $graphId, Type: 'Start'}) RETURN properties(n)"
+        query = "MATCH (n:Node {GraphID: $graphId, Type: 'Start'}) RETURN properties(n)"
         assert graphId is not None
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId).single()
@@ -176,7 +179,7 @@ class Neo4jWorkflow(AbstractWorkflow):
 
     def get_node_properties(self, graphId: str, nodeId: str) -> Dict[str, str]:
         """ get properties of a node with specific name in a graph """
-        query = "MATCH (n {GraphID: $graphId, ID: $nodeId}) RETURN properties(n)"
+        query = "MATCH (n:Node {GraphID: $graphId, ID: $nodeId}) RETURN properties(n)"
         assert graphId is not None
         assert nodeId is not None
         with self.driver.session() as session:
@@ -191,9 +194,9 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert graphId is not None
         assert nodeId is not None
         if role is not None:
-            query = "MATCH ({GraphID: $graphId, ID: $nodeId}) -[:isPrerequisiteFor]-> (n {GraphID: $graphId}) WHERE $role IN split(n.Role, ',') RETURN n.ID"
+            query = "MATCH (:Node {GraphID: $graphId, ID: $nodeId}) -[:isPrerequisiteFor]-> (n:Node {GraphID: $graphId}) WHERE $role IN split(n.Role, ',') RETURN n.ID"
         else:
-            query = "MATCH ({GraphID: $graphId, ID: $nodeId}) -[:isPrerequisiteFor]-> (n {GraphID: $graphId}) RETURN n.ID"
+            query = "MATCH (:Node {GraphID: $graphId, ID: $nodeId}) -[:isPrerequisiteFor]-> (n:Node {GraphID: $graphId}) RETURN n.ID"
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId, role=role)
             if val is None:
@@ -206,7 +209,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert graphId is not None
         assert nodeId is not None
         assert role is not None
-        query = """MATCH (s {GraphID: $graphId, ID: $nodeId}), (pi), p=(s) -[:isPrerequisiteFor*]-> (pi)
+        query = """MATCH (s:Node {GraphID: $graphId, ID: $nodeId}), (pi), p=(s) -[:isPrerequisiteFor*]-> (pi)
         WHERE $role IN split(pi.Role, ',') AND ALL(x in tail(reverse(tail(nodes(p)))) WHERE NOT $role IN split(x.Role, ',') ) WITH distinct(pi) AS dpi return dpi.ID"""
 
         with self.driver.session() as session:
@@ -220,7 +223,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert graphId is not None
         assert nodeId is not None
         assert propName is not None
-        query = "MATCH (s {GraphID: $graphId, ID: $nodeId}) SET s+={ %s: $propVal} RETURN properties(s)" % propName
+        query = "MATCH (s:Node {GraphID: $graphId, ID: $nodeId}) SET s+={ %s: $propVal} RETURN properties(s)" % propName
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId, propVal=propVal)
             if val is None or len(val.value()) == 0:
@@ -239,7 +242,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         if len(allProps) > 2:
             allProps = allProps[:-2]
 
-        query = "MATCH (s {GraphID: $graphId, ID: $nodeId}) SET s+= { %s } RETURN properties(s)" % allProps
+        query = "MATCH (s:Node {GraphID: $graphId, ID: $nodeId}) SET s+= { %s } RETURN properties(s)" % allProps
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId)
             if val is None or len(val.value()) == 0:
@@ -259,7 +262,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         # using merge guarantees duplicates won't be created. copying properties ON CREATE
         # guarantees they will not be overwritten on existing node, however parent properties
         # are immutable anyway
-        query = """MATCH (n {GraphID: $graphId, ID: $nodeId}) MERGE (m {GraphID:$graphId, ID:$childNode})
+        query = """MATCH (n:Node {GraphID: $graphId, ID: $nodeId}) MERGE (m:Node {GraphID:$graphId, ID:$childNode})
             -[:isChildOf]-> (n) ON CREATE SET m=n, m.ID=$childNode, m.SAFEType="user-set" RETURN m"""
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId, childNode=childNode)
@@ -284,7 +287,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         # using merge guarantees duplicates won't be created. copying properties ON CREATE
         # guarantees they will not be overwritten on existing node, however parent properties
         # are immutable anyway
-        query = """MATCH (n {GraphID: $graphId, ID: $nodeId}) MERGE (m {GraphID:$graphId, ID:$childNode})
+        query = """MATCH (n:Node {GraphID: $graphId, ID: $nodeId}) MERGE (m:Node {GraphID:$graphId, ID:$childNode})
             -[:isChildOf]-> (n) ON CREATE SET m=n, m.ID=$childNode, m.SAFEType="user-set", m.principal=$principalId RETURN m"""
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId, childNode=childNode, principalId=principalId)
@@ -298,7 +301,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert graphId is not None
         assert nodeId is not None
 
-        query = "MATCH (n {GraphID: $graphId, ID: $nodeId}) RETURN n"
+        query = "MATCH (n:Node {GraphID: $graphId, ID: $nodeId}) RETURN n"
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId)
             if val is None or len(val.value()) == 0:
@@ -310,7 +313,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert graphId is not None
         assert nodeId is not None
 
-        query = "MATCH (n {GraphID: $graphId, ID: $nodeId}), (m) -[:isChildOf]-> (n) RETURN collect(m.ID)"
+        query = "MATCH (n:Node {GraphID: $graphId, ID: $nodeId}), (m) -[:isChildOf]-> (n) RETURN collect(m.ID)"
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId)
             if val is None:
@@ -322,7 +325,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert graphId is not None
         assert nodeId is not None
 
-        query = "MATCH (n {GraphID: $graphId, ID: $nodeId}), (n) -[:isChildOf]-> () RETURN count(n) > 0 AS result"
+        query = "MATCH (n:Node {GraphID: $graphId, ID: $nodeId}), (n) -[:isChildOf]-> () RETURN count(n) > 0 AS result"
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId)
             if val is None:
@@ -334,7 +337,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert graphId is not None
         assert nodeId is not None
 
-        query = """MATCH (n {GraphID:$graphId, ID: $nodeId, Type: "ConditionalAssertionItem"}) RETURN count(n) > 0"""
+        query = """MATCH (n:Node {GraphID:$graphId, ID: $nodeId, Type: "ConditionalAssertionItem"}) RETURN count(n) > 0"""
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId)
             if val is None:
@@ -347,12 +350,12 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert parameterValue is not None
 
         if role is not None:
-            query = """MATCH (n {GraphID: $graphId, ID: $nodeId, Type: "ConditionalAssertionItem"}) 
-            -[r:isPrerequisiteFor {ParameterValue: $parameterValue}]-> (m {GraphID: $graphId}) 
+            query = """MATCH (n:Node {GraphID: $graphId, ID: $nodeId, Type: "ConditionalAssertionItem"}) 
+            -[r:isPrerequisiteFor {ParameterValue: $parameterValue}]-> (m:Node {GraphID: $graphId}) 
             WHERE $role IN split(m.Role, ',') RETURN m.ID"""
         else:
-            query = """MATCH (n {GraphID: $graphId, ID: $nodeId, Type: "ConditionalAssertionItem"}) 
-            -[r:isPrerequisiteFor {ParameterValue: $parameterValue}]-> (m {GraphID: $graphId}) RETURN m.ID"""
+            query = """MATCH (n:Node {GraphID: $graphId, ID: $nodeId, Type: "ConditionalAssertionItem"}) 
+            -[r:isPrerequisiteFor {ParameterValue: $parameterValue}]-> (m:Node {GraphID: $graphId}) RETURN m.ID"""
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId, role=role, parameterValue=parameterValue)
             if val is None:
@@ -368,8 +371,8 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert graphId is not None
         assert nodeId is not None
 
-        query = """MATCH path = (p {GraphID: $graphId}) -[:isPrerequisiteFor*]-> (c {GraphID: $graphId, ID: $nodeId})
-            <-[:isPrerequisiteFor*]- (p {GraphID: $graphId}) RETURN p.ID ORDER BY length(path) LIMIT 1"""
+        query = """MATCH path = (p:Node {GraphID: $graphId}) -[:isPrerequisiteFor*]-> (c:Node {GraphID: $graphId, ID: $nodeId})
+            <-[:isPrerequisiteFor*]- (p:Node {GraphID: $graphId}) RETURN p.ID ORDER BY length(path) LIMIT 1"""
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId)
             if val is None:
@@ -386,11 +389,11 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert graphId is not None
         assert nodeId is not None
 
-        query = """match (n {GraphID: $graphId, ID: $nodeId}) <-[:isPrerequisiteFor]-
-           (ip {GraphID: $graphId, SAFEType: "template-user-set"}) <-[:isPrerequisiteFor*]- (p1 {GraphID: $graphId, SAFEType: "common-set"})
-           WITH p1 MATCH (p1)-[:isPrerequisiteFor]-> (m {GraphID: $graphId, SAFEType: "template-user-set"})
+        query = """match (n:Node {GraphID: $graphId, ID: $nodeId}) <-[:isPrerequisiteFor]-
+           (ip:Node {GraphID: $graphId, SAFEType: "template-user-set"}) <-[:isPrerequisiteFor*]- (p1:Node {GraphID: $graphId, SAFEType: "common-set"})
+           WITH p1 MATCH (p1)-[:isPrerequisiteFor]-> (m:Node {GraphID: $graphId, SAFEType: "template-user-set"})
            RETURN DISTINCT p1.ID as id UNION
-           MATCH (n {GraphID: $graphId, ID: $nodeId}) <-[:isPrerequisiteFor]- (p2 {GraphID: $graphId, SAFEType: "common-set"})
+           MATCH (n:Node {GraphID: $graphId, ID: $nodeId}) <-[:isPrerequisiteFor]- (p2:Node {GraphID: $graphId, SAFEType: "common-set"})
            RETURN p2.ID as id"""
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId)
@@ -403,7 +406,7 @@ class Neo4jWorkflow(AbstractWorkflow):
 
         assert graphId is not None
 
-        query = """MATCH (n {GraphID: $graphId, SAFEType: "common-set"}) 
+        query = """MATCH (n:Node {GraphID: $graphId, SAFEType: "common-set"}) 
         WHERE NOT exists(n.completed) OR n.completed <> "True"  RETURN collect(n.ID) as id"""
 
         with self.driver.session() as session:
@@ -424,7 +427,7 @@ class Neo4jWorkflow(AbstractWorkflow):
         if not self.is_conditional_node(graphId, nodeId):
             raise WorkflowQueryError(graphId, nodeId, "Is not a conditional node - unable to make selection")
 
-        query = """MATCH (n {GraphID: $graphId, ID: $nodeId}) -[r:isPrerequisiteFor]-> (m) 
+        query = """MATCH (n:Node {GraphID: $graphId, ID: $nodeId}) -[r:isPrerequisiteFor]-> (m) 
         RETURN r.ParameterValue"""
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId)
@@ -445,7 +448,7 @@ class Neo4jWorkflow(AbstractWorkflow):
 
         self.update_node_property(graphId, nodeId, AbstractWorkflow.PARAMETER_VALUE_FIELD, value)
 
-        query = """MATCH (n {GraphID: $graphId, ID: $nodeId}) -[r:isPrerequisiteFor]-> (m {GraphID: $graphId}) 
+        query = """MATCH (n:Node {GraphID: $graphId, ID: $nodeId}) -[r:isPrerequisiteFor]-> (m:Node {GraphID: $graphId}) 
         WHERE r.ParameterValue <> $value 
         CREATE (n) -[r2:isNotSelectedPrerequisiteFor]-> (m) SET r2=r 
         WITH r DELETE r"""
@@ -460,8 +463,8 @@ class Neo4jWorkflow(AbstractWorkflow):
         assert graphId is not None
         assert nodeId is not None
 
-        query = """MATCH p=(n {GraphID: $graphId, ID: "Start"}) -[q:isPrerequisiteFor*1..]-> 
-        (m {GraphID: $graphId, ID: $nodeId}) RETURN count(p) > 0"""
+        query = """MATCH p=(n:Node {GraphID: $graphId, ID: "Start"}) -[q:isPrerequisiteFor*1..]-> 
+        (m:Node {GraphID: $graphId, ID: $nodeId}) RETURN count(p) > 0"""
 
         with self.driver.session() as session:
             val = session.run(query, graphId=graphId, nodeId=nodeId)

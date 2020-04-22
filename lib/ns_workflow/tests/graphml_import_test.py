@@ -81,7 +81,7 @@ class TestGraphImport(unittest.TestCase):
             self.log.error(wexc)
             self.assertTrue(False)
         self.assertEqual(self.gid, self.TEST_ASSIGNED_ID)
-        self.log.info("Using graph id %s", self.gid)
+        self.log.info(f"Using graph id {self.gid} with {self.neo4j.count_nodes(self.gid)} nodes")
         self.assertEqual(self.neo4j.count_nodes(self.gid), 27)
         self.assertEqual(self.neo4j.count_nodes(self.gid, nodeRole=self.TEST_ROLE), 16)
 
@@ -95,7 +95,7 @@ class TestGraphImport(unittest.TestCase):
         except WorkflowError as wexc:
             self.log.error(wexc)
             self.assertTrue(False)
-        self.log.info("Using graph id %s", self.gid)
+        self.log.info(f"Using graph id {self.gid} with {self.neo4j.count_nodes(self.gid)} nodes")
         self.assertEqual(self.neo4j.count_nodes(self.gid), 27)
         self.assertEqual(self.neo4j.count_nodes(self.gid, nodeRole=self.TEST_ROLE), 16)
 
@@ -106,7 +106,7 @@ class TestGraphImport(unittest.TestCase):
         graphmlFile.close()
         try:
             self.gid = self.neo4j.import_workflow(graphml)
-            self.log.info("Using graph id %s", self.gid)
+            self.log.info(f"Using graph id {self.gid} with {self.neo4j.count_nodes(self.gid)} nodes")
             self.assertEqual(self.neo4j.count_nodes(self.gid), 27)
             self.neo4j.validate_workflow(self.gid)
         except WorkflowError as wexc:

@@ -103,7 +103,8 @@ plt.hist(d1, **kwargs, color='green',
          label='7x7 (avg: ' + str(round(np.average(d1), 4)) + ' s)')
 
 plt.title('Load workflow from GraphML file: time (s)')
-plt.xlim(0.0, 0.05)
+plt.xlim(0.0, 0.14)
+
 
 # validate times
 # plt.hist(a2, **kwargs, color='dodgerblue',
@@ -117,7 +118,7 @@ plt.xlim(0.0, 0.05)
 #
 # plt.title('Validate workflow integrity: time (s)')
 #
-# plt.ylim(0.0, 3.0)
+# plt.xlim(0.0, 0.25)
 
 
 # check empty workflow
@@ -131,8 +132,7 @@ plt.xlim(0.0, 0.05)
 #          label='7x7 (avg: ' + str(round(np.average(d3), 4)) + ' s)')
 #
 # plt.title('Check workflow - empty: time (s)')
-# plt.xlim(0.0, 0.35)
-# plt.ylim(0.0, 100)
+# plt.xlim(0.0, 0.006)
 
 
 # check empty workflow
@@ -146,8 +146,7 @@ plt.xlim(0.0, 0.05)
 #          label='7x7 (avg: ' + str(round(np.average(d4), 4)) + ' s)')
 #
 # plt.title('Check workflow - complete: time (s)')
-# plt.xlim(0.0, 11.5)
-# plt.ylim(0.0, 10)
+# plt.xlim(0.0, 0.14)
 
 plt.legend()
 plt.show()
