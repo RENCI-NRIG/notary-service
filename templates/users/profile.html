@@ -6,22 +6,23 @@
 {% block content %}
     <div class="container">
         {% if user.is_authenticated %}
+        <div class="user-profile">
             <h1>User profile</h1>
-            <table width="100%" cellpadding="5px">
-                <tr>
-                    <td style="width: 50%"><b>First name: </b>{{ user.given_name }}</td>
-                    <td><b>Last name: </b>{{ user.family_name }}</td>
-                </tr>
-                <tr>
-                    <td><b>Email: </b>{{ user.email }}</td>
-                    <td><b>Affiliation: </b>{{ user.ns_affiliation | affiliation_uuid_to_name }}</td>
-                </tr>
-                <tr>
-                    <td><b>Identity provider: </b>{{ user.idp }}</td>
-                    <td></td>
-                </tr>
-            </table>
+            <p><b>First name: </b>{{ user.given_name }}</p>
+            <p><b>Last name: </b>{{ user.family_name }}</p>
+            <p><b>Email: </b>{{ user.email }}</p>
+            <p><b>Affiliation: </b>{{ user.ns_affiliation | affiliation_uuid_to_name }}</p>
+            <p><b>Identity provider: </b>{{ user.idp }}</p>
             <hr>
+            <h2>Preferences</h2>
+            <form method="POST" class="post-form">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" name="update-preferences" value="Save preferences"
+                style="color: darkgreen">
+            </form>
+            <hr>
+        </div>
             <table width="100%" cellpadding="5px">
                 <tr>
                     <td style="width: 50%">
@@ -43,28 +44,6 @@
                     </td>
                 </tr>
             </table>
-
-            <hr>
-            <form method="POST" class="post-form">
-                {% csrf_token %}
-                <table width="100%" cellpadding="5px">
-                    <tr>
-                        <td style="width: 50%">
-                            <b style="font-size: larger">Preferences</b>
-                        </td>
-                        <td>
-                            <input type="submit" name="update-preferences" value="Save preferences"
-                                   style="color: darkgreen">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            {{ form.as_p }}
-                        </td>
-                        <td></td>
-                    </tr>
-                </table>
-            </form>
             <hr>
             <form method="POST" class="post-form">
                 {% csrf_token %}

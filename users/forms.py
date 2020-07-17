@@ -30,8 +30,8 @@ class UserPreferences(forms.ModelForm):
         super(UserPreferences, self).__init__(*args, **kwargs)
         self.fields['role'] = forms.ChoiceField(
             choices=sorted(role_choices, key=itemgetter(1)),
-            widget=forms.Select,
-            label='User role',
+            widget=forms.RadioSelect,
+            label='Change user role',
             required=False
         )
 
@@ -42,8 +42,8 @@ class UserPreferences(forms.ModelForm):
 
     show_uuid = forms.ChoiceField(
         choices=VIEW_CHOICE,
-        widget=forms.Select,
-        label='URL rendering',
+        widget=forms.RadioSelect,
+        label='Change URL rendering',
         required=False,
     )
 
@@ -53,7 +53,6 @@ class UserPreferences(forms.ModelForm):
             'role',
             'show_uuid',
         )
-
 
 class AffiliationCreationForm(forms.ModelForm):
     class Meta:
