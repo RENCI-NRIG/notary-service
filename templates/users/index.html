@@ -5,6 +5,7 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
     <div class="container">
         <div class="text-center">
             <h1>Infrastructure for Privacy-Assured CompuTations</h1>
@@ -15,17 +16,30 @@
             <div class="container">
                 <p>Hello <b>{{ user.name }}</b>, You are logged in as username: <b>{{ user.username }}</b></p>
                 <h2>My Messages</h2>
+                <button
+                    onclick="location.href = 'messages'"
+                    class="btn btn-success"
+                >
+                    Active Messages
+                </button>
                 <form method="POST" class="post-form">
                     {% csrf_token %}
-                    <input type="submit" name="check-messages" value="Check for new messages" style="color: darkgreen">
+                    <input
+                      type="submit"
+                      name="check-messages"
+                      value="New Messages"
+                      class="btn btn-info"
+                    />
                 </form>
                 <br>
-                <table width="100%" border="1px solid black" cellpadding="5px">
-                    <tr>
-                        <td align="center"><b>Subject</b></td>
-                        <td align="center"><b>Body</b></td>
-                        <td align="center"><b>Created Date</b></td>
-                        <td align="center"><b>Modified Date</b></td>
+                <table class="table table-striped table-bordered text-center">
+                    <tr class="font-weight-bold">
+                        <td>Subject</td>
+                        <td>Body</td>
+                        <td>Created Date</td>
+                        <td>Modified Date</td>
+                        <td>View</td>
+                        <td>Delete</td>
                     </tr>
 
                     {% for message in ns_messages %}
@@ -54,9 +68,6 @@
                         </tr>
                     {% endfor %}
                 </table>
-                <p>
-                    <a href="{% url 'messages' %}" title="View My Messages">View all active messages</a>
-                </p>
             </div>
         {% else %}
             <div class="container">
