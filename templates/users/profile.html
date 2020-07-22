@@ -4,31 +4,44 @@
 {% block title %}ImPACT - Notary Service{% endblock %}
 
 {% block content %}
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
     <div class="container">
         {% if user.is_authenticated %}
-        <div class="user-profile">
-            <h1>User profile</h1>
-            <p><b>First name: </b>{{ user.given_name }}</p>
-            <p><b>Last name: </b>{{ user.family_name }}</p>
-            <p><b>Email: </b>{{ user.email }}</p>
-            <p>
-                <b>Affiliation: </b>
-                {{ user.ns_affiliation | affiliation_uuid_to_name }}
-            </p>
-            <p><b>Identity provider: </b>{{ user.idp }}</p>
-            <hr>
-            <h1>Preferences</h1>
-            <form method="POST" class="post-form">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <input
-                  type="submit"
-                  name="update-preferences"
-                  value="Save Preferences"
-                  class="btn btn-success"
-                />
-            </form>
-            <hr>
+        <div class="row">
+            <div class="col-3">
+                <nav class="nav flex-column profile-sidenav">
+                    <a class="nav-link active" href="#"><i class="fa fa-user mr-2"></i>User Profile</a>
+                    <a class="nav-link" href="#"><i class="fa fa-key mr-2"></i>CILogon Certificate</a>
+                    <a class="nav-link" href="#"><i class="fa fa-envelope mr-2"></i>Messages</a>
+                    <a class="nav-link" href="#"><i class="fa fa-info-circle mr-2"></i>Identity Attributes</a>
+                </nav>
+            </div>
+            <div class="col-9 profile-body">
+                <div class="user-profile">
+                    <h1>User profile</h1>
+                    <p><b>First name: </b>{{ user.given_name }}</p>
+                    <p><b>Last name: </b>{{ user.family_name }}</p>
+                    <p><b>Email: </b>{{ user.email }}</p>
+                    <p>
+                        <b>Affiliation: </b>
+                        {{ user.ns_affiliation | affiliation_uuid_to_name }}
+                    </p>
+                    <p><b>Identity provider: </b>{{ user.idp }}</p>
+                    <hr>
+                    <h1>Preferences</h1>
+                    <form method="POST" class="post-form">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <input
+                          type="submit"
+                          name="update-preferences"
+                          value="Save Preferences"
+                          class="btn btn-success"
+                        />
+                    </form>
+                    <hr>
+                </div>
+            </div>
         </div>
             <table width="100%" cellpadding="5px">
                 <tr>
