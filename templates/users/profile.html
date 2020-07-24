@@ -19,15 +19,32 @@
             <div class="col-9 profile-body">
                 <div class="user-profile">
                     <h1>User profile</h1>
-                    <p><b>First name: </b>{{ user.given_name }}</p>
-                    <p><b>Last name: </b>{{ user.family_name }}</p>
-                    <p><b>Email: </b>{{ user.email }}</p>
-                    <p>
-                        <b>Affiliation: </b>
-                        {{ user.ns_affiliation | affiliation_uuid_to_name }}
-                    </p>
-                    <p><b>Identity provider: </b>{{ user.idp }}</p>
-                    <hr>
+                    <table class="table table-striped table-bordered my-4">
+                      <tr>
+                          <td>First name</td>
+                          <td><b>{{ user.given_name }}</b></td>
+                      </tr>
+                      <tr>
+                          <td>Last name</td>
+                          <td><b>{{ user.family_name }}</b></td>
+                      </tr>
+                      <tr>
+                          <td>Email</td>
+                          <td><b>{{ user.email }}</b></td>
+                      </tr>
+                      <tr>
+                          <td>Affiliation</td>
+                          <td><b>{{ user.ns_affiliation | affiliation_uuid_to_name }}}</b></td>
+                      </tr>
+                      <tr>
+                          <td>Identity provider</td>
+                          <td><b>{{ user.idp }}</b></td>
+                      </tr>
+                      <tr>
+                        <td>Current user role</td>
+                        <td><b>{{ user.role }}</b></td>
+                    </tr>
+                    </table>
                     <h1>Preferences</h1>
                     <form method="POST" class="preference-form">
                         {% csrf_token %}
