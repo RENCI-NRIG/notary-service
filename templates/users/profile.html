@@ -125,9 +125,22 @@
                     </p>
                     <hr>
                 </div>
-                <div class="identity-attributes">
-                    <h1 data-toggle="collapse" data-target="#cilogon-claims">Identity: CILogon Claims</h1>
-                    <table id="cilogon-claims" class="table table-striped table-bordered">
+                <div id="identityAttributes">
+                    <h1
+                      id="cilogonHeading"
+                      data-toggle="collapse"
+                      data-target="#cilogonClaims"
+                      aria-expanded="true"
+                      aria-controls="cilogonClaims"
+                    >
+                      Identity: CILogon Claims
+                    </h1>
+                    <table
+                      id="cilogonClaims"
+                      class="collapse show table table-striped table-bordered"
+                      aria-labelledby="cilogonHeading"
+                      data-parent="#identityAttributes"
+                    >
                         <tr>
                             <td>name</td>
                             <td><b>{{ user.name }}</b></td>
