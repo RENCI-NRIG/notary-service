@@ -8,7 +8,7 @@
     <div class="container">
         {% if user.is_authenticated %}
         <div class="row">
-            <div class="col-3">
+            <div class="col-3 pr-5">
                 <nav class="nav flex-column profile-sidenav">
                     <a class="nav-link active" href="#"><i class="fa fa-user mr-2"></i>User Profile</a>
                     <a class="nav-link" href="#"><i class="fa fa-key mr-2"></i>CILogon Certificate</a>
@@ -41,177 +41,181 @@
                     </form>
                     <hr>
                 </div>
+                <div class="cilogon-certificate">
+                    <table width="100%" cellpadding="5px">
+                        <tr>
+                            <td style="width: 50%">
+                                <h1>CILogon Certificate</h1>
+                                {% if user.cilogon_certificate_date %}
+                                    - Generated: {{ user.cilogon_certificate_date }}<br>
+                                    - Valid until: {{ user.cilogon_certificate_date|cert_exp_datetime }}
+                                {% else %}
+                                    - Generated: Not yet generated
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button
+                                    onclick="location.href = 'profile/certificate';"
+                                    id="profile-certificate"
+                                    class="btn btn-success"
+                                >
+                                  Generate New Certificate
+                                </button>
+                            </td>
+                        </tr>
+                    </table>
+                    <hr>
+                </div>
+                <div class="messages">
+                    <form method="POST" class="post-form">
+                        {% csrf_token %}
+                        <table width="100%" cellpadding="5px">
+                            <tr>
+                                <td style="width: 50%">
+                                    <h1>Messages</h1>
+                                </td>
+                                <td>
+                                    <input
+                                      type="submit"
+                                      name="check-messages"
+                                      value="Get new messages"
+                                      class="btn btn-success"
+                                    />
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                    <br>
+                    <table class="table table-striped table-bordered">
+                        <tr>
+                            <td align="center"><b>Subject</b></td>
+                            <td align="center"><b>Body</b></td>
+                            <td align="center"><b>Created Date</b></td>
+                            <td align="center"><b>Modified Date</b></td>
+                        </tr>
+        
+                        {% for message in ns_messages %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'message_detail' uuid=message.uuid %}">
+                                        {{ message.subject|truncatechars:"37" }}
+                                    </a>
+                                </td>
+                                <td>{{ message.body|truncatechars:"37" }}</td>
+                                <td>{{ message.created_date }}</td>
+                                <td>{{ message.modified_date }}</td>
+                                <td>
+                                    <a href="{% url 'message_detail' uuid=message.uuid %}"
+                                       title="View message" class="fa fa-fw fa-eye" style="color: #146885;"></a>
+                                </td>
+                                <td>
+                                    <form method="POST" class="post-form">
+                                        {% csrf_token %}
+                                        <input style="font-family: FontAwesome;color: #B22222;
+                                        border: none; background: none" name="delete-message"
+                                               title="Move message to trash" value="&#xf1f8;" type="submit">
+                                        <input type="hidden" name="remove_message_uuid" value="{{ message.uuid }}">
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                    <p>
+                        <a href="{% url 'messages' %}" title="View My Messages">View all active messages</a>
+                    </p>
+                    <hr>
+                </div>
+                <div class="identity-attributes">
+                    <h1 data-toggle="collapse" data-target="#cilogon-claims">Identity: CILogon Claims</h1>
+                    <table id="cilogon-claims" class="table table-striped table-bordered">
+                        <tr>
+                            <td>name</td>
+                            <td><b>{{ user.name }}</b></td>
+                        </tr>
+                        <tr>
+                            <td>email</td>
+                            <td><b>{{ user.email }}</b></td>
+                        </tr>
+                        <tr>
+                            <td>given_name</td>
+                            <td><b>{{ user.first_name }}</b></td>
+                        </tr>
+                        <tr>
+                            <td>family_name</td>
+                            <td><b>{{ user.last_name }}</b></td>
+                        </tr>
+                        <tr>
+                            <td>idp</td>
+                            <td><b>{{ user.idp }}</b></td>
+                        </tr>
+                        <tr>
+                            <td>idp_name</td>
+                            <td><b>{{ user.idp_name }}</b></td>
+                        </tr>
+                        <tr>
+                            <td>sub</td>
+                            <td><b>{{ user.sub }}</b></td>
+                        </tr>
+                        <tr>
+                            <td>aud</td>
+                            <td><b>{{ user.aud }}</b></td>
+                        </tr>
+                        <tr>
+                            <td>cert_subject_dn</td>
+                            <td><b>{{ user.cert_subject_dn }}</b></td>
+                        </tr>
+                        <tr>
+                            <td>iss</td>
+                            <td><b>{{ user.iss }}</b></td>
+                        </tr>
+                        <tr>
+                            <td>oidc</td>
+                            <td><b>{{ user.oidc }}</b></td>
+                        </tr>
+                        <tr>
+                            <td>eppn</td>
+                            <td><b>{{ user.eppn }}</b></td>
+                        </tr>
+                        <tr>
+                            <td>eptid</td>
+                            <td><b>{{ user.eptid }}</b></td>
+                        </tr>
+                        <tr>
+                            <td>acr</td>
+                            <td><b>{{ user.acr }}</b></td>
+                        </tr>
+                        <tr>
+                            <td>affiliation</td>
+                            <td><b>{{ user.affiliation }}</b></td>
+                        </tr>
+                    </table>
+                    {% if isMemberOf %}
+                        <br>
+                        <h2>COmanage membership</h2>
+                        <table class="table table-striped table-bordered">
+                            {% for group in isMemberOf %}
+                                <tr>
+                                    <td>{{ group.attribute }}</td>
+                                    <td><b>{{ group.value }}</b></td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    {% endif %}
+                    {% if LDAPOther %}
+                        <br>
+                        <h2>Other attributes</h2>
+                        <table class="table table-striped table-bordered">
+                            {% for group in LDAPOther %}
+                                <tr>
+                                    <td>{{ group.attribute }}</td>
+                                    <td><b>{{ group.value }}</b></td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    {% endif %}
+                </div>
             </div>
         </div>
-            <table width="100%" cellpadding="5px">
-                <tr>
-                    <td style="width: 50%">
-                        <h1>CILogon Certificate</h1>
-                        {% if user.cilogon_certificate_date %}
-                            - Generated: {{ user.cilogon_certificate_date }}<br>
-                            - Valid until: {{ user.cilogon_certificate_date|cert_exp_datetime }}
-                        {% else %}
-                            - Generated: Not yet generated
-                        {% endif %}
-                    </td>
-                    <td>
-                        <button
-                            onclick="location.href = 'profile/certificate';"
-                            id="profile-certificate"
-                            class="btn btn-success"
-                        >
-                          Generate New Certificate
-                        </button>
-                    </td>
-                </tr>
-            </table>
-            <hr>
-            <form method="POST" class="post-form">
-                {% csrf_token %}
-                <table width="100%" cellpadding="5px">
-                    <tr>
-                        <td style="width: 50%">
-                            <h1>Messages</h1>
-                        </td>
-                        <td>
-                            <input
-                              type="submit"
-                              name="check-messages"
-                              value="Get new messages"
-                              class="btn btn-success"
-                            />
-                        </td>
-                    </tr>
-                </table>
-            </form>
-            <br>
-            <table class="table table-striped table-bordered">
-                <tr>
-                    <td align="center"><b>Subject</b></td>
-                    <td align="center"><b>Body</b></td>
-                    <td align="center"><b>Created Date</b></td>
-                    <td align="center"><b>Modified Date</b></td>
-                </tr>
-
-                {% for message in ns_messages %}
-                    <tr>
-                        <td>
-                            <a href="{% url 'message_detail' uuid=message.uuid %}">
-                                {{ message.subject|truncatechars:"37" }}
-                            </a>
-                        </td>
-                        <td>{{ message.body|truncatechars:"37" }}</td>
-                        <td>{{ message.created_date }}</td>
-                        <td>{{ message.modified_date }}</td>
-                        <td>
-                            <a href="{% url 'message_detail' uuid=message.uuid %}"
-                               title="View message" class="fa fa-fw fa-eye" style="color: #146885;"></a>
-                        </td>
-                        <td>
-                            <form method="POST" class="post-form">
-                                {% csrf_token %}
-                                <input style="font-family: FontAwesome;color: #B22222;
-                                border: none; background: none" name="delete-message"
-                                       title="Move message to trash" value="&#xf1f8;" type="submit">
-                                <input type="hidden" name="remove_message_uuid" value="{{ message.uuid }}">
-                            </form>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </table>
-            <p>
-                <a href="{% url 'messages' %}" title="View My Messages">View all active messages</a>
-            </p>
-
-            <hr>
-            <h1>Identity Attributes</h1>
-            <h2>Identity: CILogon Claims</h2>
-            <table class="table table-striped table-bordered">
-                <tr>
-                    <td>name</td>
-                    <td><b>{{ user.name }}</b></td>
-                </tr>
-                <tr>
-                    <td>email</td>
-                    <td><b>{{ user.email }}</b></td>
-                </tr>
-                <tr>
-                    <td>given_name</td>
-                    <td><b>{{ user.first_name }}</b></td>
-                </tr>
-                <tr>
-                    <td>family_name</td>
-                    <td><b>{{ user.last_name }}</b></td>
-                </tr>
-                <tr>
-                    <td>idp</td>
-                    <td><b>{{ user.idp }}</b></td>
-                </tr>
-                <tr>
-                    <td>idp_name</td>
-                    <td><b>{{ user.idp_name }}</b></td>
-                </tr>
-                <tr>
-                    <td>sub</td>
-                    <td><b>{{ user.sub }}</b></td>
-                </tr>
-                <tr>
-                    <td>aud</td>
-                    <td><b>{{ user.aud }}</b></td>
-                </tr>
-                <tr>
-                    <td>cert_subject_dn</td>
-                    <td><b>{{ user.cert_subject_dn }}</b></td>
-                </tr>
-                <tr>
-                    <td>iss</td>
-                    <td><b>{{ user.iss }}</b></td>
-                </tr>
-                <tr>
-                    <td>oidc</td>
-                    <td><b>{{ user.oidc }}</b></td>
-                </tr>
-                <tr>
-                    <td>eppn</td>
-                    <td><b>{{ user.eppn }}</b></td>
-                </tr>
-                <tr>
-                    <td>eptid</td>
-                    <td><b>{{ user.eptid }}</b></td>
-                </tr>
-                <tr>
-                    <td>acr</td>
-                    <td><b>{{ user.acr }}</b></td>
-                </tr>
-                <tr>
-                    <td>affiliation</td>
-                    <td><b>{{ user.affiliation }}</b></td>
-                </tr>
-            </table>
-            {% if isMemberOf %}
-                <br>
-                <h2>COmanage membership</h2>
-                <table class="table table-striped table-bordered">
-                    {% for group in isMemberOf %}
-                        <tr>
-                            <td>{{ group.attribute }}</td>
-                            <td><b>{{ group.value }}</b></td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            {% endif %}
-            {% if LDAPOther %}
-                <br>
-                <h2>Other attributes</h2>
-                <table class="table table-striped table-bordered">
-                    {% for group in LDAPOther %}
-                        <tr>
-                            <td>{{ group.attribute }}</td>
-                            <td><b>{{ group.value }}</b></td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            {% endif %}
         {% else %}
             <div class="container">
                 <p>You are not currently logged in or not authorized to view this page</p>
