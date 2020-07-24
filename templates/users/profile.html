@@ -2,281 +2,279 @@
 {% load static user_tags %}
 
 {% block title %}ImPACT - Notary Service{% endblock %}
-
 {% block content %}
-    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
-    <div class="container">
-        {% if user.is_authenticated %}
-        <div class="row">
-            <div class="col-3 pr-5">
-                <nav class="nav flex-column profile-sidenav">
-                    <a class="nav-link active" href="#"><i class="fa fa-user mr-2"></i>User Profile</a>
-                    <a class="nav-link" href="#"><i class="fa fa-key mr-2"></i>CILogon Certificate</a>
-                    <a class="nav-link" href="#"><i class="fa fa-envelope mr-2"></i>Messages</a>
-                    <a class="nav-link" href="#"><i class="fa fa-info-circle mr-2"></i>Identity Attributes</a>
-                </nav>
-            </div>
-            <div class="col-9 profile-body">
-                <div class="user-profile">
-                    <h1>User profile</h1>
-                    <table class="table table-striped table-bordered my-4">
-                      <tr>
-                          <td>First name</td>
-                          <td><b>{{ user.given_name }}</b></td>
-                      </tr>
-                      <tr>
-                          <td>Last name</td>
-                          <td><b>{{ user.family_name }}</b></td>
-                      </tr>
-                      <tr>
-                          <td>Email</td>
-                          <td><b>{{ user.email }}</b></td>
-                      </tr>
-                      <tr>
-                          <td>Affiliation</td>
-                          <td><b>{{ user.ns_affiliation | affiliation_uuid_to_name }}</b></td>
-                      </tr>
-                      <tr>
-                          <td>Identity provider</td>
-                          <td><b>{{ user.idp }}</b></td>
-                      </tr>
-                      <tr>
-                        <td>Current user role</td>
-                        <td><b>{{ user.role }}</b></td>
-                    </tr>
-                    </table>
-                    <h1>Preferences</h1>
-                    <form method="POST" class="preference-form">
-                        {% csrf_token %}
-                        {{ form.as_p }}
-                        <input
-                          type="submit"
-                          name="update-preferences"
-                          value="Save Preferences"
-                          class="btn btn-success"
-                        />
-                    </form>
-                    <hr>
-                </div>
-                <div class="cilogon-certificate">
-                  <h1>CILogon Certificate</h1>
-                  <div class="certificate-body">
-                    {% if user.cilogon_certificate_date %}
-                      - Generated: {{ user.cilogon_certificate_date }}<br>
-                      - Valid until: {{ user.cilogon_certificate_date|cert_exp_datetime }}
-                    {% else %}
-                      - Generated: Not yet generated
-                    {% endif %}
-                  </div>
-                  <button
-                    onclick="location.href = 'profile/certificate';"
-                    id="profile-certificate"
+  <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+  <div class="container">
+    {% if user.is_authenticated %}
+      <div class="row">
+        <div class="col-3">
+          <div class="list-group" id="profile-list-tab" role="tablist">
+            <a class="list-group-item list-group-item-action active" id="user-profile-list" data-toggle="list" href="#user-profile" role="tab" aria-controls="home"><i class="fa fa-user mr-2"></i>User Profile</a>
+            <a class="list-group-item list-group-item-action" id="cilogon-certificate-list" data-toggle="list" href="#cilogon-certificate" role="tab" aria-controls="profile"><i class="fa fa-key mr-2"></i>CILogon Certificate</a>
+            <a class="list-group-item list-group-item-action" id="messages-list" data-toggle="list" href="#messages" role="tab" aria-controls="messages"><i class="fa fa-envelope mr-2"></i>Messages</a>
+            <a class="list-group-item list-group-item-action" id="identity-attributes-list" data-toggle="list" href="#identity-attributes" role="tab" aria-controls="settings"><i class="fa fa-info-circle mr-2"></i>Identity Attributes</a>
+          </div>
+        </div>
+        <div class="col-9">
+          <div class="tab-content profile-body" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="user-profile" role="tabpanel" aria-labelledby="user-profile-list">
+              <h1>User profile</h1>
+              <table class="table table-striped table-bordered my-4">
+                <tr>
+                    <td>First name</td>
+                    <td><b>{{ user.given_name }}</b></td>
+                </tr>
+                <tr>
+                    <td>Last name</td>
+                    <td><b>{{ user.family_name }}</b></td>
+                </tr>
+                <tr>
+                    <td>Email</td>
+                    <td><b>{{ user.email }}</b></td>
+                <tr>
+                    <td>Affiliation</td>
+                    <td><b>{{ user.ns_affiliation | affiliation_uuid_to_name }}</b></td>
+                </tr>
+                <tr>
+                    <td>Identity provider</td>
+                    <td><b>{{ user.idp }}</b></td>
+                </tr>
+                <tr>
+                  <td>Current user role</td>
+                  <td><b>{{ user.role }}</b></td>
+              </tr>
+              </table>
+              <h1>Preferences</h1>
+              <form method="POST" class="preference-form">
+                  {% csrf_token %}
+                  {{ form.as_p }}
+                  <input
+                    type="submit"
+                    name="update-preferences"
+                    value="Save Preferences"
                     class="btn btn-success"
-                  >
-                    Generate New Certificate
-                  </button>
-                  <hr>
-                </div>
-                <div class="messages">
-                  <h1>My Messages</h1>
-                  <div class="message-toolbar d-flex flex-row my-4">
-                    <form method="POST" class="post-form">
-                        {% csrf_token %}
-                        <input
-                          type="submit"
-                          name="check-messages"
-                          value="New Messages"
-                          class="btn btn-info mr-2"
-                        />
-                    </form>
-                    <button
-                      onclick="location.href = 'messages'"
-                      class="btn btn-success"
-                    >
-                      Active Messages
-                    </button>
-                  </div>
-                  <table class="table table-striped table-bordered text-center">
-                    <tr class="font-weight-bold">
-                        <td>Subject</td>
-                        <td>Body</td>
-                        <td>Created Date</td>
-                        <td>Modified Date</td>
-                        <td>View</td>
-                        <td>Delete</td>
+                  />
+              </form>
+            </div>
+            <div class="tab-pane fade" id="cilogon-certificate" role="tabpanel" aria-labelledby="cilogon-certificate-list">
+              <h1>CILogon Certificate</h1>
+              <div class="certificate-body">
+                {% if user.cilogon_certificate_date %}
+                  - Generated: {{ user.cilogon_certificate_date }}<br>
+                  - Valid until: {{ user.cilogon_certificate_date|cert_exp_datetime }}
+                {% else %}
+                  - Generated: Not yet generated
+                {% endif %}
+              </div>
+              <button
+                onclick="location.href = 'profile/certificate';"
+                id="profile-certificate"
+                class="btn btn-success"
+              >
+                Generate New Certificate
+              </button>
+            </div>
+            <div class="tab-pane fade" id="messages" role="tabpanel" aria-labelledby="messages-list">
+              <h1>My Messages</h1>
+              <div class="message-toolbar d-flex flex-row my-4">
+                <form method="POST" class="post-form">
+                    {% csrf_token %}
+                    <input
+                      type="submit"
+                      name="check-messages"
+                      value="New Messages"
+                      class="btn btn-info mr-2"
+                    />
+                </form>
+                <button
+                  onclick="location.href = 'messages'"
+                  class="btn btn-success"
+                >
+                  Active Messages
+                </button>
+              </div>
+              <table class="table table-striped table-bordered text-center">
+                <tr class="font-weight-bold">
+                    <td>Subject</td>
+                    <td>Body</td>
+                    <td>Created Date</td>
+                    <td>Modified Date</td>
+                    <td>View</td>
+                    <td>Delete</td>
+                </tr>
+                {% for message in ns_messages %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'message_detail' uuid=message.uuid %}" style="color: #146885;">
+                                {{ message.subject|truncatechars:"37" }}
+                            </a>
+                        </td>
+                        <td>{{ message.body|truncatechars:"37" }}</td>
+                        <td>{{ message.created_date }}</td>
+                        <td>{{ message.modified_date }}</td>
+                        <td>
+                            <a href="{% url 'message_detail' uuid=message.uuid %}"
+                                title="View message" class="fa fa-fw fa-eye" style="color: #146885;"></a>
+                        </td>
+                        <td>
+                            <form method="POST" class="post-form">
+                                {% csrf_token %}
+                                {% if message.is_active %}
+                                    <input style="font-family: FontAwesome;color: #B22222;
+                                border: none; background: none" name="delete-message"
+                                            title="Move message to trash" value="&#xf1f8;" type="submit">
+                                {% else %}
+                                    <input style="font-family: FontAwesome;color: #B22222;
+                                border: none; background: none" name="delete-message"
+                                            title="Delete message" value="&#xf00d;" type="submit">
+                                {% endif %}
+                                <input type="hidden" name="remove_message_uuid" value="{{ message.uuid }}">
+                            </form>
+                        </td>
                     </tr>
-                    {% for message in ns_messages %}
+                {% endfor %}
+              </table>
+            </div>
+            <div class="tab-pane fade" id="identity-attributes" role="tabpanel" aria-labelledby="identity-attributes-list">
+              <h1>Identity Attributes</h1>
+              <h4
+                id="cilogonHeading"
+                class="card-header my-4"
+                data-toggle="collapse"
+                data-target="#cilogonClaims"
+                aria-expanded="true"
+                aria-controls="cilogonClaims"
+              >
+                Identity: CILogon Claims
+                <i class="fa fa-plus ml-2"></i>
+                <i class="fa fa-minus ml-2"></i>
+              </h4>
+              <table
+                id="cilogonClaims"
+                class="collapse show table table-striped table-bordered"
+                aria-labelledby="cilogonHeading"
+              >
+                  <tr>
+                      <td>name</td>
+                      <td><b>{{ user.name }}</b></td>
+                  </tr>
+                  <tr>
+                      <td>email</td>
+                      <td><b>{{ user.email }}</b></td>
+                  </tr>
+                  <tr>
+                      <td>given_name</td>
+                      <td><b>{{ user.first_name }}</b></td>
+                  </tr>
+                  <tr>
+                      <td>family_name</td>
+                      <td><b>{{ user.last_name }}</b></td>
+                  </tr>
+                  <tr>
+                      <td>idp</td>
+                      <td><b>{{ user.idp }}</b></td>
+                  </tr>
+                  <tr>
+                      <td>idp_name</td>
+                      <td><b>{{ user.idp_name }}</b></td>
+                  </tr>
+                  <tr>
+                      <td>sub</td>
+                      <td><b>{{ user.sub }}</b></td>
+                  </tr>
+                  <tr>
+                      <td>aud</td>
+                      <td><b>{{ user.aud }}</b></td>
+                  </tr>
+                  <tr>
+                      <td>cert_subject_dn</td>
+                      <td><b>{{ user.cert_subject_dn }}</b></td>
+                  </tr>
+                  <tr>
+                      <td>iss</td>
+                      <td><b>{{ user.iss }}</b></td>
+                  </tr>
+                  <tr>
+                      <td>oidc</td>
+                      <td><b>{{ user.oidc }}</b></td>
+                  </tr>
+                  <tr>
+                      <td>eppn</td>
+                      <td><b>{{ user.eppn }}</b></td>
+                  </tr>
+                  <tr>
+                      <td>eptid</td>
+                      <td><b>{{ user.eptid }}</b></td>
+                  </tr>
+                  <tr>
+                      <td>acr</td>
+                      <td><b>{{ user.acr }}</b></td>
+                  </tr>
+                  <tr>
+                      <td>affiliation</td>
+                      <td><b>{{ user.affiliation }}</b></td>
+                  </tr>
+              </table>
+              {% if isMemberOf %}
+                <h4
+                  id="comanageHeading"
+                  class="card-header my-4"
+                  data-toggle="collapse"
+                  data-target="#comanageMembership"
+                  aria-expanded="false"
+                  aria-controls="comanageMembership"
+                >
+                  COmanage membership
+                  <i class="fa fa-plus ml-2"></i>
+                  <i class="fa fa-minus ml-2"></i>
+                </h4>
+                <table
+                  id="comanageMembership"
+                  class="collapse table table-striped table-bordered"
+                  aria-labelledby="comanageHeading"
+                >
+                    {% for group in isMemberOf %}
                         <tr>
-                            <td>
-                                <a href="{% url 'message_detail' uuid=message.uuid %}" style="color: #146885;">
-                                    {{ message.subject|truncatechars:"37" }}
-                                </a>
-                            </td>
-                            <td>{{ message.body|truncatechars:"37" }}</td>
-                            <td>{{ message.created_date }}</td>
-                            <td>{{ message.modified_date }}</td>
-                            <td>
-                                <a href="{% url 'message_detail' uuid=message.uuid %}"
-                                   title="View message" class="fa fa-fw fa-eye" style="color: #146885;"></a>
-                            </td>
-                            <td>
-                                <form method="POST" class="post-form">
-                                    {% csrf_token %}
-                                    {% if message.is_active %}
-                                        <input style="font-family: FontAwesome;color: #B22222;
-                                    border: none; background: none" name="delete-message"
-                                               title="Move message to trash" value="&#xf1f8;" type="submit">
-                                    {% else %}
-                                        <input style="font-family: FontAwesome;color: #B22222;
-                                    border: none; background: none" name="delete-message"
-                                               title="Delete message" value="&#xf00d;" type="submit">
-                                    {% endif %}
-                                    <input type="hidden" name="remove_message_uuid" value="{{ message.uuid }}">
-                                </form>
-                            </td>
+                            <td>{{ group.attribute }}</td>
+                            <td><b>{{ group.value }}</b></td>
                         </tr>
                     {% endfor %}
                 </table>
-                </div>
-                <div id="identityAttributes">
-                    <h1>Identity Attributes</h1>
-                    <h4
-                      id="cilogonHeading"
-                      class="card-header my-4"
-                      data-toggle="collapse"
-                      data-target="#cilogonClaims"
-                      aria-expanded="true"
-                      aria-controls="cilogonClaims"
-                    >
-                      Identity: CILogon Claims
-                      <i class="fa fa-plus ml-2"></i>
-                      <i class="fa fa-minus ml-2"></i>
-                    </h4>
-                    <table
-                      id="cilogonClaims"
-                      class="collapse show table table-striped table-bordered"
-                      aria-labelledby="cilogonHeading"
-                    >
-                        <tr>
-                            <td>name</td>
-                            <td><b>{{ user.name }}</b></td>
-                        </tr>
-                        <tr>
-                            <td>email</td>
-                            <td><b>{{ user.email }}</b></td>
-                        </tr>
-                        <tr>
-                            <td>given_name</td>
-                            <td><b>{{ user.first_name }}</b></td>
-                        </tr>
-                        <tr>
-                            <td>family_name</td>
-                            <td><b>{{ user.last_name }}</b></td>
-                        </tr>
-                        <tr>
-                            <td>idp</td>
-                            <td><b>{{ user.idp }}</b></td>
-                        </tr>
-                        <tr>
-                            <td>idp_name</td>
-                            <td><b>{{ user.idp_name }}</b></td>
-                        </tr>
-                        <tr>
-                            <td>sub</td>
-                            <td><b>{{ user.sub }}</b></td>
-                        </tr>
-                        <tr>
-                            <td>aud</td>
-                            <td><b>{{ user.aud }}</b></td>
-                        </tr>
-                        <tr>
-                            <td>cert_subject_dn</td>
-                            <td><b>{{ user.cert_subject_dn }}</b></td>
-                        </tr>
-                        <tr>
-                            <td>iss</td>
-                            <td><b>{{ user.iss }}</b></td>
-                        </tr>
-                        <tr>
-                            <td>oidc</td>
-                            <td><b>{{ user.oidc }}</b></td>
-                        </tr>
-                        <tr>
-                            <td>eppn</td>
-                            <td><b>{{ user.eppn }}</b></td>
-                        </tr>
-                        <tr>
-                            <td>eptid</td>
-                            <td><b>{{ user.eptid }}</b></td>
-                        </tr>
-                        <tr>
-                            <td>acr</td>
-                            <td><b>{{ user.acr }}</b></td>
-                        </tr>
-                        <tr>
-                            <td>affiliation</td>
-                            <td><b>{{ user.affiliation }}</b></td>
-                        </tr>
-                    </table>
-                    {% if isMemberOf %}
-                      <h4
-                        id="comanageHeading"
-                        class="card-header my-4"
-                        data-toggle="collapse"
-                        data-target="#comanageMembership"
-                        aria-expanded="false"
-                        aria-controls="comanageMembership"
-                      >
-                        COmanage membership
-                        <i class="fa fa-plus ml-2"></i>
-                        <i class="fa fa-minus ml-2"></i>
-                      </h4>
-                      <table
-                        id="comanageMembership"
-                        class="collapse table table-striped table-bordered"
-                        aria-labelledby="comanageHeading"
-                      >
-                          {% for group in isMemberOf %}
-                              <tr>
-                                  <td>{{ group.attribute }}</td>
-                                  <td><b>{{ group.value }}</b></td>
-                              </tr>
-                          {% endfor %}
-                      </table>
-                    {% endif %}
-                    {% if LDAPOther %}
-                      <h4
-                        id="otherHeading"
-                        class="card-header my-4"
-                        data-toggle="collapse"
-                        data-target="#otherAttributes"
-                        aria-expanded="false"
-                        aria-controls="otherAttributes"
-                      >
-                        Other attributes
-                        <i class="fa fa-plus ml-2"></i>
-                        <i class="fa fa-minus ml-2"></i>
-                      </h4>
-                        <table
-                          id="otherAttributes"
-                          class="collapse table table-striped table-bordered"
-                          aria-labelledby="otherHeading"
-                        >
-                            {% for group in LDAPOther %}
-                                <tr>
-                                    <td>{{ group.attribute }}</td>
-                                    <td><b>{{ group.value }}</b></td>
-                                </tr>
-                            {% endfor %}
-                        </table>
-                    {% endif %}
-                </div>
+              {% endif %}
+              {% if LDAPOther %}
+                <h4
+                  id="otherHeading"
+                  class="card-header my-4"
+                  data-toggle="collapse"
+                  data-target="#otherAttributes"
+                  aria-expanded="false"
+                  aria-controls="otherAttributes"
+                >
+                  Other attributes
+                  <i class="fa fa-plus ml-2"></i>
+                  <i class="fa fa-minus ml-2"></i>
+                </h4>
+                  <table
+                    id="otherAttributes"
+                    class="collapse table table-striped table-bordered"
+                    aria-labelledby="otherHeading"
+                  >
+                      {% for group in LDAPOther %}
+                          <tr>
+                              <td>{{ group.attribute }}</td>
+                              <td><b>{{ group.value }}</b></td>
+                          </tr>
+                      {% endfor %}
+                  </table>
+              {% endif %}
             </div>
+          </div>
         </div>
-        {% else %}
-            <div class="container">
-                <p>You are not currently logged in or not authorized to view this page</p>
-            </div>
-        {% endif %}
-    </div>
+      </div>
+    {% else %}
+      <div class="container">
+          <p>You are not currently logged in or not authorized to view this page</p>
+      </div>
+    {% endif %}
+  </div>
 {% endblock %}
