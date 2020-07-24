@@ -34,7 +34,7 @@
                       </tr>
                       <tr>
                           <td>Affiliation</td>
-                          <td><b>{{ user.ns_affiliation | affiliation_uuid_to_name }}}</b></td>
+                          <td><b>{{ user.ns_affiliation | affiliation_uuid_to_name }}</b></td>
                       </tr>
                       <tr>
                           <td>Identity provider</td>
@@ -59,29 +59,23 @@
                     <hr>
                 </div>
                 <div class="cilogon-certificate">
-                    <table width="100%" cellpadding="5px">
-                        <tr>
-                            <td style="width: 50%">
-                                <h1>CILogon Certificate</h1>
-                                {% if user.cilogon_certificate_date %}
-                                    - Generated: {{ user.cilogon_certificate_date }}<br>
-                                    - Valid until: {{ user.cilogon_certificate_date|cert_exp_datetime }}
-                                {% else %}
-                                    - Generated: Not yet generated
-                                {% endif %}
-                            </td>
-                            <td>
-                                <button
-                                    onclick="location.href = 'profile/certificate';"
-                                    id="profile-certificate"
-                                    class="btn btn-success"
-                                >
-                                  Generate New Certificate
-                                </button>
-                            </td>
-                        </tr>
-                    </table>
-                    <hr>
+                  <h1>CILogon Certificate</h1>
+                  <div class="certificate-body">
+                    {% if user.cilogon_certificate_date %}
+                      - Generated: {{ user.cilogon_certificate_date }}<br>
+                      - Valid until: {{ user.cilogon_certificate_date|cert_exp_datetime }}
+                    {% else %}
+                      - Generated: Not yet generated
+                    {% endif %}
+                  </div>
+                  <button
+                    onclick="location.href = 'profile/certificate';"
+                    id="profile-certificate"
+                    class="btn btn-success"
+                  >
+                    Generate New Certificate
+                  </button>
+                  <hr>
                 </div>
                 <div class="messages">
                   <h1>My Messages</h1>
