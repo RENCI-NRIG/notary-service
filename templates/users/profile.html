@@ -126,20 +126,23 @@
                     <hr>
                 </div>
                 <div id="identityAttributes">
-                    <h1
+                    <h1>Identity Attributes</h1>
+                    <h4
                       id="cilogonHeading"
+                      class="card-header my-4"
                       data-toggle="collapse"
                       data-target="#cilogonClaims"
                       aria-expanded="true"
                       aria-controls="cilogonClaims"
                     >
                       Identity: CILogon Claims
-                    </h1>
+                      <i class="fa fa-plus ml-2"></i>
+                      <i class="fa fa-minus ml-2"></i>
+                    </h4>
                     <table
                       id="cilogonClaims"
                       class="collapse show table table-striped table-bordered"
                       aria-labelledby="cilogonHeading"
-                      data-parent="#identityAttributes"
                     >
                         <tr>
                             <td>name</td>
@@ -203,21 +206,49 @@
                         </tr>
                     </table>
                     {% if isMemberOf %}
-                        <br>
-                        <h2>COmanage membership</h2>
-                        <table class="table table-striped table-bordered">
-                            {% for group in isMemberOf %}
-                                <tr>
-                                    <td>{{ group.attribute }}</td>
-                                    <td><b>{{ group.value }}</b></td>
-                                </tr>
-                            {% endfor %}
-                        </table>
+                      <h4
+                        id="comanageHeading"
+                        class="card-header my-4"
+                        data-toggle="collapse"
+                        data-target="#comanageMembership"
+                        aria-expanded="false"
+                        aria-controls="comanageMembership"
+                      >
+                        COmanage membership
+                        <i class="fa fa-plus ml-2"></i>
+                        <i class="fa fa-minus ml-2"></i>
+                      </h4>
+                      <table
+                        id="comanageMembership"
+                        class="collapse table table-striped table-bordered"
+                        aria-labelledby="comanageHeading"
+                      >
+                          {% for group in isMemberOf %}
+                              <tr>
+                                  <td>{{ group.attribute }}</td>
+                                  <td><b>{{ group.value }}</b></td>
+                              </tr>
+                          {% endfor %}
+                      </table>
                     {% endif %}
                     {% if LDAPOther %}
-                        <br>
-                        <h2>Other attributes</h2>
-                        <table class="table table-striped table-bordered">
+                      <h4
+                        id="otherHeading"
+                        class="card-header my-4"
+                        data-toggle="collapse"
+                        data-target="#otherAttributes"
+                        aria-expanded="false"
+                        aria-controls="otherAttributes"
+                      >
+                        Other attributes
+                        <i class="fa fa-plus ml-2"></i>
+                        <i class="fa fa-minus ml-2"></i>
+                      </h4>
+                        <table
+                          id="otherAttributes"
+                          class="collapse table table-striped table-bordered"
+                          aria-labelledby="otherHeading"
+                        >
                             {% for group in LDAPOther %}
                                 <tr>
                                     <td>{{ group.attribute }}</td>
