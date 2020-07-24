@@ -29,7 +29,7 @@
                     <p><b>Identity provider: </b>{{ user.idp }}</p>
                     <hr>
                     <h1>Preferences</h1>
-                    <form method="POST" class="post-form">
+                    <form method="POST" class="preference-form">
                         {% csrf_token %}
                         {{ form.as_p }}
                         <input

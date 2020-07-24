@@ -30,7 +30,7 @@ class UserPreferences(forms.ModelForm):
         super(UserPreferences, self).__init__(*args, **kwargs)
         self.fields['role'] = forms.ChoiceField(
             choices=sorted(role_choices, key=itemgetter(1)),
-            widget=forms.RadioSelect,
+            widget=forms.RadioSelect(attrs={'class': 'profile-radios'}),
             label='Change user role',
             required=False
         )
@@ -42,7 +42,7 @@ class UserPreferences(forms.ModelForm):
 
     show_uuid = forms.ChoiceField(
         choices=VIEW_CHOICE,
-        widget=forms.RadioSelect,
+        widget=forms.RadioSelect(attrs={'class': 'profile-radios'}),
         label='Change URL rendering',
         required=False,
     )
