@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
+from django.contrib import messages
 
 from apache_kafka.models import Message
 from apache_kafka.views import index_page_messages, check_for_new_messages
@@ -129,6 +130,7 @@ def profile(request):
         if request.method == "POST":
             form = UserPreferences(request.POST, instance=user, user=request.user)
             if form.is_valid():
+                messages.success(request, 'Preferences changed successfully!')
                 if request.POST.get("delete-message"):
                     message = get_object_or_404(Message, uuid=request.POST.get('remove_message_uuid'))
                     message.is_active = False

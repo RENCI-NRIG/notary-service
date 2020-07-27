@@ -55,6 +55,16 @@
                     class="btn btn-success"
                   />
               </form>
+              {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-success alert-dismissible w-50 mt-4">
+                  {{ message }}
+                  <button type="button" class="close" data-dismiss="alert">
+                    <i class="fa fa-times"></i>
+                  </button>
+                </div>
+                {% endfor %}
+              {% endif %}
             </div>
             <div class="tab-pane fade" id="cilogon-certificate" role="tabpanel" aria-labelledby="cilogon-certificate-list">
               <h1>CILogon Certificate</h1>
