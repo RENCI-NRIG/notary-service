@@ -156,8 +156,14 @@
                 aria-controls="cilogonClaims"
               >
                 Identity: CILogon Claims
-                <i class="fa fa-plus ml-2"></i>
-                <i class="fa fa-minus ml-2"></i>
+                <i
+                  id="cilogonTooltip"
+                  class="fa fa-question-circle ml-2 text-secondary"
+                ></i>
+                <span class="attributes-collapse pull-right">
+                  <i class="fa fa-plus"></i>
+                  <i class="fa fa-minus"></i>
+                </span>
               </h4>
               <table
                 id="cilogonClaims"
@@ -235,8 +241,14 @@
                   aria-controls="comanageMembership"
                 >
                   COmanage membership
-                  <i class="fa fa-plus ml-2"></i>
-                  <i class="fa fa-minus ml-2"></i>
+                  <i
+                    id="comanageTooltip"
+                    class="fa fa-question-circle ml-2 text-secondary"
+                  ></i>
+                  <span class="attributes-collapse pull-right">
+                    <i class="fa fa-plus"></i>
+                    <i class="fa fa-minus"></i>
+                  </span>
                 </h4>
                 <table
                   id="comanageMembership"
@@ -261,8 +273,14 @@
                   aria-controls="otherAttributes"
                 >
                   Other attributes
-                  <i class="fa fa-plus ml-2"></i>
-                  <i class="fa fa-minus ml-2"></i>
+                  <i
+                    id="otherTooltip"
+                    class="fa fa-question-circle ml-2 text-secondary"
+                  ></i>
+                  <span class="attributes-collapse pull-right">
+                    <i class="fa fa-plus"></i>
+                    <i class="fa fa-minus"></i>
+                  </span>
                 </h4>
                   <table
                     id="otherAttributes"
@@ -287,4 +305,9 @@
       </div>
     {% endif %}
   </div>
+  <script type="text/javascript">
+    $('#cilogonTooltip').tooltip({ title: 'TODO: Tooltip content', placement:"right"});
+    $('#comanageTooltip').tooltip({ title: 'TODO: Tooltip content', placement:"right"});
+    $('#otherTooltip').tooltip({ title: 'TODO: Tooltip content', placement:"right"});
+  </script>
 {% endblock %}
