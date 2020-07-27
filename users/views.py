@@ -152,6 +152,7 @@ def profile(request):
                        'isMemberOf': ismemberof,
                        'LDAPOther': ldapother,
                        'form': form,
+                       'role': get_object_or_404(Role, id=user.role).get_id_display(),
                        'ns_messages': ns_messages})
     else:
         return render(request, 'profile.html', {'profile_page': 'active'})
