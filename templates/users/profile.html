@@ -306,8 +306,11 @@
     {% endif %}
   </div>
   <script type="text/javascript">
-    $('#cilogonTooltip').tooltip({ title: 'TODO: Tooltip content', placement:"right"});
-    $('#comanageTooltip').tooltip({ title: 'TODO: Tooltip content', placement:"right"});
-    $('#otherTooltip').tooltip({ title: 'TODO: Tooltip content', placement:"right"});
+    $('#cilogonTooltip')
+      .tooltip({ title: 'Aggregate identity attributes as provided by the institutional identity provider (based on dropdown selection at login) and CILogon.',placement:"right"});
+    $('#comanageTooltip')
+      .tooltip({ title: 'Group membership as defined within the COmanage registry in terms of Collaborative Organization Units (COUs).', placement:"right"});
+    $('#otherTooltip')
+      .tooltip({ title: 'Other LDAP attributes stored as read-only entries within the COmanage registry.', placement:"right"});
   </script>
 {% endblock %}
