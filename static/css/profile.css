@@ -1,0 +1,72 @@
+
+.profile-body {
+  margin: 1rem 0;
+  padding-left: 2rem;
+}
+
+.profile-body .active {
+background-color: #FFF;
+}
+
+.list-group-item {
+color: #FFF;
+background-color: #555;
+}
+
+.list-group-item.active {
+background-color: #107B97;
+border: none;
+}
+
+#profile-list-tab {
+margin-top: 5.5rem;
+}
+
+.list-group-item:hover {
+background-color: #D67B0B;
+}
+
+h4[aria-expanded=true] .fa-plus {
+  display: none;
+}
+
+h4[aria-expanded=false] .fa-minus {
+  display: none;
+}
+
+.preference-form p {
+margin: .8rem 0;
+}
+
+.preference-form p label {
+font-size: 1.25rem;
+font-weight: 500;
+margin: 0;
+}
+
+.preference-form ul {
+list-style-type:none;
+display: inline;
+}
+
+.preference-form ul li {
+display: inline;
+}
+
+.preference-form ul li label {
+padding-right: 1rem;
+}
+
+#id_role, #id_show_uuid {
+padding-left: 0;
+}
+
+.certificate-body {
+margin: 2rem 0;
+}
+
+.tooltip-inner {
+max-width: 25rem;
+text-align: left;
+border-radius: .25rem;
+}
