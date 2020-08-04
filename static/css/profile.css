@@ -61,12 +61,12 @@ padding-right: 1rem;
 padding-left: 0;
 }
 
-.certificate-body {
-margin: 2rem 0;
-}
-
 .tooltip-inner {
 max-width: 25rem;
 text-align: left;
 border-radius: .25rem;
+}
+
+.errorlist {
+  display: none;
 }

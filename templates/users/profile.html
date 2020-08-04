@@ -47,7 +47,7 @@
               <h2>Preferences</h2>
               <form method="POST" class="preference-form">
                   {% csrf_token %}
-                  {{ form.as_p }}
+                  {{ preference_form.as_p }}
                   <input
                     type="submit"
                     name="update-preferences"
@@ -68,21 +68,60 @@
             </div>
             <div class="tab-pane fade" id="cilogon-certificate" role="tabpanel" aria-labelledby="cilogon-certificate-list">
               <h1>CILogon Certificate</h1>
-              <div class="certificate-body">
-                {% if user.cilogon_certificate_date %}
-                  - Generated: {{ user.cilogon_certificate_date }}<br>
-                  - Valid until: {{ user.cilogon_certificate_date|cert_exp_datetime }}
+              <div class="py-4 mb-4 border-bottom">
+                  Certificate last generated on:
+                  <mark class="font-weight-bold ml-2">
+                    {{ user.cilogon_certificate_date|default:"Not generated yet" }}
+                  </mark>
+              </div>
+              <div>
+                {% if certificate_files == '' %}
+                  <div>
+                    <h3>Steps to Generate Certificates</h3>
+                    <ol>
+                      <li class="my-4">Certificate generation requires you to
+                        <a href="{{ auth_url }}" target="_blank"> make a new authorization request</a></li>
+                      <li class="my-4">Copy the <b>Response Code</b> returned to you from part 1. into the <b>Authorization response</b> box below</li>
+                      <li class="my-4">Set a password for the p12 certificate (certificate type used by browsers)</li>
+                      <li class="my-4">Press the "<b>Generate My Certificate</b>" button</li>
+                    </ol>
+                    <form method="POST" class="post-form">
+                        {% csrf_token %}
+                        {{ certificate_form.as_p }}
+                        <input
+                          type="submit"
+                          name="generate-certificate"
+                          value="Generate My Certificate"
+                          class="btn btn-success"
+                        >
+                        <input type="hidden" name="use_my_key" value="False">
+                    </form>
+                  </div>
                 {% else %}
-                  - Generated: Not yet generated
+                  <h3>Download Certificates</h3>
+                  <div class="my-4">
+                    {% for file_ref in certificate_files %}
+                    <form method="POST" class="post-form">
+                      {% csrf_token %}
+                      <input type="hidden" name="path-{{ file_ref.name }}" value={{ file_ref.path }}>
+                      {{ file_ref.name }} ({{ file_ref.description }})
+                      <input
+                        type="submit"
+                        name="download"
+                        value="download"
+                        class="btn btn-success my-2"
+                      />
+                    </form>
+                  {% endfor %}
+                  </div>
+                  <div class="alert alert-warning alert-dismissible w-100 mt-4">
+                    Download all desired certificates before leaving this page!
+                    <button type="button" class="close" data-dismiss="alert">
+                      <i class="fa fa-times"></i>
+                    </button>
+                  </div>
                 {% endif %}
               </div>
-              <button
-                onclick="location.href = 'profile/certificate';"
-                id="profile-certificate"
-                class="btn btn-success"
-              >
-                Generate New Certificate
-              </button>
             </div>
             <div class="tab-pane fade" id="messages" role="tabpanel" aria-labelledby="messages-list">
               <h1>My Messages</h1>
