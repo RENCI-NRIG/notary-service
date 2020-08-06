@@ -57,56 +57,6 @@ def authresponse(request):
         }
     )
 
-# def certificate(request):
-#     """
-#     Generate and retrieve certificate files from CILogon
-#     If certificate files are generated, give the user one chance to download them, otherwise present the
-#     certificate creation options
-#     :param request:
-#     :return:
-#     """
-#     if request.user.is_authenticated:
-#         user = get_object_or_404(NotaryServiceUser, id=request.user.id)
-#         auth_url = get_authorization_url()
-#         certificate_files = ''
-#         if request.method == 'POST':
-#             if request.POST.get("download"):
-#                 if request.POST.get("path-cilogon.crt"):
-#                     path = request.POST.get("path-cilogon.crt")
-#                 elif request.POST.get("path-cilogon.key"):
-#                     path = request.POST.get("path-cilogon.key")
-#                 else:
-#                     path = request.POST.get("path-cilogon.p12")
-#                 return download(request, path=path)
-#             form = CILogonCertificateForm(request.POST)
-#             if form.is_valid():
-#                 if request.POST.get("generate-certificate"):
-#                     if str(request.POST.get('use_my_key')) == "True":
-#                         # TODO allow user to upload private key for CSR generation
-#                         pass
-#                     else:
-#                         certificate_files = generate_cilogon_certificates(
-#                             user=user,
-#                             authorization_response=str(request.POST.get("authorization_response")),
-#                             p12_password=str(request.POST.get("p12_password")),
-#                         )
-#                         user.cilogon_certificate_date = timezone.now()
-#                         user.save()
-#         else:
-#             form = CILogonCertificateForm()
-#         return render(
-#             request, 'certificate.html',
-#             {
-#                 'profile_page': 'active',
-#                 'form': form,
-#                 'auth_url': auth_url,
-#                 'certificate_files': certificate_files
-#             }
-#         )
-#     else:
-#         return render(request, 'certificate.html', {'profile_page': 'active'})
-
-
 def set_role_boolean(user):
     user.is_nsadmin = (int(user.role) == int(getattr(Role, 'NSADMIN')))
     user.is_nsstaff = (int(user.role) == int(getattr(Role, 'STAFF')))
@@ -134,7 +84,6 @@ def profile(request):
             # for user profile
             preference_form = UserPreferences(request.POST, instance=user, user=request.user)
             if preference_form.is_valid():
-                messages.success(request, 'Preferences changed successfully!')
                 if request.POST.get("delete-message"):
                     message = get_object_or_404(Message, uuid=request.POST.get('remove_message_uuid'))
                     message.is_active = False
@@ -144,9 +93,11 @@ def profile(request):
                     user.role = preference_form.data.get('role')
                     user.save()
                     set_role_boolean(user=user)
+                    messages.success(request, 'Preferences changed successfully!')
                 if request.POST.get("check-messages"):
                     check_for_new_messages(str(request.user.uuid))
                 return redirect('profile')
+            # for cilogon certificate
             if request.POST.get("download"):
                 if request.POST.get("path-cilogon.crt"):
                     path = request.POST.get("path-cilogon.crt")
@@ -155,7 +106,6 @@ def profile(request):
                 else:
                     path = request.POST.get("path-cilogon.p12")
                 return download(request, path=path)
-            # for cilogon certificate
             certificate_form = CILogonCertificateForm(request.POST or None)
             if certificate_form.is_valid():
                 if request.POST.get("generate-certificate"):
@@ -183,8 +133,10 @@ def profile(request):
                        'isMemberOf': ismemberof,
                        'LDAPOther': ldapother,
                        'preference_form': preference_form,
-                       'certificate_form': certificate_form,
                        'role': get_object_or_404(Role, id=user.role).get_id_display(),
-                       'ns_messages': ns_messages})
+                       'ns_messages': ns_messages,
+                       'certificate_form': certificate_form,
+                       'auth_url': auth_url,
+                       'certificate_files': certificate_files})
     else:
         return render(request, 'profile.html', {'profile_page': 'active'})

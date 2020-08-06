@@ -345,6 +345,19 @@
     {% endif %}
   </div>
   <script type="text/javascript">
+    // add hash # to url without redirecting.
+    $(function(){
+    var hash = window.location.hash;
+    hash && $('ul.nav a[href="' + hash + '"]').tab('show');
+
+    $('.list-group a').click(function (e) {
+      $(this).tab('show');
+      var scrollmem = $('body').scrollTop() || $('html').scrollTop();
+      window.location.hash = this.hash;
+      $('html,body').scrollTop(scrollmem);
+    });
+    });
+    // add tooltip to identity attribute tables.
     $('#cilogonTooltip')
       .tooltip({ title: 'Aggregate identity attributes as provided by the institutional identity provider (based on dropdown selection at login) and CILogon.',placement:"right"});
     $('#comanageTooltip')
