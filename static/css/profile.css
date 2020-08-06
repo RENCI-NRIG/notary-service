@@ -4,6 +4,10 @@
   padding-left: 2rem;
 }
 
+.message-body {
+  margin-top: 1rem; 
+}
+
 .profile-body .active {
 background-color: #FFF;
 }
@@ -69,4 +73,10 @@ border-radius: .25rem;
 
 .errorlist {
   display: none;
+}
+
+.message-btn {
+  font-family: FontAwesome;
+  padding: .35rem 1rem;
+  margin-right: .75rem;
 }

@@ -1,82 +1,82 @@
 {% extends 'base.html' %}
 {% load static %}
 
-
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    <div class="container">
-        <div class="text-center">
-            <h1>Infrastructure for Privacy-Assured CompuTations</h1>
-            <img class="rounded" width="300" src="{% static 'img/logo/impact-logo-1600x752.png' %}">
-        </div>
-        <br><br>
-        {% if user.is_authenticated %}
-            <div class="container">
-                <p>Hello <b>{{ user.name }}</b>, You are logged in as username: <b>{{ user.username }}</b></p>
-                <h2>My Messages</h2>
-                <div class="message-toolbar d-flex flex-row my-4">
-                  <form method="POST" class="post-form">
-                      {% csrf_token %}
-                      <input
-                        type="submit"
-                        name="check-messages"
-                        value="New Messages"
-                        class="btn btn-info mr-2"
-                      />
-                  </form>
-                  <button
-                    onclick="location.href = 'messages'"
-                    class="btn btn-success"
-                  >
-                    Active Messages
-                  </button>
-                </div>
-                <table class="table table-striped table-bordered text-center">
-                  <tr class="font-weight-bold">
-                      <td>Subject</td>
-                      <td>Body</td>
-                      <td>Created Date</td>
-                      <td>Modified Date</td>
-                      <td>View</td>
-                      <td>Delete</td>
-                  </tr>
-                  {% for message in ns_messages %}
-                      <tr>
-                          <td>
-                              <a href="{% url 'message_detail' uuid=message.uuid %}" style="color: #146885;">
-                                  {{ message.subject|truncatechars:"37" }}
-                              </a>
-                          </td>
-                          <td>{{ message.body|truncatechars:"37" }}</td>
-                          <td>{{ message.created_date }}</td>
-                          <td>{{ message.modified_date }}</td>
-                          <td>
-                              <a href="{% url 'message_detail' uuid=message.uuid %}"
-                                 title="View message" class="fa fa-fw fa-eye" style="color: #146885;"></a>
-                          </td>
-                          <td>
-                              <form method="POST" class="post-form">
-                                  {% csrf_token %}
-                                  {% if message.is_active %}
-                                      <input style="font-family: FontAwesome;color: #B22222;
-                                  border: none; background: none" name="delete-message"
-                                             title="Move message to trash" value="&#xf1f8;" type="submit">
-                                  {% else %}
-                                      <input style="font-family: FontAwesome;color: #B22222;
-                                  border: none; background: none" name="delete-message"
-                                             title="Delete message" value="&#xf00d;" type="submit">
-                                  {% endif %}
-                                  <input type="hidden" name="remove_message_uuid" value="{{ message.uuid }}">
-                              </form>
-                          </td>
-                      </tr>
-                  {% endfor %}
-              </table>
-            </div>
-        {% else %}
-            <div class="container">
-                <p>You are not currently logged in or not authorized to view this page</p>
-            </div>
-        {% endif %}
+  <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+  <div class="container">
+      <div class="text-center">
+          <h1>Infrastructure for Privacy-Assured CompuTations</h1>
+          <img class="rounded" width="300" src="{% static 'img/logo/impact-logo-1600x752.png' %}">
+      </div>
+      <br><br>
+      {% if user.is_authenticated %}
+          <div class="container">
+              <p>Hello <b>{{ user.name }}</b>, You are logged in as username: <b>{{ user.username }}</b></p>
+              <h2>My Messages</h2>
+              <div class="message-toolbar d-flex flex-row my-3">
+                <form method="POST" class="post-form">
+                    {% csrf_token %}
+                    <input
+                      type="submit"
+                      name="check-messages"
+                      value="&#xf021;&nbsp;&nbsp;Refresh"
+                      class="message-btn btn btn-info"
+                    />
+                </form>
+                <button
+                  onclick="location.href = 'messages'"
+                  class="message-btn btn btn-success"
+                >
+                  <i class="fa fa-inbox mr-1"></i> Mailbox
+                </button>
+              </div>
+              <table class="table table-striped table-bordered text-center">
+                <tr class="font-weight-bold">
+                    <td>Subject</td>
+                    <td>Body</td>
+                    <td>Created Date</td>
+                    <td>Modified Date</td>
+                    <td>View</td>
+                    <td>Delete</td>
+                </tr>
+                {% for message in ns_messages %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'message_detail' uuid=message.uuid %}" style="color: #146885;">
+                                {{ message.subject|truncatechars:"37" }}
+                            </a>
+                        </td>
+                        <td>{{ message.body|truncatechars:"37" }}</td>
+                        <td>{{ message.created_date }}</td>
+                        <td>{{ message.modified_date }}</td>
+                        <td>
+                            <a href="{% url 'message_detail' uuid=message.uuid %}"
+                                title="View message" class="fa fa-fw fa-eye" style="color: #146885;"></a>
+                        </td>
+                        <td>
+                            <form method="POST" class="post-form">
+                                {% csrf_token %}
+                                {% if message.is_active %}
+                                    <input style="font-family: FontAwesome;color: #B22222;
+                                border: none; background: none" name="delete-message"
+                                            title="Move message to trash" value="&#xf1f8;" type="submit">
+                                {% else %}
+                                    <input style="font-family: FontAwesome;color: #B22222;
+                                border: none; background: none" name="delete-message"
+                                            title="Delete message" value="&#xf00d;" type="submit">
+                                {% endif %}
+                                <input type="hidden" name="remove_message_uuid" value="{{ message.uuid }}">
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+          </div>
+      {% else %}
+          <div class="container">
+              <p>You are not currently logged in or not authorized to view this page</p>
+          </div>
+      {% endif %}
 {% endblock %}
