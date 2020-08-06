@@ -9,7 +9,7 @@
       <div class="row">
         <div class="col-3">
           <div class="list-group" id="profile-list-tab" role="tablist">
-            <a class="list-group-item list-group-item-action active" id="user-profile-list" data-toggle="list" href="#user-profile" role="tab" aria-controls="home"><i class="fa fa-user mr-2"></i>User Profile</a>
+            <a class="list-group-item list-group-item-action" id="user-profile-list" data-toggle="list" href="#user-profile" role="tab" aria-controls="home"><i class="fa fa-user mr-2"></i>User Profile</a>
             <a class="list-group-item list-group-item-action" id="cilogon-certificate-list" data-toggle="list" href="#cilogon-certificate" role="tab" aria-controls="profile"><i class="fa fa-key mr-2"></i>CILogon Certificate</a>
             <a class="list-group-item list-group-item-action" id="messages-list" data-toggle="list" href="#messages" role="tab" aria-controls="messages"><i class="fa fa-envelope mr-2"></i>Messages</a>
             <a class="list-group-item list-group-item-action" id="identity-attributes-list" data-toggle="list" href="#identity-attributes" role="tab" aria-controls="settings"><i class="fa fa-info-circle mr-2"></i>Identity Attributes</a>
@@ -352,6 +352,10 @@
       let el_to_show_id = hash || '#user-profile';
       $(el_to_show_id).addClass('show active');
 
+      // set the default tab pane background color.
+      let active_tab_pane_id = `${el_to_show_id}-list`;
+      $(active_tab_pane_id).addClass('active');
+      
       // append hash # to url when toggling tabs.
       $('.list-group a').click(function (e) {
         $(this).tab('show');
