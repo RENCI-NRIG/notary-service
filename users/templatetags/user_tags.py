@@ -6,11 +6,13 @@ from datetime import datetime, timedelta
 
 register = template.Library()
 
+@register.filter
+def get_obj_attr(obj, attr):
+    return getattr(obj, attr)
 
 @register.filter
 def rolename(value):
     return str(Role.objects.get(id=value))
-
 
 @register.filter
 def cert_exp_datetime(start_time):

@@ -80,6 +80,9 @@ def profile(request):
         # for cilogon certificate
         auth_url = get_authorization_url()
         certificate_files = ''
+        # for identity attributes - cilogon claims
+        cilogon_claims_rows = ['name', 'email', 'given_name', 'family_name', 'idp', 'idp_name', 'sub', 
+        'aud', 'cert_subject_dn', 'iss', 'oidc', 'eppn', 'eptid', 'acr', 'affiliation']
         if request.method == "POST":
             # for user profile
             preference_form = UserPreferences(request.POST, instance=user, user=request.user)
@@ -137,6 +140,8 @@ def profile(request):
                        'ns_messages': ns_messages,
                        'certificate_form': certificate_form,
                        'auth_url': auth_url,
-                       'certificate_files': certificate_files})
+                       'certificate_files': certificate_files,
+                       'cilogon_claims_rows': cilogon_claims_rows,
+                       })
     else:
         return render(request, 'profile.html', {'profile_page': 'active'})
