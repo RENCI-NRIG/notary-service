@@ -4,6 +4,7 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
+   <link rel="stylesheet" href="{% static 'css/profile.css' %}">
     {% if user.is_authenticated %}
         <div class="container my-4">
             <h2>{{ message.subject }}</h2>
@@ -68,26 +69,26 @@
             <form method="POST" class="my-4">
                 {% csrf_token %}
                 <input
-                  class="btn btn-success mr-2"
+                  class="message-btn btn btn-success mr-2"
                   name="return-to-list"
                   title="Return to list"
-                  value="Back"
+                  value="&#xf04a;&nbsp;&nbsp;Back to Mailbox"
                   type="submit"
                 />
                 {% if message.is_active %}
                     <input
-                      class="btn btn-danger"
+                      class="message-btn btn btn-danger"
                       name="delete-message"
                       title="Move message to trash"
-                      value="Delete"
+                      value="&#xf1f8;&nbsp;&nbsp;Delete"
                       type="submit"
                     />
                 {% else %}
                     <input
-                      class="btn btn-info"
+                      class="message-btn btn btn-info"
                       name="undelete-message"
                       title="Recover message"
-                      value="Recover"
+                      value="&#xf0e2;&nbsp;&nbsp;Recover"
                       type="submit"
                     >
                 {% endif %}
