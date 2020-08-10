@@ -4,97 +4,115 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
-        {% display_projects as show_projects %}
-        {% if show_projects %}
-            <div class="container">
-                <h1>Projects</h1>
-                <p>
-                    Projects are created by their Principal Investigators (PIs) and define membership via roles
-                    registered
-                    within the ImPACT COmanage registry as well as Datasets as defined by data providers using
-                    Notary Service tools.
-                </p>
-                <h2>My Projects
-                    {% if user.is_nsadmin %}
-                        <a href="{% url 'project_new' %}"
-                           title="Create New Project" class="fa fa-fw fa-plus-square" style="color: green;"></a>
-                    {% endif %}
-                </h2>
-                {% if user.is_piadmin or user.is_nsadmin %}
-                    <form method="POST" class="post-form">
-                        {% csrf_token %}
-                        <input type="submit" name="check-comanage-projects" value="Check COmanage for new projects"
-                               style="color: darkgreen">
-                    </form>
-                {% endif %}
-                <table width="100%" border="1px solid black" cellpadding="5px">
-                    <tr>
-                        {% if user.is_ig %}
-                            <td align="center"><b>Assigned</b></td>
-                        {% endif %}
-                        <td align="center"><b>Name</b></td>
-                        <td align="center"><b>Validated</b></td>
-                        <td align="center"><b>
-                            {% if user.show_uuid %}
-                                UUID
-                            {% else %}
-                                Description
-                            {% endif %}
-                        </b></td>
-                        <td align="center"><b>Created Date</b></td>
-                        <td align="center"><b>Modified Date</b></td>
-                    </tr>
-                    {% for project in projects %}
-                        <tr>
-                        {% if user.is_ig %}
-                            <td>
-                                {% with assigned=request|project_ig_assignment:project.uuid %}
-                                    {% if assigned == 'False' %}
-                                        <form method="POST" class="post-form">
-                                            {% csrf_token %}
-                                            <input type="submit"
-                                                   name="ig-self-assign-project"
-                                                   value="Self Assign Project"
-                                                   style="color: deeppink">
-                                            <input hidden name="project_uuid" value="{{ project.uuid }}">
-                                        </form>
-                                    {% else %}
-                                        {{ assigned.cn }}
-                                    {% endif %}
-                                {% endwith %}
-                            </td>
-                        {% endif %}
-                        <td>{{ project.name }}</td>
-                        <td align="center">
-                            {% if project.is_valid %}
-                                <i class="fa fa-fw fa-check" style="color: green;"></i>
-                            {% else %}
-                                <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
-                            {% endif %}
-                        </td>
-                        <td style="font-family: Courier"><a href="{% url 'project_detail' uuid=project.uuid %}"
-                                                            title="Project Details">
-                            {% if user.show_uuid %}
-                                {{ project.uuid }}
-                            {% else %}
-                                {{ project.description|truncatechars:"57" }}
-                            {% endif %}
-                        </a></td>
-                        <td>{{ project.created_date|date:"m/d/Y g:i a" }}</td>
-                        <td>{{ project.modified_date|date:"m/d/Y g:i a" }}</td>
-                        {% if user.is_piadmin or user.is_nsadmin %}
-                            <td><a href="{% url 'project_edit' uuid=project.uuid %}"
-                                   title="Edit" class="fa fa-fw fa-pencil" style="color: green;"></a>
-                            </td>
-                        {% endif %}
-                    {% endfor %}
-                </table>
-            </div>
-        {% endif %}
-    {% else %}
-        <div class="container">
-            <p>You are not currently logged in or not authorized to view this page</p>
+  {% if user.is_authenticated %}
+    {% display_projects as show_projects %}
+    {% if show_projects %}
+      <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+      <div class="container">
+        <h1 class="mt-4">Projects</h1>
+        <p>
+            Projects are created by their Principal Investigators (PIs) and define membership via roles
+            registered
+            within the ImPACT COmanage registry as well as Datasets as defined by data providers using
+            Notary Service tools.
+        </p>
+        <div class="d-flex flex-row align-items-center justify-content-between">
+          <h2>My Projects</h2>
+          <div class="project-toolbar d-flex flex-row">
+            {% if user.is_nsadmin %}
+              <button class="btn btn-success mr-2">
+                <i class="fa fa-plus mr-2"></i>
+                <a href="{% url 'project_new' %}" class="unlink">Create New Project</a>
+              </button>
+            {% endif %}
+            {% if user.is_piadmin or user.is_nsadmin %}
+              <form method="POST" class="post-form">
+                {% csrf_token %}
+                <input
+                  type="submit"
+                  name="check-comanage-projects"
+                  value="&#xf021;&nbsp;&nbsp;Check COmanage for New Projects"
+                  class="message-btn btn btn-info mr-0"
+                />
+              </form>
+            {% endif %}
+          </div>
         </div>
+        <table class="collapse show table table-striped table-bordered text-center mt-2">
+          <tr class="font-weight-bold">
+            {% if user.is_ig %}
+              <td>Assigned</td>
+            {% endif %}
+            <td>Name</td>
+            <td>Validated</td>
+            <td>
+                {% if user.show_uuid %}
+                    UUID
+                {% else %}
+                    Description
+                {% endif %}
+            </td>
+            <td>Created Date</td>
+            <td>Modified Date</td>
+            <td>Modify</td>
+          </tr>
+          {% for project in projects %}
+            <tr>
+              {% if user.is_ig %}
+                <td>
+                  {% with assigned=request|project_ig_assignment:project.uuid %}
+                    {% if assigned == 'False' %}
+                      <form method="POST" class="post-form">
+                          {% csrf_token %}
+                          <input type="submit"
+                            name="ig-self-assign-project"
+                            value="Self Assign Project"
+                            class="text-warning"
+                          >
+                          <input hidden name="project_uuid" value="{{ project.uuid }}">
+                      </form>
+                    {% else %}
+                      {{ assigned.cn }}
+                    {% endif %}
+                  {% endwith %}
+                </td>
+              {% endif %}
+                <td>{{ project.name }}</td>
+                <td>
+                  {% if project.is_valid %}
+                    <i class="fa fa-fw fa-check text-success"></i>
+                  {% else %}
+                    <i class="fa fa-fw fa-remove text-danger"></i>
+                  {% endif %}
+                </td>
+                <td class="project-detail-link">
+                  <a href="{% url 'project_detail' uuid=project.uuid %}"title="Project Details">
+                    {% if user.show_uuid %}
+                      {{ project.uuid }}
+                    {% else %}
+                      {{ project.description|truncatechars:"57" }}
+                    {% endif %}
+                  </a>
+                </td>
+                <td>{{ project.created_date|date:"m/d/Y g:i a" }}</td>
+                <td>{{ project.modified_date|date:"m/d/Y g:i a" }}</td>
+              {% if user.is_piadmin or user.is_nsadmin %}
+                <td>
+                  <a
+                    href="{% url 'project_edit' uuid=project.uuid %}"
+                    title="Edit"
+                    class="fa fa-fw fa-pencil text-success"
+                  >
+                  </a>
+                </td>
+              {% endif %}
+          {% endfor %}
+        </table>
+      </div>
     {% endif %}
+  {% else %}
+    <div class="container">
+      <p>You are not currently logged in or not authorized to view this page</p>
+    </div>
+  {% endif %}
 {% endblock %}

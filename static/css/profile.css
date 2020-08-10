@@ -80,3 +80,19 @@ border-radius: .25rem;
   padding: .35rem 1rem;
   margin-right: .5rem;
 }
+
+.unlink {
+  font-family: FontAwesome;
+  color: #FFF;
+  text-decoration: none;
+}
+
+.unlink:hover,
+.unlink:focus {
+  color: #FFF;
+  text-decoration: none;
+}
+
+.project-detail-link {
+  font-family: Courier;
+}
