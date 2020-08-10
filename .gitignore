@@ -22,7 +22,10 @@ nosetests.xml
 pg_data
 safe/imports
 sample_data
-static/*
+static/admin/*
+static/css/bootstrap*
+static/img/*
+static/js/*
 !static/.include_this_dir
 venv
 !workflows/static

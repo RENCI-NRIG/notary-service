@@ -26,12 +26,11 @@ class UserPreferences(forms.ModelForm):
         role_choices = ()
         for role in user.roles.filter(notaryserviceuser=user):
             role_choices += ((role.id, role.get_id_display()),)
-        # print(role_choices)
         super(UserPreferences, self).__init__(*args, **kwargs)
         self.fields['role'] = forms.ChoiceField(
             choices=sorted(role_choices, key=itemgetter(1)),
-            widget=forms.Select,
-            label='User role',
+            widget=forms.RadioSelect(attrs={'class': 'profile-radios'}),
+            label='Change user role',
             required=False
         )
 
@@ -42,8 +41,8 @@ class UserPreferences(forms.ModelForm):
 
     show_uuid = forms.ChoiceField(
         choices=VIEW_CHOICE,
-        widget=forms.Select,
-        label='URL rendering',
+        widget=forms.RadioSelect(attrs={'class': 'profile-radios'}),
+        label='Change URL rendering',
         required=False,
     )
 
@@ -53,7 +52,6 @@ class UserPreferences(forms.ModelForm):
             'role',
             'show_uuid',
         )
-
 
 class AffiliationCreationForm(forms.ModelForm):
     class Meta:
