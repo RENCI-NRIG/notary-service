@@ -1,8 +1,8 @@
 {% load static user_tags %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="{% static 'css/ns-navbar.css' %}" type="text/css">
-<nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-white">
-    <a class="navbar-brand text-secondary" href="{% url 'index' %}">
+<nav class="navbar sticky-top navbar-expand-lg navbar-dark p-0">
+    <a class="navbar-brand text-secondary p-0" href="{% url 'index' %}">
         <img src="{% static 'img/logo/impact-logo-1600x752.png' %}" height="40">
         NotaryService
     </a>
@@ -72,14 +72,14 @@
                 </li>
             {% endif %}
         </ul>
-        <ul class="navbar-nav ml-auto ns-navbar">
+        <ul class="navbar-nav ns-navbar">
             <li class="nav-item {{ logout_page }}">
                 <a class="nav-link" href="{% url 'logout' %}">
                     <i class="fa fa-fw fa-sign-out"></i> Logout</a>
             </li>
         </ul>
     {% else %}
-        <ul class="navbar-nav ml-auto ns-navbar">
+        <ul class="navbar-nav ns-navbar">
             <li class="nav-item {{ login_page }}">
                 <a class="nav-link" href="{% url 'oidc_authentication_init' %}">
                     <i class="fa fa-fw fa-sign-in"></i> Login</a>
