@@ -61,7 +61,7 @@
                         {% if user.is_dp or user.is_nsadmin %}
                           <button class="btn btn-success mr-0">
                             <i class="fa fa-pencil mr-2"></i>
-                            <a href="{% url 'dataset_edit'uuid=dataset.uuid %}" class="unlink">Edit</a>
+                            <a href="{% url 'dataset_edit' uuid=dataset.uuid %}" class="unlink">Edit</a>
                           </button>
                         {% endif %}
                     {% endfor %}
