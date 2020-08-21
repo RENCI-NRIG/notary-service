@@ -4,73 +4,77 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
-        {% display_infrastructure as show_infrastructure %}
-        {% if  show_infrastructure %}
-        <link rel="stylesheet" href="{% static 'css/profile.css' %}">
-            <div class="container">
-                <h1 class="mt-4">Infrastructure</h1>
-                <p>Infrastructure is the collection of compute, storage and network resources owned or managed by an
-                    institutional or organizational entity.</p>
-                    <div class="d-flex flex-row align-items-center justify-content-between">
-                      <h2 class="mt-2">My Infrastructure</h2>
-                      {% if user.is_dp or user.is_nsadmin %}
-                        <button class="btn btn-success mr-0">
-                          <i class="fa fa-plus mr-2"></i>
-                          <a href="{% url 'infrastructure_new' %}" class="unlink">Create new Infrastructure</a>
-                        </button>
+  {% if user.is_authenticated %}
+    {% display_infrastructure as show_infrastructure %}
+    {% if  show_infrastructure %}
+      <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+      <div class="container">
+        <h1 class="mt-4">Infrastructure</h1>
+        <p>
+          Infrastructure is the collection of compute, storage and network resources owned or managed by an
+          institutional or organizational entity.</p>
+              <div class="d-flex flex-row align-items-center justify-content-between">
+                <h2 class="mt-2">My Infrastructure</h2>
+                {% if user.is_dp or user.is_nsadmin %}
+                  <button class="btn btn-success mr-0">
+                    <i class="fa fa-plus mr-2"></i>
+                    <a href="{% url 'infrastructure_new' %}" class="unlink">Create New Infrastructure</a>
+                  </button>
+                {% endif %}
+              </div>
+          <table class="collapse show table table-striped table-bordered text-center mt-2">
+              <tr class="font-weight-bold">
+                  <td>Name</td>
+                  <td>Validated</td>
+                  <td>
+                    {% if user.show_uuid %}
+                        UUID
+                    {% else %}
+                        Description
+                    {% endif %}
+                  </td>
+                  {#<td>File</td>#}
+                  <td>Created Date</td>
+                  <td>Modified Date</td>
+              </tr>
+              {% for infra in infra_objs %}
+                  <tr>
+                  <td>{{ infra.name }}</td>
+                  <td>{% if infra.is_valid %}
+                      <i class="fa fa-fw fa-check text-success"></i>
+                  {% else %}
+                      <i class="fa fa-fw fa-remove text-danger"></i>
+                  {% endif %}
+                  </td>
+                  <td class="courier-font-link">
+                    <a
+                      href="{% url 'infrastructure_detail' uuid=infra.uuid %}"
+                      title="Infrastructure Details"
+                    >
+                      {% if user.show_uuid %}
+                          {{ infra.uuid }}
+                      {% else %}
+                          {{ infra.description|truncatechars:"57" }}
                       {% endif %}
-                    </div>
-                <table class="collapse show table table-striped table-bordered text-center mt-2">
-                    <tr class="font-weight-bold">
-                        <td>Name</td>
-                        <td>Validated</td>
-                        <td>
-                          {% if user.show_uuid %}
-                              UUID
-                          {% else %}
-                              Description
-                          {% endif %}
-                        </td>
-                        {#<td>File</td>#}
-                        <td>Created Date</td>
-                        <td>Modified Date</td>
-                    </tr>
-                    {% for infra in infra_objs %}
-                        <tr>
-                        <td>{{ infra.name }}</td>
-                        <td>{% if infra.is_valid %}
-                            <i class="fa fa-fw fa-check text-success"></i>
-                        {% else %}
-                            <i class="fa fa-fw fa-remove text-danger"></i>
-                        {% endif %}
-                        </td>
-                        <td class="courier-font-link">
-                          <a
-                            href="{% url 'infrastructure_detail' uuid=infra.uuid %}"
-                            title="Infrastructure Details"
-                          >
-                            {% if user.show_uuid %}
-                                {{ infra.uuid }}
-                            {% else %}
-                                {{ infra.description|truncatechars:"57" }}
-                            {% endif %}
-                        </a></td>
-                        <td>{{ infra.created_date|date:"m/d/Y g:i a" }}</td>
-                        <td>{{ infra.modified_date|date:"m/d/Y g:i a" }}</td>
-                        {% if user.is_inp or user.is_nsadmin %}
-                          <button class="btn btn-success mr-0">
-                            <i class="fa fa-pencil mr-2"></i>
-                            <a href="{% url 'infrastructure_edit' uuid=infra.uuid %}" class="unlink">Edit</a>
-                          </button>
-                        {% endif %}
-                    {% endfor %}
-                </table>
-            </div>
-        {% endif %}
+                  </a></td>
+                  <td>{{ infra.created_date|date:"m/d/Y g:i a" }}</td>
+                  <td>{{ infra.modified_date|date:"m/d/Y g:i a" }}</td>
+                  <td>
+                  {% if user.is_inp or user.is_nsadmin %}
+                    <button class="btn btn-success mr-0">
+                      <i class="fa fa-pencil mr-2"></i>
+                      <a href="{% url 'infrastructure_edit' uuid=infra.uuid %}" class="unlink">Edit</a>
+                    </button>
+                  {% endif %}
+                </td>
+              {% endfor %}
+                  </tr>
+          </table>
+      </div>
+    {% endif %}
     {% else %}
-        <div class="container">
-            <p>You are not currently logged in or not authorized to view this page</p>
-        </div>
+      <div class="container">
+        <p>You are not currently logged in or not authorized to view this page</p>
+      </div>
     {% endif %}
 {% endblock %}

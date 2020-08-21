@@ -1,0 +1,8 @@
+{
+  "eslint.alwaysShowStatus": true,
+  "eslint.codeAction.disableRuleComment": {
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+  }
+}

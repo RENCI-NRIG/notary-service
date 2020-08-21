@@ -86,7 +86,7 @@
                   {% endif %}
                 </td>
                 <td class="courier-font-link">
-                  <a href="{% url 'project_detail' uuid=project.uuid %}"title="Project Details">
+                  <a href="{% url 'project_detail' uuid=project.uuid %}" title="Project Details">
                     {% if user.show_uuid %}
                       {{ project.uuid }}
                     {% else %}
