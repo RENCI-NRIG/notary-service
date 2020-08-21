@@ -1,12 +1,15 @@
 /* Site footer styling */
-
 .footer {
     position: fixed;
     left: 0;
     bottom: 0;
     width: 100%;
+    padding: .5rem 0;
     background-color: #555;
     color: white;
     text-align: center;
-    padding: 5px;
+}
+
+.link {
+  color:#14A2CF;
 }
