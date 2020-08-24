@@ -23,3 +23,22 @@
   color: #fff;
   background-color: #555;
 }
+
+#profileCard {
+  position: fixed;
+  right: 1rem;
+  top: 4rem;
+  width: 15rem;
+  z-index: 999;
+  background-color: #555;
+  color: #fff;
+}
+
+.card-body {
+  padding: .75rem;
+}
+
+#profileBtn {
+  padding: .375rem .5rem;
+  border-radius: 50%;
+}

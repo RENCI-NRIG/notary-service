@@ -1,11 +1,11 @@
 {% load static user_tags %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="{% static 'css/navbar.css' %}" type="text/css">
-<nav class="navbar sticky-top navbar-expand-lg navbar-dark">
+<nav class="navbar sticky-top navbar-expand-lg navbar-dark px-sm-4">
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
-  <a class="navbar-brand" href="#">
+  <a class="navbar-brand" href="{% url 'index' %}">
     <img src="{% static 'img/logo/impact-logo-1600x752.png' %}" height="40">
     Notary Service
   </a>
@@ -50,15 +50,6 @@
               <i class="fa fa-fw fa-gears"></i> Infrastructure</a>
           </li>
         {% endif %}
-        <!-- <li class="nav-item {{ profile_page }}">
-          <a class="nav-link" href="{% url 'profile' %}">
-            <i class="fa fa-fw fa-user"></i> {{ user.username }} ({{ user.role|rolename }})</a>
-        </li> -->
-        <li class="nav-item {{ profile_page }}">
-          <a class="nav-link" href="{% url 'profile' %}">
-            <i class="fa fa-fw fa-user"></i>Profile
-          </a>
-        </li>
         {% if user.is_nsadmin %}
         <li class="nav-item {{ debug_page }}">
           <a class="nav-link" href="{% url 'debug' %}">
@@ -66,19 +57,20 @@
           </a>
         </li>
         {% endif %}
-      {% display_search as show_search %}
-      {% if show_search %}
-        <form class="form-inline my-2 my-lg-0">
-          <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-        </form>
-      {% endif %}
       <li class="nav-item {{ logout_page }}">
         <a class="nav-link" href="{% url 'logout' %}">
           <i class="fa fa-fw fa-sign-out"></i> Logout
         </a>
       </li>
       </ul>
+      {% display_search as show_search %}
+      {% if show_search %}
+        <form class="form-inline my-2 my-lg-0">
+          <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-outline-success my-2 my-sm-0 mr-3" type="submit"><i class="fa fa-fw fa-search"></i>Search</button>
+        </form>
+      {% endif %}
+      <a id="profileBtn" class="btn btn-info ml-sm-0 my-sm-2" href="{% url 'profile' %}"><i class="fa fa-fw fa-user"></i></a>
     </div>
   {% else %}
     <ul class="navbar-nav ns-navbar">
@@ -90,3 +82,10 @@
     </ul>
   {% endif %}
 </nav>
+<div id="profileCard" class="card">
+  <div class="card-body">
+    <p class="card-title">{{ user.username }}</p>
+    <p class="card-subtitle mb-2">{{ user.role|rolename }}</p>
+    <a class="btn btn-outline-info mr-2 my-sm-2" href="{% url 'profile' %}"><i class="fa fa-fw fa-user"></i>Profile</a>
+  </div>
+</div>
