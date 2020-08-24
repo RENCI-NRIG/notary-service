@@ -10,3 +10,16 @@
 .navbar-brand {
   margin-right: 0;
 }
+
+.dropdown-menu {
+  background-color: #555;
+}
+
+.dropdown-item {
+  color: rgba(255,255,255,.5);
+}
+
+.dropdown-item:focus, .dropdown-item:hover {
+  color: #fff;
+  background-color: #555;
+}

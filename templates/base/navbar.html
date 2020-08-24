@@ -9,9 +9,18 @@
     <img src="{% static 'img/logo/impact-logo-1600x752.png' %}" height="40">
     Notary Service
   </a>
-  {% if user.is_authenticated %}
-    <div class="collapse navbar-collapse" id="navbarToggler">
-      <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+  <div class="collapse navbar-collapse" id="navbarToggler">
+    <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fa fa-fw fa-info-circle"></i>About
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="{% url 'about' %}"><i class="fa fa-fw fa-info-circle"></i>Overview</a>
+          <a class="dropdown-item" href="{% url 'faq' %}"><i class="fa fa-fw fa-question-circle"></i>FAQ</a>
+        </div>
+      </li>
+      {% if user.is_authenticated %}
         {% display_projects as show_projects %}
         {% if show_projects %}
           <li class="nav-item {{ projects_page }}">
@@ -41,16 +50,6 @@
               <i class="fa fa-fw fa-gears"></i> Infrastructure</a>
           </li>
         {% endif %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'about' %}">
-            <i class="fa fa-fw fa-info-circle"></i>About
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'faq' %}">
-            <i class="fa fa-fw fa-question-circle"></i>FAQ
-          </a>
-        </li>
         <!-- <li class="nav-item {{ profile_page }}">
           <a class="nav-link" href="{% url 'profile' %}">
             <i class="fa fa-fw fa-user"></i> {{ user.username }} ({{ user.role|rolename }})</a>
