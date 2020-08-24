@@ -70,7 +70,7 @@
           <button class="btn btn-outline-success my-2 my-sm-0 mr-3" type="submit"><i class="fa fa-fw fa-search"></i>Search</button>
         </form>
       {% endif %}
-      <a id="profileBtn" class="btn btn-info ml-sm-0 my-sm-2" href="{% url 'profile' %}"><i class="fa fa-fw fa-user"></i></a>
+      <button id="profileBtn" class="btn btn-info ml-sm-0 my-sm-2"><i class="fa fa-fw fa-user"></i></button>
     </div>
   {% else %}
     <ul class="navbar-nav ns-navbar">
@@ -87,5 +87,11 @@
     <p class="card-title">{{ user.username }}</p>
     <p class="card-subtitle mb-2">{{ user.role|rolename }}</p>
     <a class="btn btn-outline-info mr-2 my-sm-2" href="{% url 'profile' %}"><i class="fa fa-fw fa-user"></i>Profile</a>
+    <a class="btn btn-outline-info ml-sm-0 my-sm-2 mr-0" href="{% url 'logout' %}"><i class="fa fa-fw fa-sign-out"></i>Logout</a>
   </div>
 </div>
+<script type="text/javascript">
+  $('#profileBtn').click(function() {        
+      $('#profileCard').toggle();
+  });
+</script>
