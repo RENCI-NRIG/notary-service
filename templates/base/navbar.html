@@ -57,20 +57,27 @@
           </a>
         </li>
         {% endif %}
-      <li class="nav-item {{ logout_page }}">
-        <a class="nav-link" href="{% url 'logout' %}">
-          <i class="fa fa-fw fa-sign-out"></i> Logout
-        </a>
-      </li>
       </ul>
       {% display_search as show_search %}
-      {% if show_search %}
+      <!-- {% if show_search %}
         <form class="form-inline my-2 my-lg-0">
           <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-          <button class="btn btn-outline-success my-2 my-sm-0 mr-3" type="submit"><i class="fa fa-fw fa-search"></i>Search</button>
+          <button class="btn btn-outline-success my-2 my-sm-0 mr-3" type="submit"><i class="fa fa-fw fa-search"></i></button>
         </form>
-      {% endif %}
-      <button id="profileBtn" class="btn btn-info ml-sm-0 my-sm-2"><i class="fa fa-fw fa-user"></i></button>
+      {% endif %} -->
+      <button id="profileBtn" class="btn btn-info ml-sm-0 my-sm-2 hidden-md"><i class="fa fa-fw fa-user"></i></button>
+    </div>
+    <div id="profileCard" class="card text-center">
+      <div class="card-header">
+        <b>{{ user.username }}</b>
+      </div>
+      <div class="card-body">
+        <p class="card-subtitle mb-2 pb-0">
+          Your current user role is <em><b>{{ user.role|rolename }}</b></em>
+        </p>
+        <a class="btn btn-outline-info mr-2 my-0" href="{% url 'profile' %}"><i class="fa fa-fw fa-user"></i>Profile</a>
+        <a class="btn btn-outline-info ml-sm-0 my-0 mr-0" href="{% url 'logout' %}"><i class="fa fa-fw fa-sign-out"></i>Logout</a>
+      </div>
     </div>
   {% else %}
     <ul class="navbar-nav ns-navbar">
@@ -82,14 +89,6 @@
     </ul>
   {% endif %}
 </nav>
-<div id="profileCard" class="card">
-  <div class="card-body">
-    <p class="card-title">{{ user.username }}</p>
-    <p class="card-subtitle mb-2">{{ user.role|rolename }}</p>
-    <a class="btn btn-outline-info mr-2 my-sm-2" href="{% url 'profile' %}"><i class="fa fa-fw fa-user"></i>Profile</a>
-    <a class="btn btn-outline-info ml-sm-0 my-sm-2 mr-0" href="{% url 'logout' %}"><i class="fa fa-fw fa-sign-out"></i>Logout</a>
-  </div>
-</div>
 <script type="text/javascript">
   $('#profileBtn').click(function() {        
       $('#profileCard').toggle();
