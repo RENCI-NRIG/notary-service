@@ -57,6 +57,14 @@
           </a>
         </li>
         {% endif %}
+        <li class="nav-item d-lg-none {{ profile_page }}">
+          <a class="nav-link" href="{% url 'profile' %}">
+              <i class="fa fa-fw fa-user"></i>Profile</a>
+        </li>
+        <li class="nav-item d-lg-none {{ logout_page }}">
+          <a class="nav-link" href="{% url 'logout' %}">
+            <i class="fa fa-fw fa-sign-out"></i> Logout</a>
+        </li>
       </ul>
       {% display_search as show_search %}
       <!-- {% if show_search %}
@@ -65,7 +73,7 @@
           <button class="btn btn-outline-success my-2 my-sm-0 mr-3" type="submit"><i class="fa fa-fw fa-search"></i></button>
         </form>
       {% endif %} -->
-      <button id="profileBtn" class="btn btn-info ml-sm-0 my-sm-2 hidden-md"><i class="fa fa-fw fa-user"></i></button>
+      <button id="profileBtn" class="btn btn-info ml-sm-0 my-sm-2 d-none d-lg-block"><i class="fa fa-fw fa-user"></i></button>
     </div>
     <div id="profileCard" class="card text-center">
       <div class="card-header">
