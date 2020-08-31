@@ -24,7 +24,6 @@ safe/imports
 sample_data
 static/admin/*
 static/css/bootstrap*
-static/img/*
 static/js/*
 !static/.include_this_dir
 venv
