@@ -13,6 +13,7 @@
 
 .navbar-brand {
   margin-right: 0;
+  font-size: 1.2rem;
 }
 
 .dropdown-menu {
@@ -37,6 +38,11 @@
   z-index: 999;
   background-color: #326bb3;
   color: rgba(255,255,255,.8);
+}
+
+.nav-profile-card-btn {
+  font-size: .75rem;
+  height: 2.25rem;
 }
 
 .card-body {

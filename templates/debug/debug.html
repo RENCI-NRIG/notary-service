@@ -8,17 +8,17 @@
         {% if user.is_nsadmin %}
             {% if user.is_superuser %}
                 <div class="container">
-                    <h2>Debug Console</h2>
-                    <form method="POST">
+                    <h2 class="mt-4">Debug Console</h2>
+                    <form method="POST" class="my-4">
                         {% csrf_token %}
                         {{ terminal }}
-                        <input type="submit" name="submit_terminal" value="Run"/>
+                        <input type="submit" name="submit_terminal" value="Run"class="btn btn-secondary mx-2"/>
                         (Console commands run on the host/container serving the application)
                     </form>
-                    <form method="POST">
+                    <form method="POST" class="mb-4">
                         {% csrf_token %}
                         {{ comanage }}
-                        <input type="submit" name="submit_comanage" value="Get Attributes"/>
+                        <input type="submit" name="submit_comanage" value="Get Attributes"class="btn btn-secondary mx-2" />
                         (Query COmanage LDAP instance)
                     </form>
                     <div style="background-color: #062c33;color:whitesmoke;font-family:Courier;
