@@ -1,6 +1,10 @@
 .navbar {
-  background-color: #555;
+  background-color: #326bb3;
   padding: 0 1rem 0 0;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+  color: rgba(255,255,255,.8);
 }
 
 .navbar a {
@@ -12,16 +16,16 @@
 }
 
 .dropdown-menu {
-  background-color: #555;
+  background-color: #326bb3;
 }
 
 .dropdown-item {
-  color: rgba(255,255,255,.5);
+  color: rgba(255,255,255,.8);
 }
 
 .dropdown-item:focus, .dropdown-item:hover {
   color: #fff;
-  background-color: #555;
+  background-color: #326bb3;
 }
 
 #profileCard {
@@ -31,7 +35,7 @@
   top: 4rem;
   width: 15rem;
   z-index: 999;
-  background-color: #555;
+  background-color: #326bb3;
   color: rgba(255,255,255,.8);
 }
 

@@ -1,4 +1,16 @@
 /* main styling */
+html {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+body {
+  position: relative;
+  min-height: 100%;
+  padding-bottom: 8em;
+  margin: 0;
+}
+
 ul.errorlist {
     margin: 0;
     padding: 0;
@@ -49,22 +61,13 @@ input:not([type="submit"], [type="checkbox"]), textarea, select {
 background-color: #FFF;
 }
 
-.list-group-item {
-color: #FFF;
-background-color: #555;
-}
-
 .list-group-item.active {
-background-color: #107B97;
+background-color: #326bb3;
 border: none;
 }
 
 #profile-list-tab {
 margin-top: 5.5rem;
-}
-
-.list-group-item:hover {
-background-color: #D67B0B;
 }
 
 h4[aria-expanded=true] .fa-plus {

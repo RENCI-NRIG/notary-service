@@ -1,15 +1,21 @@
 /* Site footer styling */
 .footer {
-    position: fixed;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    padding: .5rem 0;
-    background-color: #555;
-    color: white;
-    text-align: center;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #326bb3;
+  color: #fff;
+  height: 8em;
+  margin-top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  width: 100%;
 }
 
 .link {
-  color:#14A2CF;
+  color: #fff;
+  font-weight: 600;
 }
