@@ -76,7 +76,9 @@ class NSJWT:
             self.log.info("Decoding token without verification of origin or date")
             verify = False
 
-        self.claims = jwt.decode(self.jwt, publicKey, verify=verify, algorithms='RS256')
+        options = {"verify_signature": verify}
+
+        self.claims = jwt.decode(self.jwt, publicKey, verify=verify, algorithms='RS256', options=options)
 
         if self.claims['ver'] != self.VERSION:
             raise NSJWTError("Version of encoding {self.claims['ver']} doesn't match the code {self.VERSION}")
