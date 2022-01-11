@@ -1,9 +1,16 @@
 import datetime
 import logging as log
 
+import simplejson as json
 from django.conf import settings
+from kafka import KafkaProducer
 
-from apache_kafka import producer
+producer = KafkaProducer(
+    bootstrap_servers=settings.KAFKA_SERVERS,
+    key_serializer=lambda m: json.dumps(m).encode('ascii'),
+    value_serializer=lambda m: json.dumps(m).encode('ascii'),
+    retries=5
+)
 
 
 def on_send_success(record_metadata):

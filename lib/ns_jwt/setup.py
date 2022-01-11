@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='ns_jwt',
-    version='0.1.3',
+    version='0.1.4',
     author='Ilya Baldin',
     author_email='ibaldin@renci.org',
     description='Notary Service support for JWT',

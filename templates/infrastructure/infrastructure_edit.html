@@ -4,20 +4,21 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
-        {% if user.is_inp or user.is_nsadmin %}
-            <div class="container">
-                <h2>Edit Infrastructure
-                    <a href="{% url 'infrastructure_detail' uuid=uuid %}"
-                       title="Cancel edit" class="fa fa-fw fa-ban" style="color: green"></a>
-                </h2>
-                <form method="POST" class="post-form" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <input type="submit" value="Save" style="color: darkgreen">
-                </form>
-            </div>
-        {% endif %}
+    {% if user.is_nsadmin or user == infra.created_by %}
+        <div class="container">
+            <h2>Edit Infrastructure
+                <button class="btn btn-success mr-2">
+                    <a href="{% url 'infrastructure_detail' uuid=infra.uuid %}" class="unlink text-white">
+                        <i class="fa fa-ban mr-1"></i> Cancel
+                    </a>
+                </button>
+            </h2>
+            <form method="POST" class="post-form" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="Save" style="color: darkgreen">
+            </form>
+        </div>
     {% else %}
         <div class="container">
             <p>You are not currently logged in or not authorized to view this page</p>

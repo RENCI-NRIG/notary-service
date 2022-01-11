@@ -1,16 +1,21 @@
+from itertools import chain
+
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 
-from projects.models import MembershipProjectWorkflow, ComanagePersonnel, ProjectWorkflowUserCompletionByRole
+from datasets.models import Dataset
+from projects.models import MembershipProjectWorkflow
+from projects.models import Project
 from projects.workflows import take_user_through_workflow, \
     workflow_save_safe_token_and_complete, workflow_update_node_property, \
     workflow_make_conditional_selection_and_disable_branches
 from workflows import workflow_neo4j as wf
 from .context_processors import export_neo4j_vars
 from .models import WorkflowNeo4j
-from users.models import Role
 
 
+@login_required()
 def workflows(request):
     neo4j_vars = export_neo4j_vars(request)
     if request.user.is_authenticated:
@@ -21,75 +26,64 @@ def workflows(request):
 
 
 def workflow_list(request):
-    try:
-        person = ComanagePersonnel.objects.get(
-            uid=request.user.sub,
-        )
-    except ComanagePersonnel.DoesNotExist:
-        person = None
+    wf_objs = []
 
-    if request.user.is_nsadmin:
+    if request.user.is_nsadmin():
         wf_objs = WorkflowNeo4j.objects.filter(created_date__lte=timezone.now()).order_by('name')
-    elif request.user.is_ig:
-        wf_objs = WorkflowNeo4j.objects.filter(
-            uuid__in=ProjectWorkflowUserCompletionByRole.objects.values_list('workflow__uuid').filter(
-                person=request.user,
-                role=Role.objects.get(id=request.user.role)
-            )
-        ).order_by('name')
-    elif request.user.is_dp:
-        wf_objs = WorkflowNeo4j.objects.filter(
-            uuid__in=ProjectWorkflowUserCompletionByRole.objects.values_list('workflow__uuid').filter(
-                person=request.user,
-                role=Role.objects.get(id=request.user.role)
-            )
-        ).order_by('name')
-    elif request.user.is_inp:
-        wf_objs = WorkflowNeo4j.objects.filter(
-            uuid__in=ProjectWorkflowUserCompletionByRole.objects.values_list('workflow__uuid').filter(
-                person=request.user,
-                role=Role.objects.get(id=request.user.role)
-            )
-        ).order_by('name')
-    elif request.user.is_piadmin:
+    elif request.user.is_dp():
+        wf_objs = WorkflowNeo4j.objects.filter(created_date__lte=timezone.now()).order_by('name')
+    elif request.user.is_inp():
         wf_objs = []
-    elif request.user.is_pi:
-        wf_objs = WorkflowNeo4j.objects.filter(
-            uuid__in=ProjectWorkflowUserCompletionByRole.objects.values_list('workflow__uuid').filter(
-                person=request.user,
-                role=Role.objects.get(id=request.user.role)
-            )
-        ).order_by('name')
-    elif request.user.is_nsstaff:
-        wf_objs = WorkflowNeo4j.objects.filter(
-            uuid__in=ProjectWorkflowUserCompletionByRole.objects.values_list('workflow__uuid').filter(
-                person=request.user,
-                role=Role.objects.get(id=request.user.role)
-            )
-        ).order_by('name')
-    else:
-        print('---- shouldn\'t get here ----')
-        wf_objs = WorkflowNeo4j.objects.filter(created_date__lte=timezone.now()).order_by('name')
+    elif request.user.is_pi():
+        wf_objs = []
+    elif request.user.is_ig():
+        wf_objs = []
 
     return wf_objs
 
 
+@login_required()
 def workflow_detail(request, uuid):
     workflow = get_object_or_404(WorkflowNeo4j, uuid=uuid)
     project = MembershipProjectWorkflow.objects.get(workflow__uuid=workflow.uuid)
+    ns_project = Project.objects.filter(
+        id=MembershipProjectWorkflow.objects.get(workflow_id=workflow.id).project_id
+    ).first()
+    ns_dataset = Dataset.objects.filter(
+        id=MembershipProjectWorkflow.objects.get(workflow_id=workflow.id).dataset_id
+    ).first()
     workflow_graph = wf.get_neo4j_workflow_by_uuid(str(uuid))
+    ns_piadmins = ns_project.comanage_pi_admins.all()
+    ns_pis = ns_project.comanage_pi_members.all()
+    ns_staff = ns_project.comanage_staff.all()
+    ns_igs = ns_project.project_igs.all()
+    ns_inp = ns_project.infrastructure.owner
+    ns_dso = ns_dataset.owner
+    members_set = list(chain(ns_piadmins, ns_pis, ns_staff, ns_igs))
+    members_set.append(ns_inp)
+    members_set.append(ns_dso)
+    project_pis = list(chain(ns_piadmins, ns_pis))
     return render(request, 'workflow_detail.html', {
         'projects_page': 'active',
         'workflow': workflow,
         'project': project,
         'workflow_graph': workflow_graph,
+        'members_set': members_set,
+        'project_pis': project_pis
     })
 
 
+@login_required()
 def workflow_delete(request, uuid):
     workflow = get_object_or_404(WorkflowNeo4j, uuid=uuid)
     project = MembershipProjectWorkflow.objects.get(workflow__uuid=workflow.uuid)
+    ns_project = Project.objects.filter(
+        id=MembershipProjectWorkflow.objects.get(workflow_id=workflow.id).project_id
+    ).first()
     workflow_graph = wf.get_neo4j_workflow_by_uuid(str(uuid))
+    ns_piadmins = ns_project.comanage_pi_admins.all()
+    ns_pis = ns_project.comanage_pi_members.all()
+    project_pis = list(chain(ns_piadmins, ns_pis))
     if request.method == "POST":
         if request.POST.get("workflow_delete"):
             delete_neo4j_workflow(
@@ -102,9 +96,11 @@ def workflow_delete(request, uuid):
         'workflow': workflow,
         'project': project,
         'workflow_graph': workflow_graph,
+        'project_pis': project_pis
     })
 
 
+@login_required()
 def workflow_reset(request, uuid):
     workflow = get_object_or_404(WorkflowNeo4j, uuid=uuid)
     project = MembershipProjectWorkflow.objects.get(workflow__uuid=workflow.uuid)
@@ -123,14 +119,22 @@ def workflow_reset(request, uuid):
             if is_reset:
                 return redirect('workflow_detail', uuid=workflow.uuid)
         return redirect('project_detail', uuid=project.project.uuid)
+    ns_project = Project.objects.filter(
+        id=MembershipProjectWorkflow.objects.get(workflow_id=workflow.id).project_id
+    ).first()
+    ns_piadmins = ns_project.comanage_pi_admins.all()
+    ns_pis = ns_project.comanage_pi_members.all()
+    project_pis = list(chain(ns_piadmins, ns_pis))
     return render(request, 'workflow_reset.html', {
         'projects_page': 'active',
         'workflow': workflow,
         'project': project,
         'workflow_graph': workflow_graph,
+        'project_pis': project_pis
     })
 
 
+@login_required()
 def workflow_access(request, uuid):
     """
     template objects for workflow_access.html
@@ -249,17 +253,37 @@ def workflow_access(request, uuid):
         user_obj=request.user,
         workflow=str(workflow.uuid)
     )
-    workflow_graph = wf.get_neo4j_workflow_by_uuid_and_role(
-        workflow_uuid=str(uuid),
-        role_id=request.user.role,
-        user_dn=request.user.cert_subject_dn
+    # print(assertions)
+    # workflow_graph = wf.get_neo4j_workflow_by_uuid_and_role(
+    #     workflow_uuid=str(uuid),
+    #     role_id=request.user.role,
+    #     user_dn=request.user.cert_subject_dn
+    # )
+    workflow_graph = wf.get_neo4j_workflow_by_uuid(
+        workflow_uuid=str(uuid)
     )
+    ns_project = Project.objects.filter(
+        id=MembershipProjectWorkflow.objects.get(workflow_id=workflow.id).project_id
+    ).first()
+    ns_dataset = Dataset.objects.filter(
+        id=MembershipProjectWorkflow.objects.get(workflow_id=workflow.id).dataset_id
+    ).first()
+    ns_piadmins = ns_project.comanage_pi_admins.all()
+    ns_pis = ns_project.comanage_pi_members.all()
+    ns_staff = ns_project.comanage_staff.all()
+    ns_igs = ns_project.project_igs.all()
+    ns_inp = ns_project.infrastructure.owner
+    ns_dso = ns_dataset.owner
+    members_set = list(chain(ns_piadmins, ns_pis, ns_staff, ns_igs))
+    members_set.append(ns_inp)
+    members_set.append(ns_dso)
     return render(request, 'workflow_access.html', {
         'projects_page': 'active',
         'workflow': workflow,
         'project': project,
         'assertions': assertions,
-        'workflow_graph': workflow_graph
+        'workflow_graph': workflow_graph,
+        'members_set': members_set
     })
 
 

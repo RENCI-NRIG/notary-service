@@ -5,7 +5,7 @@ from django.db import models
 from django.utils import timezone
 
 from datasets.models import NSTemplate, Dataset
-from users.models import Role, Affiliation
+from users.models import WorkflowRole, Affiliation
 
 User = get_user_model()
 
@@ -21,7 +21,7 @@ class WorkflowNeo4j(models.Model):
     modified_by = models.ForeignKey(User, related_name='workflow_modified_by', on_delete=models.CASCADE)
     modified_date = models.DateTimeField(blank=True, null=True)
     loaded_in_neo4j = models.BooleanField(default=False)
-    roles = models.ManyToManyField(Role)
+    roles = models.ManyToManyField(WorkflowRole)
     affiliation = models.ForeignKey(Affiliation, related_name='workflow_affiliation', on_delete=models.CASCADE)
 
     class Meta:

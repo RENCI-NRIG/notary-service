@@ -6,8 +6,11 @@ from django.utils import timezone
 
 from datasets.models import Dataset, NSTemplate
 from infrastructure.models import Infrastructure
-from users.models import Affiliation, NotaryServiceUser, Role
+from users.models import Affiliation, NotaryServiceUser, Role, WorkflowRole
 from workflows.models import WorkflowNeo4j
+
+from core.mixins import AuditModelMixin
+from core.models import BaseModel
 
 User = get_user_model()
 
@@ -64,32 +67,52 @@ class ComanagePersonnel(models.Model):
         return self.cn
 
 
-class Project(models.Model):
-    name = models.CharField(max_length=255)
+class Project(BaseModel,
+           AuditModelMixin):
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
-    comanage_name = models.CharField(max_length=255)
-    description = models.TextField()
+    name = models.CharField(max_length=255, blank=False)
+    description = models.TextField(default='', blank=True)
     is_valid = models.BooleanField(default=False)
-    affiliations = models.ManyToManyField(Affiliation, through="MembershipAffiliations")
-    infrastructure = models.ManyToManyField(Infrastructure, through="MembershipInfrastructure")
-    comanage_pi_admins = models.ManyToManyField(ComanagePIAdmin, through="MembershipComanagePIAdmin")
-    comanage_pi_members = models.ManyToManyField(ComanagePIMember, through="MembershipComanagePIMember")
-    comanage_staff = models.ManyToManyField(ComanageStaff, through="MembershipComanageStaff")
-    comanage_personnel = models.ManyToManyField(ComanagePersonnel, through="MembershipComanagePersonnel")
-    datasets = models.ManyToManyField(Dataset, through="MembershipDatasets")
-    workflows = models.ManyToManyField(WorkflowNeo4j, through="MembershipProjectWorkflow")
-    created_by = models.ForeignKey(User, related_name='project_created_by', on_delete=models.CASCADE, null=True,
-                                   blank=True)
-    created_date = models.DateTimeField(default=timezone.now)
-    modified_by = models.ForeignKey(User, related_name='project_modified_by', on_delete=models.CASCADE, null=True,
-                                    blank=True)
-    modified_date = models.DateTimeField(blank=True, null=True)
-
-    class Meta:
-        verbose_name = 'NS Project'
+    is_public = models.BooleanField(default=True)
+    affiliation = models.ManyToManyField(Affiliation)
+    infrastructure = models.ForeignKey(Infrastructure, on_delete=models.SET_NULL, blank=True, null=True)
+    comanage_pi_admins = models.ManyToManyField(NotaryServiceUser, related_name='projects_pi_admins')
+    comanage_pi_members = models.ManyToManyField(NotaryServiceUser, related_name='projects_pi_members')
+    comanage_staff = models.ManyToManyField(NotaryServiceUser, related_name='projects_staff')
+    project_igs = models.ManyToManyField(NotaryServiceUser, related_name='projects_igs')
+    datasets = models.ManyToManyField(Dataset)
+    workflows = models.ManyToManyField(WorkflowNeo4j)
 
     def __str__(self):
         return self.name
+
+
+# class Project(models.Model):
+#     name = models.CharField(max_length=255)
+#     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
+#     comanage_name = models.CharField(max_length=255)
+#     description = models.TextField()
+#     is_valid = models.BooleanField(default=False)
+#     affiliations = models.ManyToManyField(Affiliation, through="MembershipAffiliations")
+#     infrastructure = models.ManyToManyField(Infrastructure, through="MembershipInfrastructure")
+#     comanage_pi_admins = models.ManyToManyField(ComanagePIAdmin, through="MembershipComanagePIAdmin")
+#     comanage_pi_members = models.ManyToManyField(ComanagePIMember, through="MembershipComanagePIMember")
+#     comanage_staff = models.ManyToManyField(ComanageStaff, through="MembershipComanageStaff")
+#     comanage_personnel = models.ManyToManyField(ComanagePersonnel, through="MembershipComanagePersonnel")
+#     datasets = models.ManyToManyField(Dataset, through="MembershipDatasets")
+#     workflows = models.ManyToManyField(WorkflowNeo4j, through="MembershipProjectWorkflow")
+#     created_by = models.ForeignKey(User, related_name='project_created_by', on_delete=models.CASCADE, null=True,
+#                                    blank=True)
+#     created_date = models.DateTimeField(default=timezone.now)
+#     modified_by = models.ForeignKey(User, related_name='project_modified_by', on_delete=models.CASCADE, null=True,
+#                                     blank=True)
+#     modified_date = models.DateTimeField(blank=True, null=True)
+#
+#     class Meta:
+#         verbose_name = 'NS Project'
+#
+#     def __str__(self):
+#         return self.name
 
 
 class MembershipAffiliations(models.Model):
@@ -171,7 +194,7 @@ class ProjectWorkflowUserCompletionByRole(models.Model):
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
     workflow = models.ForeignKey(WorkflowNeo4j, on_delete=models.CASCADE)
     person = models.ForeignKey(NotaryServiceUser, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    role = models.ForeignKey(WorkflowRole, on_delete=models.CASCADE, blank=True, null=True)
     is_complete = models.BooleanField(default=False)
 
     class Meta:

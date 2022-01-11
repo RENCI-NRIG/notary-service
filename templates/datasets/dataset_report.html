@@ -1,12 +1,11 @@
 {% extends 'base.html' %}
-{% load static dataset_tags replace_tags user_tags %}
+{% load static dataset_tags user_tags %}
 
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
-        {% if not user.is_norole %}
-            <div class="container">
+    {% if user.is_nsadmin or user in members_set %}
+        <div class="container">
             <h3>Dataset / Workflow Report: {{ dataset.name }}</h3>
 
             Project:
@@ -20,7 +19,7 @@
             <br><br>
 
             {% for report in workflow_reports %}
-                <b>Workflow: </b>{{ report.workflow.name }} - {{ report.workflow.affiliation }}<br>
+                <b>Workflow: </b>{{ report.workflow.name }} - {{ report.workflow.affiliation.name }}<br>
                 <div style="background-color: #DCDCDC;color:darkblue;font-family:Courier;
                 font-size: 14px; overflow-x: scroll; height: 300px; overflow-y: scroll; white-space: nowrap">
                     {# Ref: https://docs.djangoproject.com/en/2.2/ref/templates/builtins/#date#}
@@ -39,15 +38,21 @@
             <table width="100%" style="font-size: small">
                 <tr>
                     <td width="60%">
-                        <b>Created By:</b> {{ user.username }}
+                        <b>Created By:</b> {{ user.display_name }}
                     </td>
                     <td>
                         <b>Created Date:</b> {% now "D, M d, Y, H:i:s T" %}
                     </td>
                 </tr>
             </table>
-        {% endif %}
-    </div>
+            <br>
+            <button class="btn btn-success mr-2">
+                <a href="{% url 'project_detail' uuid=project.uuid %}#project-dataset"
+                   class="unlink text-white">
+                    <i class="fa fa-hand-o-left mr-1"></i> Back
+                </a>
+            </button>
+        </div>
     {% else %}
         <div class="container">
             <p>You are not currently logged in or not authorized to view this page</p>

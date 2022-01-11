@@ -1,11 +1,5 @@
 # Notary Service
 
-### Status
-
-[![Requirements Status](https://requires.io/github/RENCI-NRIG/notary-service/requirements.svg?branch=master)](https://requires.io/github/RENCI-NRIG/notary-service/requirements/?branch=master)
-
-- [kafka-python](https://kafka-python.readthedocs.io/en/master/) to remain at v1.4.7 due to dependencies
-
 ## What is Notary Service?
 
 Notary Service (NS) consists of a web server interacting with different principals (Researchers, representatives of Institutional Governance, Infrastructure Providers and Data Providers) via their User Agent. It accepts policy descriptions and associated document forms from Data Providers (DPs) and then presents different views of those documents to other principals to allow them to make digitally signed statements (attestations) about the requirements spelled out in the documents. NS also provides a communications channel between DPs and other principals that allows for direct negotiation of access via threaded conversations linked to a particular context. The attestations are recorded using SAFE in the remote Data Policy Store. The attestations are then used by Data Provider agents guarding access to data to make decisions regarding granting access to the data by the principals. 
@@ -54,10 +48,8 @@ There are a small set of system requirements in order to run Notary Service code
 
 ```
 cp env.template .env                                  # set variables accordingly
-cp base/env.template base/.env                        # set variables accordingly
-cp base/secrets.py.template base/secrets.py           # set variables accordingly
 cp nginx/default.conf.template nginx/default.conf     # configure accordingly
-source base/.env
+source .env
 UWSGI_UID=$(id -u) UWSGI_GID=$(id -g) docker-compose up -d
 ```
 
@@ -86,9 +78,7 @@ Your project must be configured prior to running it for the first time. Example 
 Do not check any of your configuration files into a repository as they will contain your projects **secrets** (use `.gitignore` to exclude any files containing secrets).
 
 1. **.env** from [env.template](env.template) - Environment variables for docker-compose.yml to use
-2. **base/.env** from [base/env.template](base/env.template) - Environment variables for Django to use via the dotenv package
-3. **base/secrets.py** from [base/secrets.py.template](base/secrets.py.template) - Django requires a secret key and this file provides an example.
-4. **nginx/default.conf** from [nginx/default.conf.template](nginx/default.conf.template) - Example Nginx SSL configuration file to use for deployment.
+2. **nginx/default.conf** from [nginx/default.conf.template](nginx/default.conf.template) - Example Nginx SSL configuration file to use for deployment.
 
 ### `.env`
 
@@ -112,116 +102,98 @@ Once copied, modify the default values for each to correspond to your desired de
 #  4. Dockerfile
 #  5. Variable is not defined
 
-# database PostgreSQL - default values should not be used in production
-POSTGRES_PASSWORD=postgres
-POSTGRES_USER=postgres
-PGDATA=/var/lib/postgresql/data
-POSTGRES_DB=postgres
-POSTGRES_PORT=5432
+# Django settings
+export PYTHONPATH=$(pwd):$(pwd)/venv:$(pwd)/.venv
+export DJANGO_SECRET_KEY='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+export DJANGO_DEBUG=True
+export DJANGO_LOG_LEVEL='DEBUG'
+export DJANGO_SESSION_COOKIE_AGE='3600'
+export DJANGO_TIME_ZONE='America/New_York'
+export OIDC_RENEW_ID_TOKEN_EXPIRY_SECONDS='900'
 
-# django
-UWSGI_UID=1000
-UWSGI_GID=1000
+# NS Roles
+export ROLE_IMPACT_USER='ImpactUser'
+export ROLE_DP='DataProvider'
+export ROLE_INP='InfrastructureProvider'
+export ROLE_PI='PrincipalInvestigator'
+export ROLE_IG='InstitutionalGovernance'
+export ROLE_NSADMIN='NotaryServiceAdmin'
+export ROLE_ENROLLMENT_APPROVAL='EnrollmentApproval'
 
-# nginx
-NGINX_DEFAULT_CONF=./nginx/default.conf
-NGINX_SSL_CERT=./ssl/ssl_dev.crt
-NGINX_SSL_KEY=./ssl/ssl_dev.key
+# COmanage COU IDs / FLAGs
+export COU_ID_ACTIVE_USER=100
+export COU_ID_PROJECTS=101
+export COU_ID_DATA_PROVIDERS=102
+export COU_ID_INFRASTRUCTURE_PROVIDERS=103
+export COU_ID_PRINCIPAL_INVESTIGATORS=104
+export COU_ID_INSTITUTIONAL_GOVERNANCE=105
+export COU_ID_NOTARY_SERVICE_ADMINS=106
+export COU_ID_ENROLLMENT_APPROVAL=107
+export COU_FLAG_PI_ADMIN='-ADMIN'
+export COU_FLAG_PI_MEMBER='-PI'
+export COU_FLAG_STAFF='-STAFF'
 
-# neo4J
-NEO4J_UID=1000
-NEO4J_GID=1000
-NEO4J_DATA_PATH_HOST=./neo4j/data
-NEO4J_DATA_PATH_DOCKER=/data
-NEO4J_IMPORTS_PATH_HOST=./neo4j/imports
-NEO4J_IMPORTS_PATH_DOCKER=/imports
-NEO4J_LOGS_PATH_HOST=./neo4j/logs
-NEO4J_LOGS_PATH_DOCKER=/logs
-NEO4J_BOLT_URL=bolt://127.0.0.1:7687
-NEO4J_USER=neo4j
-NEO4J_PASS=password
-NEO4J_HOST=127.0.0.1
-```
+# Neo4J configuration
+#export NEO4J_BOLT_URL=bolt://localhost:7687
+export NEO4J_BOLT_URL=bolt://neo4j:7687
+export NEO4J_DATA_PATH_DOCKER=/data
+export NEO4J_DATA_PATH_HOST=./neo4j/data
+export NEO4J_GID=1000
+export NEO4J_HOST=neo4j
+export NEO4J_IMPORTS_PATH_DOCKER=/imports
+export NEO4J_IMPORTS_PATH_HOST=./neo4j/imports
+export NEO4J_LOGS_PATH_DOCKER=/logs
+export NEO4J_LOGS_PATH_HOST=./neo4j/logs
+export NEO4J_PASS=password
+export NEO4J_UID=1000
+export NEO4J_USER=neo4j
 
-### `base/.env`
+# Nginx configuration
+export NGINX_DEFAULT_CONF=./nginx/default.conf
+export NGINX_SSL_CERTS_DIR=./ssl
 
-A file named `base/dummy.env` has been provided as an example, and is used by Django's python-dotenv package.
+# Notary Service
+export NS_NAME=localhost
+export NS_PRESIDIO_JWT_PUBLIC_KEY_PATH='./safe/keys/safe-principal.pub'
+export NS_PRESIDIO_JWT_PRIVATE_KEY_PATH='./safe/keys/safe-principal.key'
 
-If you're planning on doing local development with virutalenv, configure the database to be reachable from the local machine.
+# COmanage API - privileged API user generated in COmanage
+export COMANAGE_API_URL='https://FQDN_OF_REGISTRY'
+export COMANAGE_API_USER='co_123.api-user-name'
+export COMANAGE_API_PASS='xxxx-xxxx-xxxx-xxxx'
+export COMANAGE_API_CO_ID=123
+export COMANAGE_API_CO_NAME='RegistryName'
+export COMANAGE_API_SSH_KEY_AUTHENTICATOR_ID=123
 
-- Update `POSTGRES_HOST` in `.env` to reflect the IP of your local machine (For example, from `export POSTGRES_HOST=database` to  `export POSTGRES_HOST=127.0.0.1`)
-
-```
-cp base/env.template base/.env
-```
-
-Once copied, update the variables to correspond with your deployment needs. The OIDC_RP_CLIENT values should come from your OIDC COmanage registry and the LDAP values would be provided by CILogon personnel. Default host information relates to localhost (127.0.0.1) and should be adjusted according to the hostname or IP your running on.
-
-```env
-# Settings for environment. Notes:
-#
-#  - Since these are bash-like settings, there should be no space between the
-#    variable name and the value (ie, "A=B", not "A = B")
-#  - Boolean values should be all lowercase (ie, "A=false", not "A=False")
-
-# debug - set to false in production
-export DEBUG=true
-
-# uwsgi user
-export UWSGI_UID=$(id -u)
-export UWSGI_GID=$(id -g)
-
-# database PostgreSQL - default values should not be used in production
-export POSTGRES_PASSWORD=postgres
-export POSTGRES_USER=postgres
-export PGDATA=/var/lib/postgresql/data
-export POSTGRES_DB=postgres
-export POSTGRES_HOST=database
-export POSTGRES_PORT=5432
-
-# CILogon / COmanage - values provided when OIDC client is created
+# OIDC CILogon / COmanage - values provided when OIDC client is created
 export OIDC_RP_CLIENT_ID=''
 export OIDC_RP_CLIENT_SECRET=''
+export OIDC_RP_CALLBACK='https://127.0.0.1:8443/oidc/callback/'
+export OIDC_STORE_ACCESS_TOKEN=true
+export OIDC_STORE_ID_TOKEN=true
 
-# LDAP - values provided by CILogon staff
-export LDAP_HOST=''
-export LDAP_USER=''
-export LDAP_PASSWORD=''
-export LDAP_SEARCH_BASE=''
+# PostgreSQL database - default values should not be used in production
+export POSTGRES_HOST=database
+export PGDATA=/var/lib/postgresql/data
+export POSTGRES_DB=postgres
+export POSTGRES_PASSWORD=postgres
+export POSTGRES_PORT=5432
+export POSTGRES_USER=postgres
 
-# Neo4j
-export NEO4J_UID=$(id -u)
-export NEO4J_GID=$(id -g)
-export NEO4J_DATA_PATH_HOST=./neo4j/data
-export NEO4J_DATA_PATH_DOCKER=/data
-export NEO4J_IMPORTS_PATH_HOST=./neo4j/imports
-export NEO4J_IMPORTS_PATH_DOCKER=/imports
-export NEO4J_LOGS_PATH_HOST=./neo4j/logs
-export NEO4J_LOGS_PATH_DOCKER=/logs
-export NEO4J_BOLT_URL=bolt://127.0.0.1:7687
-export NEO4J_USER=neo4j
-export NEO4J_PASS=password
-export NEO4J_HOST=127.0.0.1
-```
+# SAFE server
+export SAFE_SERVER=safe
+export SAFE_SERVER_PORT=7777
+export RIAK_IP=riak
+export RIAK_PORT=8098
+export SLANG_SCRIPT=impact/mvp-ns.slang
+export AKKA_LOG_LEVEL=info
+export SAFE_IMPORTS=./safe/imports
+export SAFE_PRINCIPAL_KEYS=./safe/keys
+export SAFE_PRINCIPAL_PUBKEY=./safe/keys/ns.pub
 
-### `base/secrets.py`
-
-A file named `base/secrets.py.template` has been provided as an exmaple.
-
-Generate a `SECRET_KEY` and save in in this file
-
-```
-cp base/secrets.py.template base/secrets.py
-```
-
-Once copied, uncomment the SECRET_KEY line and add a key (example below)
-
-```python
-# Secret Key
-# You must uncomment, and set SECRET_KEY to a secure random value
-# e.g. https://djskgen.herokuapp.com/
-
-SECRET_KEY = '1123*n%5ep$n2cmd9ul*qgr+uzc!d*47h$u_tdhk+x0_v+%z5a'
+# uWSGI services in Django
+export UWSGI_GID=1000
+export UWSGI_UID=1000
 ```
 
 ### `nginx/default.conf`
@@ -291,11 +263,15 @@ server {
 
 ### `docker-compose.yml`
 
+Choose the compose definition that fits your deployment and copy it over the `docker-compose.yml` file (default is local-development)
+
+- `compose/local-development.yml`
+- `compose/production.yml`
+- `compose/production-selinux.yml`
+
 Double check that all variable references found in `.env`, or their default values are suitable for your deployment.
 
 If you're planning on doing local development with virutalenv, configure the database to be reachable from the local machine.
-
-- Ensure the `POSTGRES_PORT=5432` is properly mapped to the host in the `docker-compose.yml` file
 
 ### `ns_core_uwsgi.ini`
 
@@ -353,10 +329,10 @@ Move on to the [Run](#run) section.
 
 ## <a name="run"></a>Run
 
-Be sure to source the environment variables that were configured from the `/base/.env` file.
+Be sure to source the environment variables that were configured from the `.env` file.
 
 ```
-source base/.env
+source .env
 ```
 
 ### database
@@ -454,14 +430,6 @@ nginx      nginx -g daemon off;            Up      0.0.0.0:8443->443/tcp, 0.0.0.
 ```
 
 At this point the notary-service stack should be running and can be verified at your defined URL: [http(s)://HOSTNAME:PORT](http://127.0.0.1:8080)
-
-## <a name="docker"></a>Docker
-
-TODO
-
-## <a name="lib"></a>Lib
-
-TODO
 
 ### ns_workflow
 

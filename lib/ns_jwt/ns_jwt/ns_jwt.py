@@ -59,7 +59,7 @@ class NSJWT:
 
         self.claims['iat'] = int(datetime.now().timestamp())
         self.claims['exp'] = int((datetime.now() + validity).timestamp())
-        self.jwt = str(jwt.encode(self.claims, privateKey, algorithm='RS256'), 'utf-8')
+        self.jwt = jwt.encode(self.claims, key=privateKey, algorithm='RS256')
 
         self.encoded = True
         return self.jwt

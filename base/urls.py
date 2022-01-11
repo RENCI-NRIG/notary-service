@@ -24,12 +24,11 @@ urlpatterns = [
     path('users/', include('django.contrib.auth.urls')),
     path('whoami', views.whoami, name='whoami'),
     path('', include('users.urls')),
-    path('', include('comanage.urls')),
     path('', include('projects.urls')),
-    path('', include('debug.urls')),
+    path('', include('nsadmin.urls')),
     path('', include('datasets.urls')),
     path('', include('workflows.urls')),
-    path('', include('apache_kafka.urls')),
+    # path('', include('apache_kafka.urls')),
     path('', include('infrastructure.urls')),
 ]
 

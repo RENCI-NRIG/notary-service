@@ -15,7 +15,7 @@ docker run --rm \
   -v $(pwd):/clean \
   -e UID=$(id -u) \
   -e GID=$(id -g) \
-  nginx /bin/bash -c 'chown -R $UID:$GID /clean'
+  nginx:1 /bin/bash -c 'chown -R $UID:$GID /clean'
 docker volume prune -f
 docker network prune -f
 
@@ -27,7 +27,6 @@ rm -rf \
   neo4j \
   kafka \
   safe/imports \
-  venv \
   .venv
 while read line; do
   rm -rf $line;

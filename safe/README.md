@@ -7,8 +7,8 @@ Development SAFE principal keys for notary service will be generated at: `./safe
 ```console
 $ ls -alh ./safe/keys
 ...
--rw-r--r--  1 xxxxx  xxxxx   3.2K Jul 17 12:05 ns.key
--rw-r--r--  1 xxxxx  xxxxx   800B Jul 17 12:05 ns.pub
+-rw-r--r--  1 xxxxx  xxxxx   3.2K Jul 17 12:05 safe-principal.key
+-rw-r--r--  1 xxxxx  xxxxx   800B Jul 17 12:05 safe-principal.pub
 ```
 
 Keys generated from the `safe` directory using openssl:
@@ -16,8 +16,8 @@ Keys generated from the `safe` directory using openssl:
 ```
 openssl rsa -in ../ssl/privkey.pem \
     -outform pem -pubout \
-    -out ./keys/ns.pub
+    -out ./keys/safe-principal.pub
 openssl rsa -in ../ssl/privkey.pem \
     -outform pem \
-    -out ./keys/ns.key
+    -out ./keys/safe-principal.key
 ```

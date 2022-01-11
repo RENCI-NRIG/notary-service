@@ -1,100 +1,248 @@
 {% extends 'base.html' %}
-{% load static user_tags project_tags %}
+{% load static project_tags %}
 
-{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+{% block title %}
+    ImPACT Projects
+{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
-        {% display_projects as show_projects %}
-        {% if show_projects %}
+    {% with ua=user.is_authenticated admin=user.is_site_admin operator=user.is_operator %}
+        {% if ua %}
             <div class="container">
-                <h1>Projects</h1>
-                <p>
-                    Projects are created by their Principal Investigators (PIs) and define membership via roles
-                    registered
-                    within the ImPACT COmanage registry as well as Datasets as defined by data providers using
-                    Notary Service tools.
+                <div class="d-flex flex-row align-items-center justify-content-between">
+                    <h1>ImPACT Projects</h1>
+                </div>
+                <p class="text-info">
+                    Projects are created by Principal Investigators (PIs) and define membership via roles
+                    registered within the ImPACT COmanage registry as well as Datasets as defined by data providers
+                    using Notary Service tools.
                 </p>
-                <h2>My Projects
-                    {% if user.is_nsadmin %}
-                        <a href="{% url 'project_new' %}"
-                           title="Create New Project" class="fa fa-fw fa-plus-square" style="color: green;"></a>
+                <h3>My Projects
+                    {% if user.is_nsadmin or user.is_pi %}
+                        <button class="btn btn-success mr-2">
+                            <a href="{% url 'project_new' %}" class="unlink text-white">
+                                <i class="fa fa-plus mr-1"></i> Add
+                            </a>
+                        </button>
                     {% endif %}
-                </h2>
-                {% if user.is_piadmin or user.is_nsadmin %}
-                    <form method="POST" class="post-form">
-                        {% csrf_token %}
-                        <input type="submit" name="check-comanage-projects" value="Check COmanage for new projects"
-                               style="color: darkgreen">
-                    </form>
-                {% endif %}
-                <table width="100%" border="1px solid black" cellpadding="5px">
+                </h3>
+                <table class="table table-striped table-bordered mt-4">
                     <tr>
                         {% if user.is_ig %}
-                            <td align="center"><b>Assigned</b></td>
+                            <th>Governance</th>
                         {% endif %}
-                        <td align="center"><b>Name</b></td>
-                        <td align="center"><b>Validated</b></td>
-                        <td align="center"><b>
-                            {% if user.show_uuid %}
-                                UUID
-                            {% else %}
-                                Description
-                            {% endif %}
-                        </b></td>
-                        <td align="center"><b>Created Date</b></td>
-                        <td align="center"><b>Modified Date</b></td>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Created By</th>
+                        <th>Created Date</th>
+                        <th>Last Modified</th>
                     </tr>
-                    {% for project in projects %}
+                    {% for project in my_projects %}
                         <tr>
-                        {% if user.is_ig %}
-                            <td>
-                                {% with assigned=request|project_ig_assignment:project.uuid %}
-                                    {% if assigned == 'False' %}
-                                        <form method="POST" class="post-form">
-                                            {% csrf_token %}
-                                            <input type="submit"
-                                                   name="ig-self-assign-project"
-                                                   value="Self Assign Project"
-                                                   style="color: deeppink">
-                                            <input hidden name="project_uuid" value="{{ project.uuid }}">
-                                        </form>
-                                    {% else %}
-                                        {{ assigned.cn }}
-                                    {% endif %}
+                            {% if user.is_ig %}
+                                {% with ig=request|project_ig_assignment_by_affiliation:project.uuid %}
+                                    <td>
+                                        {% if not ig.is_assigned and ig.is_affiliated %}
+                                            <form method="POST" class="post-form">
+                                                {% csrf_token %}
+                                                <input type="submit"
+                                                       name="ig-self-assign-project"
+                                                       value="Self Assign"
+                                                       style="color: darkgreen">
+                                                <input hidden name="project_uuid" value="{{ project.uuid }}">
+                                            </form>
+                                        {% else %}
+                                            {% if ig.is_assigned %}
+                                                {% if ig.assigned_to == request.user %}
+                                                    {{ ig.assigned_to.display_name }}
+                                                    <form method="POST" class="post-form">
+                                                        {% csrf_token %}
+                                                        <input type="submit"
+                                                               name="ig-self-unassign-project"
+                                                               value="Remove"
+                                                               style="color: firebrick">
+                                                        <input hidden name="project_uuid" value="{{ project.uuid }}">
+                                                    </form>
+                                                {% else %}
+                                                    {{ ig.assigned_to.display_name }}
+                                                {% endif %}
+                                            {% else %}
+                                                <small>
+                                                    N/A for "{{ user.affiliation.name }}"
+                                                </small>
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
                                 {% endwith %}
+                            {% endif %}
+                            <td>
+                                <a href="{% url 'project_detail' uuid=project.uuid %}">
+                                    {{ project.name }}
+                                </a>
                             </td>
+                            <td>{{ project.description }}</td>
+                            <td>{{ project.created_by }}</td>
+                            <td>{{ project.created }}</td>
+                            <td>{{ project.modified }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                <h3>Public Projects</h3>
+                <table class="table table-striped table-bordered mt-4">
+                    <tr>
+                        {% if user.is_ig %}
+                            <th>Governance</th>
                         {% endif %}
-                        <td>{{ project.name }}</td>
-                        <td align="center">
-                            {% if project.is_valid %}
-                                <i class="fa fa-fw fa-check" style="color: green;"></i>
-                            {% else %}
-                                <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
-                            {% endif %}
-                        </td>
-                        <td style="font-family: Courier"><a href="{% url 'project_detail' uuid=project.uuid %}"
-                                                            title="Project Details">
-                            {% if user.show_uuid %}
-                                {{ project.uuid }}
-                            {% else %}
-                                {{ project.description|truncatechars:"57" }}
-                            {% endif %}
-                        </a></td>
-                        <td>{{ project.created_date|date:"m/d/Y g:i a" }}</td>
-                        <td>{{ project.modified_date|date:"m/d/Y g:i a" }}</td>
-                        {% if user.is_piadmin or user.is_nsadmin %}
-                            <td><a href="{% url 'project_edit' uuid=project.uuid %}"
-                                   title="Edit" class="fa fa-fw fa-pencil" style="color: green;"></a>
-                            </td>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Created By</th>
+                        <th>Created Date</th>
+                        <th>Last Modified</th>
+                    </tr>
+                    {% for project in other_projects %}
+                        {% if project.is_public %}
+                            <tr>
+                                {% if user.is_ig %}
+                                    {% with ig=request|project_ig_assignment_by_affiliation:project.uuid %}
+                                        <td>
+                                            {% if not ig.is_assigned and ig.is_affiliated %}
+                                                <form method="POST" class="post-form">
+                                                    {% csrf_token %}
+                                                    <input type="submit"
+                                                           name="ig-self-assign-project"
+                                                           value="Self Assign"
+                                                           style="color: darkgreen">
+                                                    <input hidden name="project_uuid" value="{{ project.uuid }}">
+                                                </form>
+                                            {% else %}
+                                                {% if ig.is_assigned %}
+                                                    {% if ig.assigned_to == request.user %}
+                                                        {{ ig.assigned_to.display_name }}
+                                                        <form method="POST" class="post-form">
+                                                            {% csrf_token %}
+                                                            <input type="submit"
+                                                                   name="ig-self-unassign-project"
+                                                                   value="Remove"
+                                                                   style="color: firebrick">
+                                                            <input hidden name="project_uuid"
+                                                                   value="{{ project.uuid }}">
+                                                        </form>
+                                                    {% else %}
+                                                        {{ ig.assigned_to.display_name }}
+                                                    {% endif %}
+                                                {% else %}
+                                                    <small>
+                                                        N/A for "{{ user.affiliation.name }}"
+                                                    </small>
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                    {% endwith %}
+                                {% endif %}
+                                <td>
+                                    {% if user.is_nsadmin %}
+                                        <a href="{% url 'project_detail' uuid=project.uuid %}">
+                                            {{ project.name }}
+                                        </a>
+                                    {% else %}
+                                        {{ project.name }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ project.description }}</td>
+                                <td>{{ project.created_by }}</td>
+                                <td>{{ project.created }}</td>
+                                <td>{{ project.modified }}</td>
+                                <td class="text-center">
+                                    <form method="POST" class="post-form">
+                                        {% csrf_token %}
+                                        <input class="btn btn-info mr-2 text-white"
+                                               type="submit"
+                                               name="join-project-request"
+                                               value="Join"
+                                               style="color: darkgreen">
+                                        <input hidden name="project_uuid" value="{{ project.uuid }}">
+                                    </form>
+                                </td>
+                            </tr>
                         {% endif %}
                     {% endfor %}
                 </table>
+                {% if user.is_nsadmin or user.is_ig and user.is_affiliated %}
+                    <h3>Private Projects</h3>
+                    <table class="table table-striped table-bordered mt-4">
+                        <tr>
+                            {% if user.is_ig %}
+                                <th>Governance</th>
+                            {% endif %}
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Created By</th>
+                            <th>Created Date</th>
+                            <th>Last Modified</th>
+                        </tr>
+                        {% for project in other_projects %}
+                            {% if not project.is_public %}
+                                <tr>
+                                    {% if user.is_ig %}
+                                        {% with ig=request|project_ig_assignment_by_affiliation:project.uuid %}
+                                            <td>
+                                                {% if not ig.is_assigned and ig.is_affiliated %}
+                                                    <form method="POST" class="post-form">
+                                                        {% csrf_token %}
+                                                        <input type="submit"
+                                                               name="ig-self-assign-project"
+                                                               value="Self Assign"
+                                                               style="color: darkgreen">
+                                                        <input hidden name="project_uuid" value="{{ project.uuid }}">
+                                                    </form>
+                                                {% else %}
+                                                    {% if ig.is_assigned %}
+                                                        {% if ig.assigned_to == request.user %}
+                                                            {{ ig.assigned_to.display_name }}
+                                                            <form method="POST" class="post-form">
+                                                                {% csrf_token %}
+                                                                <input type="submit"
+                                                                       name="ig-self-unassign-project"
+                                                                       value="Remove"
+                                                                       style="color: firebrick">
+                                                                <input hidden name="project_uuid"
+                                                                       value="{{ project.uuid }}">
+                                                            </form>
+                                                        {% else %}
+                                                            {{ ig.assigned_to.display_name }}
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <small>
+                                                            N/A for "{{ user.affiliation.name }}"
+                                                        </small>
+                                                    {% endif %}
+                                                {% endif %}
+                                            </td>
+                                        {% endwith %}
+                                    {% endif %}
+                                    <td>
+                                        {% if user.is_nsadmin %}
+                                            <a href="{% url 'project_detail' uuid=project.uuid %}">
+                                                {{ project.name }}
+                                            </a>
+                                        {% else %}
+                                            {{ project.name }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ project.description }}</td>
+                                    <td>{{ project.created_by }}</td>
+                                    <td>{{ project.created }}</td>
+                                    <td>{{ project.modified }}</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="container">
+                <p>You are not currently logged in or not authorized to view this page</p>
             </div>
         {% endif %}
-    {% else %}
-        <div class="container">
-            <p>You are not currently logged in or not authorized to view this page</p>
-        </div>
-    {% endif %}
+    {% endwith %}
 {% endblock %}

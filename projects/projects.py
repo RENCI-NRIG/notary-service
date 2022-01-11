@@ -1,13 +1,18 @@
+import json
 import os
 import re
 
 from ldap3 import Connection, Server, ALL
+from comanage.comanage_api import create_project_co_cous, create_co_person_role
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
 
-from users.models import Affiliation
+from users.models import Affiliation, NotaryServiceUser, ComanageCou
 from .models import ComanageStaff, ComanagePIAdmin, ComanagePIMember, ComanagePersonnel, Project, \
     MembershipComanagePIAdmin, MembershipComanagePIMember, MembershipComanageStaff, \
     MembershipComanagePersonnel, MembershipAffiliations, MembershipProjectWorkflow
 from .workflows import create_base_project_workflows
+from comanage import api
 
 ldap_host = os.getenv('LDAP_HOST', '')
 ldap_user = os.getenv('LDAP_USER', '')
@@ -66,6 +71,7 @@ def update_comanage_personnel_membership(project_obj, comanage_groups):
     :param comanage_groups:
     :return:
     """
+    # print(comanage_groups[0].cn)
     role_type = re.findall(
         re.escape(project_obj.comanage_name) + r'[-\w]*-(\w+:(?:admins|members:active))',
         str(comanage_groups[0].cn)
@@ -340,44 +346,65 @@ def update_project_personnel(project_obj):
     project_obj.save()
 
 
-def create_new_project(comanage_project, project_name=None, project_description=None):
-    """
-    Create new project based on COmanage COU group name
-    Optional project name and description
-    :param comanage_project:
-    :param project_name:
-    :param project_description:
-    :return:
-    """
+def create_new_project(request, project_name: str, project_description: str, is_public: bool):
     project = Project()
-    if project_name:
+    if create_project_co_cous(project_uuid=project.uuid, project_name=project_name):
+        project.created_by = request.user.email
         project.name = project_name
-    else:
-        project.name = f"Untitled ({comanage_project})"
-    if project_description:
         project.description = project_description
+        project.is_public = is_public
+        project.save()
+        # add pi_admin role for created_by user
+        cou_name = str(project.uuid) + os.getenv('COU_FLAG_PI_ADMIN')
+        ns_cou = ComanageCou.objects.filter(name=cou_name).first()
+        if create_co_person_role(co_person_id=request.user.co_person_id, co_cou_id=ns_cou.co_cou_id):
+            project.comanage_pi_admins.add(request.user)
+            project.save()
+        else:
+            messages.error(
+                request,
+                'ERROR! Unable to assign {0} to Project {1} ...'.format(os.getenv('COU_FLAG_PI_ADMIN'), project_name))
+        return str(project.uuid)
     else:
-        project.description = f"Untitled ({comanage_project})"
-    project.comanage_name = str(comanage_project)
-    project.save()
-    update_project_personnel(project_obj=project)
-    return str(project.uuid)
+        messages.error(request, 'ERROR! Unable to create Project {0} ...'.format(project_name))
+        redirect('projects')
+
+    # if project_name:
+    #     project.name = project_name
+    # else:
+    #     project.name = f"Untitled ({comanage_project})"
+    # if project_description:
+    #     project.description = project_description
+    # else:
+    #     project.description = f"Untitled ({comanage_project})"
+    # project.comanage_name = str(comanage_project)
+    # project.save()
+    # update_project_personnel(project_obj=project)
+    # return str(project.uuid)
 
 
 def get_ldap_comanage_staff():
-    ldap_search_filter = '(&(objectClass=groupOfNames)(cn=CO:COU:*))'
-    conn = Connection(server, ldap_user, ldap_password, auto_bind=True)
-    groups_found = conn.search(
-        ldap_search_base,
-        ldap_search_filter,
-        attributes=['cn']
-    )
-    if groups_found:
-        attributes = conn.entries
-    else:
-        attributes = []
-    conn.unbind()
-    return attributes
+    # ldap_search_filter = '(&(objectClass=groupOfNames)(cn=CO:COU:*))'
+    # conn = Connection(server, ldap_user, ldap_password, auto_bind=True)
+    # groups_found = conn.search(
+    #     ldap_search_base,
+    #     ldap_search_filter,
+    #     attributes=['cn']
+    # )
+    # if groups_found:
+    #     attributes = conn.entries
+    # else:
+    #     attributes = []
+    # conn.unbind()
+    # print('## projects.get_ldap_comanage_staff: attributes ##')
+    # print('*** UPDATED ***')
+    # print(attributes)
+    comanage_staff = []
+    co_cous = api.cous_view_per_co().get('Cous', [])
+    if co_cous:
+        for cou in co_cous:
+            comanage_staff.append({'dn': cou.get('Description', 'DN_BLANK'), 'cn': cou.get('Name', 'CN_BLANK')})
+    return comanage_staff
 
 
 def update_comanage_group():
@@ -386,19 +413,21 @@ def update_comanage_group():
     ComanagePIMember.objects.update(active=False)
     ComanageStaff.objects.update(active=False)
     for group in group_list:
-        dn = str(group.entry_dn)
-        cn = str(group.cn[0])
-        if "-PI:admins" in cn:
+        # dn = str(group.entry_dn)
+        dn = group.get('dn')
+        # cn = str(group.cn[0])
+        cn = group.get('cn')
+        if os.getenv('ROLE_PI_ADMIN') in cn:
             if not ComanagePIAdmin.objects.filter(dn=dn).exists():
                 ComanagePIAdmin.objects.create(dn=dn, cn=cn, active=True)
             else:
                 ComanagePIAdmin.objects.filter(dn=dn, cn=cn).update(active=True)
-        elif "-PI:members:active" in cn:
+        elif os.getenv('ROLE_PI_MEMBER') in cn:
             if not ComanagePIMember.objects.filter(dn=dn).exists():
                 ComanagePIMember.objects.create(dn=dn, cn=cn, active=True)
             else:
                 ComanagePIMember.objects.filter(dn=dn, cn=cn).update(active=True)
-        elif "-STAFF:members:active" in cn:
+        elif os.getenv('ROLE_STAFF') in cn:
             if not ComanageStaff.objects.filter(dn=dn).exists():
                 ComanageStaff.objects.create(dn=dn, cn=cn, active=True)
             else:
@@ -418,22 +447,75 @@ def get_comanage_personnel():
     else:
         attributes = []
     conn.unbind()
-    return attributes
+    # print('## projects.get_comanage_personnel: attributes ##')
+    # print(attributes)
+    comanage_personnel = []
+    co_people = api.copeople_view_per_co().get('CoPeople', [])
+    if co_people:
+        for co_person in co_people:
+            co_person_id = co_person.get('Id')
+            # get name
+            conames = api.names_view_per_person(
+                person_type='copersonid', person_id=co_person_id).get('Names')
+            name = ''
+            for coname in conames:
+                if coname.get('PrimaryName', False):
+                    family = coname.get('Family', '')
+                    given = coname.get('Given', '')
+                    name = given + ' ' + family
+            # get email
+            coemail = api.email_addresses_view_per_person(
+                person_type='copersonid', person_id=co_person_id).get('EmailAddresses')
+            email = ''
+            for e in coemail:
+                if e.get('Type', None) == 'official':
+                    email = e.get('Mail', '')
+                    break
+            # get oidcsub, impactid, eppn
+            oidcsub = ''
+            impactid = ''
+            eppn = ''
+            coidentifiers = api.identifiers_view_per_entity(
+                entity_type='copersonid', entity_id=co_person_id).get('Identifiers')
+            for ident in coidentifiers:
+                if ident.get('Type', None) == 'oidcsub':
+                    oidcsub = ident.get('Identifier', '')
+                    oidcsub_id = str(oidcsub).rsplit('/', 1)[1]
+                if ident.get('Type', None) == 'impactid':
+                    impactid = ident.get('Identifier', '')
+                if ident.get('Type', None) == 'eppn':
+                    eppn = ident.get('Identifier', '')
+            comanage_personnel.append({
+                'dn': co_person_id,
+                'cn': name,
+                'eppn': eppn,
+                'employee_number': impactid,
+                'email': email,
+                'uid': oidcsub
+            })
+    # print(comanage_personnel)
+    return comanage_personnel
 
 
 def update_comanage_personnel():
     person_list = get_comanage_personnel()
     ComanagePersonnel.objects.update(active=False)
     for person in person_list:
-        dn = str(person.entry_dn)
-        cn = str(person.cn[0])
-        employee_number = str(person.employeeNumber[0])
-        if person.eduPersonPrincipalName:
-            eppn = str(person.eduPersonPrincipalName[0])
-        else:
-            eppn = ''
-        email = str(person.mail[0])
-        uid = str(person.uid[0])
+        # dn = str(person.entry_dn)
+        # cn = str(person.cn[0])
+        # employee_number = str(person.employeeNumber[0])
+        # if person.eduPersonPrincipalName:
+        #     eppn = str(person.eduPersonPrincipalName[0])
+        # else:
+        #     eppn = ''
+        # email = str(person.mail[0])
+        # uid = str(person.uid[0])
+        dn = person.get('dn')
+        cn = person.get('cn')
+        employee_number = person.get('employee_number')
+        eppn = person.get('eppn')
+        email = person.get('email')
+        uid = person.get('uid', 'OIDC_SUB_BLANK')
         if not ComanagePersonnel.objects.filter(dn=dn).exists():
             ComanagePersonnel.objects.create(
                 dn=dn,
@@ -448,6 +530,7 @@ def update_comanage_personnel():
 
 
 def personnel_by_comanage_group(cn):
+    # print(cn)
     ldap_search_filter = '(&(objectClass=groupOfNames)(cn=' + cn + '))'
     conn = Connection(server, ldap_user, ldap_password, auto_bind=True)
     personnel_found = conn.search(
@@ -461,8 +544,10 @@ def personnel_by_comanage_group(cn):
         for person in personnel[0]['member']:
             employee_number = person.split(',')[0].split('=')[1]
             if ComanagePersonnel.objects.filter(employee_number=employee_number).exists():
-                attributes.append(ComanagePersonnel.objects.get(employee_number=employee_number))
+                attributes.append(ComanagePersonnel.objects.get(employee_number=employee_number, active=True))
     else:
         attributes = []
     conn.unbind()
+    # print('## projects.personnel_by_comanage_group: attributes ##')
+    # print(attributes)
     return attributes

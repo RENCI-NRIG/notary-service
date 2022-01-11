@@ -50,6 +50,17 @@ class TemplateForm(forms.ModelForm):
 
 
 class DatasetForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request')
+        super(DatasetForm, self).__init__(*args, **kwargs)
+        if self.request.user.is_nsadmin():
+            self.fields['templates'].queryset = NSTemplate.objects.all().order_by('name')
+        else:
+            self.fields['templates'].queryset = NSTemplate.objects.filter(
+                    created_by__in=[self.request.user]
+                ).order_by('name')
+
     name = forms.CharField(
         widget=forms.TextInput(attrs={'size': 60})
     )
@@ -67,9 +78,10 @@ class DatasetForm(forms.ModelForm):
         label='SAFE SCID'
     )
     templates = forms.ModelMultipleChoiceField(
-        queryset=NSTemplate.objects.order_by('name'),
+        queryset=None,
         widget=forms.SelectMultiple(),
         label='Templates',
+        required=False
     )
 
     class Meta:

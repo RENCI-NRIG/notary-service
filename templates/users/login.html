@@ -5,20 +5,13 @@
 
 {% block content %}
     <div class="container">
-        <h2>We use
-            <div style="border: 5px outset #696; cursor:pointer; padding:3px;
-display:inline-block;" onclick="location.href='https://cilogon.org'">
-                <a href="{% url 'oidc_authentication_init' %}"
-                   style="font-family:Arial,sans-serif; font-style:italic;
-font-weight:bold; font-size:28px; color:#363;
-text-decoration:none;"><img alt=""
-                            src="https://cilogon.org/images/cilogon-logo-32x32.png"
-                            style="vertical-align:middle"/> CILogon 2.0 and COmanage </a>
-            </div>
-            for authN and authZ
-        </h2>
+        <br>
+        <h3 class="text-center">
+            ImPACT uses CILogon 2.0 (COmanage) for Authentication and Authorization
+        </h3>
+        <br>
         <p>
-        <h3>What is CILogon 2.0?</h3>
+        <h3 class="text-info text-center">What is CILogon 2.0?</h3>
         When scientists work together, they use web sites and other software to share their ideas and data.
         To ensure the integrity of their work, these systems require the scientists to log in and verify that they
         are part of the team working on a particular science problem. Too often, the identity and access verification
@@ -35,9 +28,9 @@ text-decoration:none;"><img alt=""
         cyberinfrastructure for scientific research in the US.
         <br>
         Learn more about <a href="https://www.cilogon.org/2">CILogon 2.0</a></p>
-
+        <br>
         <p>
-        <h3>What is COmanage</h3>
+        <h3 class="text-info text-center">What is COmanage</h3>
         COmanage provides collaboration management services for CILogon 2.0. COmanage enables research collaborations
         (virtual organizations or VOs) to manage the entire lifecycle of collaboration. Beginning with onboarding,
         COmanage provides flexible and customizable enrollment flows to bring people and their federated identities

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static dataset_tags replace_tags %}
+{% load static dataset_tags %}
 
 {% block head %}
     <meta charset="utf-8">
@@ -22,16 +22,22 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
+    {% if user in members_set %}
         {% if not user.is_norole %}
             <div class="container">
                 <div class="post">
                     <h2>{{ workflow.name }}
-                        {% if user.is_piadmin or user.is_nsadmin %}
-                            <a href="{% url 'workflow_reset' uuid=workflow.uuid %}"
-                               title="Reset workflow" class="fa fa-fw fa-refresh" style="color: green;"></a>
-                            <a href="{% url 'workflow_delete' uuid=workflow.uuid %}"
-                               title="Delete workflow" class="fa fa-fw fa-trash" style="color: #B22222;"></a>
+                        {% if user.is_nsadmin or user in project_pis %}
+                            <button class="btn btn-success mr-2">
+                                <a href="{% url 'workflow_reset' uuid=workflow.uuid %}" class="unlink text-white">
+                                    <i class="fa fa-refresh mr-1"></i> Reset/Refresh
+                                </a>
+                            </button>
+                            <button class="btn btn-danger mr-2">
+                                <a href="{% url 'workflow_delete' uuid=workflow.uuid %}" class="unlink text-white">
+                                    <i class="fa fa-fw fa-trash mr-1"></i> Delete
+                                </a>
+                            </button>
                         {% endif %}
                     </h2>
                     <p>{{ workflow.description|linebreaksbr }}</p>
@@ -149,6 +155,13 @@
                         </td>
                     </tr>
                 </table>
+                <br>
+                <button class="btn btn-success mr-2">
+                    <a href="{% url 'project_detail' uuid=project.project.uuid %}#project-workflow"
+                       class="unlink text-white">
+                        <i class="fa fa-hand-o-left mr-1"></i> Back
+                    </a>
+                </button>
             </div>
         {% endif %}
     {% else %}

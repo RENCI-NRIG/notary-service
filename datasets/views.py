@@ -1,12 +1,14 @@
 import os
 
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from ns_workflow import Neo4jWorkflow, WorkflowError
+from itertools import chain
 
 from datasets.models import Dataset
+from ns_workflow import Neo4jWorkflow, WorkflowError
 from projects.models import Project, MembershipDatasets, ProjectWorkflowUserCompletionByRole, \
-    MembershipProjectWorkflow, ComanagePersonnel, MembershipComanagePersonnel
+    MembershipProjectWorkflow
 from projects.workflows import get_next_set_by_role, workflow_report_from_neo4j
 from safe.post_assertions import get_id_from_pub, post_raw_idset, post_common_completion_receipt, \
     post_user_completion_receipt, post_link_receipt_for_dataset
@@ -16,7 +18,7 @@ from workflows.workflow_neo4j import create_workflow_from_template, delete_workf
 from .forms import TemplateForm, DatasetForm
 from .jwt import encode_ns_jwt, decode_ns_jwt
 from .models import NSTemplate, MembershipNSTemplate
-from users.models import Role
+from projects.workflows import get_converted_user_roles_per_project_as_id
 
 bolt_url = os.getenv('NEO4J_BOLT_URL')
 neo_user = os.getenv('NEO4J_USER')
@@ -25,50 +27,17 @@ import_dir = os.getenv('NEO4J_IMPORTS_PATH_DOCKER')
 import_host_dir = os.getenv('NEO4J_IMPORTS_PATH_HOST')
 
 
+# *** DATASETS ***
+@login_required()
 def datasets(request):
-    context = {"datasets_page": "active"}
-    if request.user.is_authenticated:
-        return dataset_list(request)
-    else:
-        return render(request, 'datasets.html', context)
+    my_datasets = Dataset.objects.filter(
+        created_by__in=[request.user]
+    ).order_by('name').distinct()
+    other_datasets = Dataset.objects.all().difference(my_datasets).order_by('name')
 
-
-def dataset_list(request):
-    if request.user.is_nsadmin:
-        ds_objs = Dataset.objects.filter(created_date__lte=timezone.now()).order_by('name')
-    elif request.user.is_ig:
-        ds_objs = Dataset.objects.filter(
-            uuid__in=ProjectWorkflowUserCompletionByRole.objects.values_list('dataset__uuid').filter(
-                person=request.user,
-                role=Role.objects.get(id=request.user.role)
-            ).distinct()
-        ).order_by('name')
-    elif request.user.is_dp:
-        ds_objs = Dataset.objects.filter(
-            created_by=request.user,
-        ).order_by('name')
-    elif request.user.is_inp:
-        ds_objs = []
-    elif request.user.is_piadmin:
-        ds_objs = Dataset.objects.filter(created_date__lte=timezone.now()).order_by('name')
-    elif request.user.is_pi:
-        ds_objs = Dataset.objects.filter(
-            uuid__in=ProjectWorkflowUserCompletionByRole.objects.values_list('dataset__uuid').filter(
-                person=request.user,
-                role=Role.objects.get(id=request.user.role)
-            ).distinct()
-        ).order_by('name')
-    elif request.user.is_nsstaff:
-        ds_objs = Dataset.objects.filter(
-            uuid__in=ProjectWorkflowUserCompletionByRole.objects.values_list('dataset__uuid').filter(
-                person=request.user,
-                role=Role.objects.get(id=request.user.role)
-            ).distinct()
-        ).order_by('name')
-    else:
-        print('---- shouldn\'t get here ----')
-        ds_objs = Dataset.objects.filter(created_date__lte=timezone.now()).order_by('name')
-    return render(request, 'datasets.html', {'datasets_page': 'active', 'datasets': ds_objs})
+    return render(request, 'datasets.html', {
+        'datasets_page': 'active', 'my_datasets': my_datasets, 'other_datasets': other_datasets
+    })
 
 
 def dataset_validate(dataset_obj, show_uuid):
@@ -98,6 +67,7 @@ def dataset_validate(dataset_obj, show_uuid):
     return True, None
 
 
+@login_required()
 def dataset_detail(request, uuid):
     dataset = get_object_or_404(Dataset, uuid=uuid)
     tpl_list = MembershipNSTemplate.objects.values_list(
@@ -107,7 +77,7 @@ def dataset_detail(request, uuid):
     )
     tpl_objs = NSTemplate.objects.filter(uuid__in=tpl_list).order_by('name')
     if request.method == "POST":
-        dataset.is_valid, dataset_error = dataset_validate(dataset, request.user.show_uuid)
+        dataset.is_valid, dataset_error = dataset_validate(dataset, False)
         dataset.save()
     else:
         dataset_error = None
@@ -133,12 +103,14 @@ def dataset_post_safe_receipts(principal, user, project, dataset, workflow1, wor
     return [r1, r2, r3, r4, r5, r6, r7]
 
 
-def workflow_is_complete(request, workflow_uuid):
+def workflow_is_complete(request, project_uuid, workflow_uuid):
     """
     :param request:
     :param workflow_uuid:
     :return:
     """
+    ns_project = Project.objects.filter(uuid=project_uuid).first()
+    user_roles = get_converted_user_roles_per_project_as_id(project=ns_project, user=request.user)
     n = Neo4jWorkflow(
         url=bolt_url,
         user=neo_user,
@@ -146,37 +118,49 @@ def workflow_is_complete(request, workflow_uuid):
         importHostDir=import_host_dir,
         importDir=import_dir,
     )
-    is_complete = n.is_workflow_complete(
-        principalId=str(request.user.uuid),
-        role=request.user.role,
-        graphId=str(workflow_uuid),
-    )
+    is_complete = False
+    for role in user_roles:
+        is_complete = n.is_workflow_complete(
+            principalId=str(request.user.uuid),
+            role=role,
+            graphId=str(workflow_uuid),
+        )
+        if not is_complete:
+            is_complete = False
+            break
+
     return is_complete
 
 
-def workflow_status_is_completed(request, workflow_uuid):
-    """
-    :param request:
-    :param workflow_uuid:
-    :return:
-    """
-    if not ProjectWorkflowUserCompletionByRole.objects.filter(
-            person=request.user.id,
-            workflow=WorkflowNeo4j.objects.get(uuid=workflow_uuid),
-    ).exists():
-        return 'Unknown'
-    if not ProjectWorkflowUserCompletionByRole.objects.filter(
-            person=request.user.id,
-            workflow=WorkflowNeo4j.objects.get(uuid=workflow_uuid),
-            role=request.user.role,
-    ).exists():
-        return 'Role N/A'
-    else:
-        next_set = get_next_set_by_role(user_obj=request.user, workflow=str(workflow_uuid))
-        if len(next_set) != 0:
-            return 'False'
-        else:
-            return str(workflow_is_complete(request=request, workflow_uuid=workflow_uuid))
+# def workflow_status_is_completed(request, workflow_uuid: str, project_uuid: str):
+#     """
+#     :param request:
+#     :param workflow_uuid:
+#     :return:
+#     """
+#     ns_project = Project.objects.filter(
+#         uuid=project_uuid
+#     ).first()
+#     user_roles = get_converted_user_roles_per_project_as_id(project=ns_project, user=request.user)
+#
+#     for role in user_roles:
+#         if not ProjectWorkflowUserCompletionByRole.objects.filter(
+#                 person=request.user.id,
+#                 workflow=WorkflowNeo4j.objects.get(uuid=workflow_uuid),
+#         ).exists():
+#             return 'Unknown'
+#         if not ProjectWorkflowUserCompletionByRole.objects.filter(
+#                 person=request.user.id,
+#                 workflow=WorkflowNeo4j.objects.get(uuid=workflow_uuid),
+#                 # role=request.user.role,
+#         ).exists():
+#             return 'Role N/A'
+#         else:
+#             next_set = get_next_set_by_role(user_obj=request.user, workflow=str(workflow_uuid), role=role)
+#             if len(next_set) != 0:
+#                 return 'False'
+#
+#     return str(workflow_is_complete(request=request, workflow_uuid=workflow_uuid))
 
 
 def dataset_are_workflows_completed(request, dataset_obj):
@@ -195,28 +179,36 @@ def dataset_are_workflows_completed(request, dataset_obj):
 
     workflow_list = ProjectWorkflowUserCompletionByRole.objects.values_list('workflow__uuid', flat=True).filter(
         person=request.user,
-        role=request.user.role,
+        # role=request.user.role,
         project=Project.objects.get(uuid=project_uuid),
         dataset=dataset_obj
     )
+    workflow_list = list(set(workflow_list))
     if len(workflow_list) == 0:
         return False
     for workflow_uuid in workflow_list:
-        status = workflow_status_is_completed(request, workflow_uuid)
-        if status != 'True':
+        is_complete = workflow_is_complete(request, project_uuid, workflow_uuid)
+        if not is_complete:
             return False
+
     return True
 
 
+@login_required()
 def dataset_access(request, uuid):
     dataset = get_object_or_404(Dataset, uuid=uuid)
     dataset_error = None
-    project_uuid = request.GET.get('project_uuid', '-1')
-    project_name = Project.objects.get(uuid=project_uuid).name
+    # ns_project = Project.objects.filter(uuid=request.GET.get('project_uuid')).first()
+    ns_project = get_object_or_404(Project, uuid=request.GET.get('project_uuid'))
+    project_uuid = str(ns_project.uuid)
+    project_name = ns_project.name
+    # project_uuid = request.GET.get('project_uuid', '-1')
+    # project_name = Project.objects.get(uuid=project_uuid).name
     if dataset_are_workflows_completed(request, dataset):
         safe_principal = get_id_from_pub(os.getenv('SAFE_PRINCIPAL_PUBKEY', './safe/keys/ns.pub'))
         safe_user = request.user.cert_subject_dn
-        safe_project = project_uuid
+        # safe_project = project_uuid
+        safe_project = str(ns_project.uuid)
         safe_dataset = dataset.safe_identifier_as_scid
         safe_workflow1, safe_workflow2 = Dataset.objects.values_list(
             'workflow_dataset__template__safe_identifier_as_scid',
@@ -232,7 +224,6 @@ def dataset_access(request, uuid):
             workflow1=safe_workflow1,
             workflow2=safe_workflow2
         )
-        print(resp)
         signed_jwt = encode_ns_jwt(
             project_uuid=project_uuid,
             dataset_scid=dataset.safe_identifier_as_scid,
@@ -242,17 +233,29 @@ def dataset_access(request, uuid):
     else:
         signed_jwt = ''
         jwt_claims = ''
+    ns_piadmins = ns_project.comanage_pi_admins.all()
+    ns_pis = ns_project.comanage_pi_members.all()
+    ns_staff = ns_project.comanage_staff.all()
+    ns_igs = ns_project.project_igs.all()
+    ns_inp = ns_project.infrastructure.owner
+    ns_dso = dataset.owner
+    members_set = list(chain(ns_piadmins, ns_pis, ns_staff, ns_igs))
+    members_set.append(ns_inp)
+    members_set.append(ns_dso)
     return render(request, 'dataset_access.html', {
         'datasets_page': 'active',
         'dataset': dataset,
         'dataset_error': dataset_error,
         'project_uuid': project_uuid,
         'project_name': project_name,
+        'project': ns_project,
         'signed_jwt': signed_jwt,
         'jwt_claims': jwt_claims,
+        'members_set': members_set
     })
 
 
+@login_required()
 def dataset_report(request, uuid):
     dataset = get_object_or_404(Dataset, uuid=uuid)
     dataset_error = None
@@ -272,6 +275,12 @@ def dataset_report(request, uuid):
         )
         worflow_report['nodes'] = workflow_report_from_neo4j(workflow_uuid)
         workflow_reports.append(worflow_report)
+    ns_piadmins = project.comanage_pi_admins.all()
+    ns_pis = project.comanage_pi_members.all()
+    ns_igs = project.project_igs.all()
+    ns_dso = dataset.owner
+    members_set = list(chain(ns_piadmins, ns_pis, ns_igs))
+    members_set.append(ns_dso)
 
     return render(request, 'dataset_report.html', {
         'datasets_page': 'active',
@@ -279,7 +288,8 @@ def dataset_report(request, uuid):
         'dataset_error': dataset_error,
         'project': project,
         'workflow_reports': workflow_reports,
-        'user': request.user
+        'user': request.user,
+        'members_set': members_set
     })
 
 
@@ -287,9 +297,10 @@ def iframe_mock(request):
     return render(request, 'iframe_mock.html', {'home_page': 'active'})
 
 
+@login_required()
 def dataset_new(request):
     if request.method == "POST":
-        form = DatasetForm(request.POST)
+        form = DatasetForm(request.POST, request=request)
         if form.is_valid():
             dataset = form.save(commit=False)
             dataset.owner = request.user
@@ -308,14 +319,15 @@ def dataset_new(request):
                     )
             return redirect('dataset_detail', uuid=dataset.uuid)
     else:
-        form = DatasetForm()
+        form = DatasetForm(request=request)
     return render(request, 'dataset_new.html', {'datasets_page': 'active', 'form': form})
 
 
+@login_required()
 def dataset_edit(request, uuid):
     dataset = get_object_or_404(Dataset, uuid=uuid)
     if request.method == "POST":
-        form = DatasetForm(request.POST, instance=dataset)
+        form = DatasetForm(request.POST, instance=dataset, request=request)
         if form.is_valid():
             dataset = form.save(commit=False)
             dataset.modified_by = request.user
@@ -341,10 +353,11 @@ def dataset_edit(request, uuid):
             update_project_status_by_dataset(dataset.uuid)
             return redirect('dataset_detail', uuid=dataset.uuid)
     else:
-        form = DatasetForm(instance=dataset)
-    return render(request, 'dataset_edit.html', {'datasets_page': 'active', 'form': form, 'dataset_uuid': uuid})
+        form = DatasetForm(instance=dataset, request=request)
+    return render(request, 'dataset_edit.html', {'datasets_page': 'active', 'form': form, 'dataset': dataset})
 
 
+@login_required()
 def dataset_delete(request, uuid):
     dataset = get_object_or_404(Dataset, uuid=uuid)
     tpl_list = MembershipNSTemplate.objects.values_list(
@@ -356,7 +369,7 @@ def dataset_delete(request, uuid):
     used_by = dataset_in_use(uuid)
     if request.method == "POST":
         dataset.delete()
-        return dataset_list(request)
+        return redirect('datasets')
     return render(request, 'dataset_delete.html', {
         'datasets_page': 'active',
         'dataset': dataset,
@@ -421,53 +434,38 @@ def template_validate(graphml_file, template_uuid):
     return is_valid, template_error
 
 
+# *** TEMPLATES ***
+@login_required()
 def templates(request):
-    context = {"templates_page": "active"}
-    if request.user.is_authenticated:
-        return template_list(request)
-    else:
-        return render(request, 'templates.html', context)
+    my_templates = NSTemplate.objects.filter(
+        created_by__in=[request.user]
+    ).order_by('name').distinct()
+    other_templates = NSTemplate.objects.all().difference(my_templates).order_by('name')
+
+    return render(request, 'templates.html', {
+      'templates_page': 'active', 'my_templates': my_templates, 'other_templates': other_templates
+    })
 
 
 def template_list(request):
-    try:
-        person = ComanagePersonnel.objects.get(
-            uid=request.user.sub,
-        )
-    except ComanagePersonnel.DoesNotExist:
-        person = None
-
-    if request.user.is_nsadmin:
+    tpl_objs = []
+    if request.user.is_nsadmin():
         tpl_objs = NSTemplate.objects.filter(created_date__lte=timezone.now()).order_by('name')
-    elif request.user.is_ig:
-        tpl_objs = []
-    elif request.user.is_dp:
+    elif request.user.is_dp():
         tpl_objs = NSTemplate.objects.filter(
             owner=request.user
         ).order_by('name')
-    elif request.user.is_inp:
+    elif request.user.is_inp():
         tpl_objs = []
-    elif request.user.is_piadmin:
-        tpl_objs = NSTemplate.objects.filter(
-            uuid__in=MembershipNSTemplate.objects.values_list('template__uuid').filter(
-                dataset__uuid__in=MembershipDatasets.objects.values_list('dataset__uuid').filter(
-                    project__uuid__in=MembershipComanagePersonnel.objects.values_list('project__uuid').filter(
-                        person=person
-                    )
-                )
-            ).distinct()
-        ).order_by('name')
-    elif request.user.is_pi:
+    elif request.user.is_pi():
         tpl_objs = []
-    elif request.user.is_nsstaff:
+    elif request.user.is_ig():
         tpl_objs = []
-    else:
-        print('---- shouldn\'t get here ----')
-        tpl_objs = NSTemplate.objects.filter(created_date__lte=timezone.now()).order_by('name')
 
     return render(request, 'templates.html', {'templates_page': 'active', 'templates': tpl_objs})
 
 
+@login_required()
 def template_detail(request, uuid):
     template = get_object_or_404(NSTemplate, uuid=uuid)
     f = open(template.graphml_definition.path)
@@ -491,6 +489,7 @@ def template_detail(request, uuid):
     })
 
 
+@login_required()
 def template_new(request):
     if request.method == "POST":
         form = TemplateForm(request.POST, request.FILES)
@@ -507,6 +506,7 @@ def template_new(request):
     return render(request, 'template_new.html', {'templates_page': 'active', 'form': form})
 
 
+@login_required()
 def template_edit(request, uuid):
     template = get_object_or_404(NSTemplate, uuid=uuid)
     if request.method == "POST":
@@ -521,9 +521,10 @@ def template_edit(request, uuid):
             return redirect('template_detail', uuid=template.uuid)
     else:
         form = TemplateForm(instance=template)
-    return render(request, 'template_edit.html', {'templates_page': 'active', 'form': form, 'template_uuid': uuid})
+    return render(request, 'template_edit.html', {'templates_page': 'active', 'form': form, 'template': template})
 
 
+@login_required()
 def template_delete(request, uuid):
     template = get_object_or_404(NSTemplate, uuid=uuid)
     used_by = template_in_use(uuid)
@@ -531,7 +532,7 @@ def template_delete(request, uuid):
         delete_workflow_by_uuid(str(uuid))
         template.graphml_definition.delete()
         template.delete()
-        return template_list(request)
+        return redirect('templates')
     return render(request, 'template_delete.html', {
         'templates_page': 'active',
         'template': template,
