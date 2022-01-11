@@ -1,4 +1,4 @@
 --editable ../lib/ns_workflow # ns-workflow==0.1
-python-dotenv==0.12.0
-matplotlib==3.2.1
-numpy==1.18.2
+matplotlib>=3.5.1
+numpy>=1.22.0
+python-dotenv>=0.19.2
