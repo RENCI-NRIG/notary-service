@@ -3,6 +3,7 @@ import uuid
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
+from users.models import Affiliation
 
 User = get_user_model()
 
@@ -11,7 +12,7 @@ class Infrastructure(models.Model):
     name = models.CharField(max_length=255)
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
     description = models.TextField()
-    affiliation = models.CharField(max_length=255)
+    affiliation = models.ForeignKey(Affiliation, on_delete=models.CASCADE)
     is_valid = models.BooleanField(default=False)
     created_by = models.ForeignKey(User, related_name='infrastructure_created_by', on_delete=models.CASCADE)
     created_date = models.DateTimeField(default=timezone.now)

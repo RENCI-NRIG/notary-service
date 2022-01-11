@@ -9,7 +9,8 @@
         {% if show_workflows %}
             <div class="container">
                 <h1>Workflows</h1>
-                <p>Workflows are Neo4j graphs where nodes represent the state of personnel or infrastructure
+                <p class="text-info">Workflows are Neo4j graphs where nodes represent the state of personnel or
+                    infrastructure
                     decision points and relationships represent completed actions between states.</p>
                 {% if user.is_nsadmin %}
                     <h3>Neo4j Browser</h3>
@@ -21,6 +22,27 @@
                     </ul>
                 {% endif %}
                 <h3>My Workflows</h3>
+                <table class="table table-striped table-bordered mt-4">
+                    <tr>
+                        <th>Name</th>
+                        <th>Affiliation</th>
+                        <th>Description</th>
+                        <th>Provenance</th>
+                    </tr>
+                    {% for w in my_workflows %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'workflow_detail' uuid=w.uuid %}">
+                                    {{ w.name }}
+                                </a>
+                            </td>
+                            <td>{{ w.affiliation }}</td>
+                            <td>{{ w.description|truncatechars:25 }}</td>
+                            <td><b>D:</b> {{ w.dataset.name }}<br><b>T:</b> {{ w.template.name }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
                 <table width="100%" border="1px solid black" cellpadding="5px">
                     <tr>
                         <td align="center"><b>Name</b></td>

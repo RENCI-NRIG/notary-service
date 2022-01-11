@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static dataset_tags replace_tags %}
+{% load static dataset_tags %}
 
 {% block head %}
     <meta charset="utf-8">
@@ -22,110 +22,111 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
-        {% if user.is_piadmin or user.is_nsadmin %}
-            <div class="container">
-                <div class="post">
-                    <h1 style="color: #B22222;">Are you sure you want to delete?</h1>
-                    <h2>{{ workflow.name }}
-                        <a href="{% url 'workflow_detail' uuid=workflow.uuid %}"
-                           title="Cancel" class="fa fa-fw fa-ban" style="color: green;"></a>
-                    </h2>
-                    <p>{{ workflow.description|linebreaksbr }}</p>
-                    <h3>Provenance</h3>
-                    <b>Project:</b> {{ project.project.name }} -
-                    <a href="{% url 'project_detail' uuid=project.project.uuid %}"
-                       title="Edit" style="font-family: Courier">
-                        {% if user.show_uuid %}
-                            {{ project.project.uuid }}
-                        {% else %}
-                            {{ project.project.description|truncatechars:"57" }}
-                        {% endif %}
-                    </a>
-                    <br>
-                    <i class="fa fa-fw fa-level-down"></i>
-                    <b>Dataset:</b> {{ workflow.dataset.name }} -
-                    <a href="{% url 'dataset_detail' uuid=workflow.dataset.uuid %}"
-                       title="Edit" style="font-family: Courier">
-                        {% if user.show_uuid %}
-                            {{ workflow.dataset.uuid }}
-                        {% else %}
-                            {{ workflow.dataset.description|truncatechars:"57" }}
-                        {% endif %}
-                    </a>
-                    <br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <i class="fa fa-fw fa-level-down"></i>
-                    <b>Template:</b> {{ workflow.template.name }} -
-                    <a href="{% url 'template_detail' uuid=workflow.template.uuid %}"
-                       title="Edit" style="font-family: Courier">
-                        {% if user.show_uuid %}
-                            {{ workflow.template.uuid }}
-                        {% else %}
-                            {{ workflow.template.description|truncatechars:"57" }}
-                        {% endif %}
-                    </a>
-                    <br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <i class="fa fa-fw fa-long-arrow-right"></i>
-                    <b>Workflow:</b> {{ workflow.name }} -
-                    <a href="{% url 'workflow_detail' uuid=workflow.uuid %}"
-                       title="Edit" style="font-family: Courier">
-                        {% if user.show_uuid %}
-                            {{ workflow.uuid }}
-                        {% else %}
-                            {{ workflow.description|truncatechars:"57" }}
-                        {% endif %}
-                    </a>
-                    <br><br>
-                    <form method="POST" class="post-form">
-                        {% csrf_token %}
-                        {% if used_by %}
-                            <input type="submit" name="workflow_delete" value="Delete" style="color: grey" disabled>
-                        {% else %}
-
-                            <input type="submit" name="workflow_delete" value="Delete" style="color: #B22222">
-                        {% endif %}
-                    </form>
-                    <br>
-                    <h3>Graph</h3>
-                </div>
-                <div style="border:3px solid #434343;width:960px;height:600px;overflow:scroll;">
-                    <script type="text/javascript">
-                        sub_graph = {{ workflow_graph | safe }};
-                    </script>
-                    {% include "workflow_graph.html" %}
-                </div>
+    {% if user.is_nsadmin or user in project_pis %}
+        <div class="container">
+            <div class="post">
+                <h1 style="color: #B22222;">Are you sure you want to delete?</h1>
+                <h2>{{ workflow.name }}
+                    <button class="btn btn-success mr-2">
+                        <a href="{% url 'workflow_detail' uuid=workflow.uuid %}" class="unlink text-white">
+                            <i class="fa fa-ban mr-1"></i> Cancel
+                        </a>
+                    </button>
+                </h2>
+                <p>{{ workflow.description|linebreaksbr }}</p>
+                <h3>Provenance</h3>
+                <b>Project:</b> {{ project.project.name }} -
+                <a href="{% url 'project_detail' uuid=project.project.uuid %}"
+                   title="Edit" style="font-family: Courier">
+                    {% if user.show_uuid %}
+                        {{ project.project.uuid }}
+                    {% else %}
+                        {{ project.project.description|truncatechars:"57" }}
+                    {% endif %}
+                </a>
                 <br>
-                <table width="100%" style="font-size: small">
-                    <tr>
-                        <td width="60%">
-                            <b>Created By:</b> {{ workflow.created_by }}
-                        </td>
-                        <td>
-                            <b>Modified By:</b> {{ workflow.modified_by }}
-                        </td>
-                    <tr>
-                        <td>
-                            <b>Created Date:</b> {{ workflow.created_date|date:"m/d/Y g:i a" }}
-                        </td>
-                        <td>
-                            <b>Modified Date:</b> {{ workflow.modified_date|date:"m/d/Y g:i a" }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <b>Loaded in Neo4j:</b> {{ workflow.loaded_in_neo4j }}
-                            {% if workflow.loaded_in_neo4j %}
-                                (<i class="fa fa-fw fa-check" style="color: green;"></i>)
-                            {% else %}
-                                (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
-                            {% endif %}
-                        </td>
-                    </tr>
-                </table>
+                <i class="fa fa-fw fa-level-down"></i>
+                <b>Dataset:</b> {{ workflow.dataset.name }} -
+                <a href="{% url 'dataset_detail' uuid=workflow.dataset.uuid %}"
+                   title="Edit" style="font-family: Courier">
+                    {% if user.show_uuid %}
+                        {{ workflow.dataset.uuid }}
+                    {% else %}
+                        {{ workflow.dataset.description|truncatechars:"57" }}
+                    {% endif %}
+                </a>
+                <br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <i class="fa fa-fw fa-level-down"></i>
+                <b>Template:</b> {{ workflow.template.name }} -
+                <a href="{% url 'template_detail' uuid=workflow.template.uuid %}"
+                   title="Edit" style="font-family: Courier">
+                    {% if user.show_uuid %}
+                        {{ workflow.template.uuid }}
+                    {% else %}
+                        {{ workflow.template.description|truncatechars:"57" }}
+                    {% endif %}
+                </a>
+                <br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <i class="fa fa-fw fa-long-arrow-right"></i>
+                <b>Workflow:</b> {{ workflow.name }} -
+                <a href="{% url 'workflow_detail' uuid=workflow.uuid %}"
+                   title="Edit" style="font-family: Courier">
+                    {% if user.show_uuid %}
+                        {{ workflow.uuid }}
+                    {% else %}
+                        {{ workflow.description|truncatechars:"57" }}
+                    {% endif %}
+                </a>
+                <br><br>
+                <form method="POST" class="post-form">
+                    {% csrf_token %}
+                    {% if used_by %}
+                        <input type="submit" name="workflow_delete" value="Delete" style="color: grey" disabled>
+                    {% else %}
+
+                        <input type="submit" name="workflow_delete" value="Delete" style="color: #B22222">
+                    {% endif %}
+                </form>
+                <br>
+                <h3>Graph</h3>
             </div>
-        {% endif %}
+            <div style="border:3px solid #434343;width:960px;height:600px;overflow:scroll;">
+                <script type="text/javascript">
+                    sub_graph = {{ workflow_graph | safe }};
+                </script>
+                {% include "workflow_graph.html" %}
+            </div>
+            <br>
+            <table width="100%" style="font-size: small">
+                <tr>
+                    <td width="60%">
+                        <b>Created By:</b> {{ workflow.created_by }}
+                    </td>
+                    <td>
+                        <b>Modified By:</b> {{ workflow.modified_by }}
+                    </td>
+                <tr>
+                    <td>
+                        <b>Created Date:</b> {{ workflow.created_date|date:"m/d/Y g:i a" }}
+                    </td>
+                    <td>
+                        <b>Modified Date:</b> {{ workflow.modified_date|date:"m/d/Y g:i a" }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Loaded in Neo4j:</b> {{ workflow.loaded_in_neo4j }}
+                        {% if workflow.loaded_in_neo4j %}
+                            (<i class="fa fa-fw fa-check" style="color: green;"></i>)
+                        {% else %}
+                            (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
     {% else %}
         <div class="container">
             <p>You are not currently logged in or not authorized to view this page</p>

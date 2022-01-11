@@ -26,6 +26,7 @@
     </ul>
     {% if user.is_authenticated %}
         <ul class="navbar-nav ns-navbar">
+            <!-- TODO: search not implemented
             {% display_search as show_search %}
             {% if show_search %}
                 <li class="nav-item {{ search_page }}">
@@ -33,6 +34,7 @@
                         <i class="fa fa-fw fa-search"></i> Search</a>
                 </li>
             {% endif %}
+            -->
             {% display_projects as show_projects %}
             {% if show_projects %}
                 <li class="nav-item {{ projects_page }}">
@@ -63,12 +65,12 @@
             {% endif %}
             <li class="nav-item {{ profile_page }}">
                 <a class="nav-link" href="{% url 'profile' %}">
-                    <i class="fa fa-fw fa-user"></i> {{ user.username }} ({{ user.role|rolename }})</a>
+                    <i class="fa fa-fw fa-user"></i> {{ user.display_name }}</a>
             </li>
             {% if user.is_nsadmin %}
-                <li class="nav-item {{ debug_page }}">
-                    <a class="nav-link" href="{% url 'debug' %}">
-                        <i class="fa fa-fw fa-bug"></i> Debug</a>
+                <li class="nav-item {{ nsadmin_page }}">
+                    <a class="nav-link" href="{% url 'nsadmin' %}">
+                        <i class="fa fa-fw fa-users"></i> UserAdmin</a>
                 </li>
             {% endif %}
         </ul>

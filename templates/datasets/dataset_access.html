@@ -1,59 +1,57 @@
 {% extends 'base.html' %}
 
-{% load static dataset_tags replace_tags user_tags project_tags %}
+{% load static dataset_tags user_tags project_tags %}
 
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    {% if user.is_authenticated %}
-        {% if not user.is_norole %}
-            <div class="container" style="background-color: #F7F7F7">
-            <div class="post">
-                <h2>{{ dataset.name }}</h2>
-                <p>{{ dataset.description|linebreaksbr }}</p>
-                <table width="100%">
-                    <tr>
-                        <td><b>DOI or Metadata URL:</b></td>
-                        <td>
-                            <a href="{{ dataset.dataset_identifier_as_doi_or_meta }}" target="_blank">
-                                {{ dataset.dataset_identifier_as_doi_or_meta }}</a>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><b>Presidio URL:</b></td>
-                        <td>
-                            {% if request|dataset_workflows_completed_button_status:dataset %}
-                                {% if signed_jwt %}
-                                    <a href="{{ dataset.dataset_identifier_as_url }}?ImPACT-JWT={{ signed_jwt }}"
-                                       target="_blank">
-                                        {{ dataset.dataset_identifier_as_url }}</a>
-                                {% else %}
-                                    {{ dataset.dataset_identifier_as_url }}
-                                {% endif %}
+    {% if user in members_set %}
+        <div class="container" style="background-color: #F7F7F7">
+        <div class="post">
+            <h2>{{ dataset.name }}</h2>
+            <p>{{ dataset.description|linebreaksbr }}</p>
+            <table width="100%">
+                <tr>
+                    <td><b>DOI or Metadata URL:</b></td>
+                    <td>
+                        <a href="{{ dataset.dataset_identifier_as_doi_or_meta }}" target="_blank">
+                            {{ dataset.dataset_identifier_as_doi_or_meta }}</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td><b>Presidio URL:</b></td>
+                    <td>
+                        {% if request|dataset_workflows_completed_button_status:dataset %}
+                            {% if signed_jwt %}
+                                <a href="{{ dataset.dataset_identifier_as_url }}?ImPACT-JWT={{ signed_jwt }}"
+                                   target="_blank">
+                                    {{ dataset.dataset_identifier_as_url }}</a>
                             {% else %}
                                 {{ dataset.dataset_identifier_as_url }}
                             {% endif %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><b>SAFE SCID:</b></td>
-                        <td>{{ dataset.safe_identifier_as_scid }}</td>
-                    </tr>
-                    <tr>
-                        <td><b>Project:</b></td>
-                        <td>
-                            <a href="{% url 'project_detail' project_uuid %}">{{ project_name }}</a>
-                        </td>
-                    </tr>
-                </table>
-            </div>
+                        {% else %}
+                            {{ dataset.dataset_identifier_as_url }}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td><b>SAFE SCID:</b></td>
+                    <td>{{ dataset.safe_identifier_as_scid }}</td>
+                </tr>
+                <tr>
+                    <td><b>Project:</b></td>
+                    <td>
+                        <a href="{% url 'project_detail' project_uuid %}">{{ project_name }}</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br>
+        <div>
+            <!-- TODO: determine if curl request should be shown?
             <br>
-            <div>
-                {% if request|dataset_workflows_completed_button_status:dataset %}
-                    {% if signed_jwt %}
-                        <br>
-                        <b>cURL request:</b><br>
-                        <pre style="background-color: #1d2124; padding-left: 10px;">
+            <b>cURL request:</b><br>
+            <pre style="background-color: #1d2124; padding-left: 10px;">
                         <code style="color: whitesmoke;">
 KEY=/path/to/cilogon.key
 CERT=/path/to/cilogon.crt
@@ -64,46 +62,52 @@ curl -v -L -c cyberimpact.us \
   --cacert "${CAFILE}" \
   "{{ dataset.dataset_identifier_as_url }}?ImPACT-JWT={{ signed_jwt }}"</code>
                         </pre>
-                        <br>
-                        <b>Claims:</b>
-                        <br>
-                        <pre>{{ jwt_claims|pprint }}</pre>
-                    {% endif %}
-                {% endif %}
-            </div>
-            <div>
-                <br>
-                <br>
-                <table width="100%" style="font-size: small">
-                    <tr>
-                        <td width="60%">
-                            <b>Created By:</b> {{ dataset.created_by }}
-                        </td>
-                        <td>
-                            <b>Modified By:</b> {{ dataset.modified_by }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <b>Created Date:</b> {{ dataset.created_date|date:"m/d/Y g:i a" }}
-                        </td>
-                        <td>
-                            <b>Modified Date:</b> {{ dataset.modified_date|date:"m/d/Y g:i a" }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <b>Validated:</b> {{ dataset.is_valid }}
-                            {% if dataset.is_valid %}
-                                (<i class="fa fa-fw fa-check" style="color: green;"></i>)
-                            {% else %}
-                                (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
-                            {% endif %}
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        {% endif %}
+            <br>
+            -->
+            <b>JWT Claims (to send to Presidio):</b>
+            <br>
+            <br>
+            <pre class="text-monospace text-secondary">{{ jwt_claims|pprint }}</pre>
+        </div>
+        <div>
+            <br>
+            <br>
+            <table width="100%" style="font-size: small">
+                <tr>
+                    <td width="60%">
+                        <b>Created By:</b> {{ dataset.created_by }}
+                    </td>
+                    <td>
+                        <b>Modified By:</b> {{ dataset.modified_by }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Created Date:</b> {{ dataset.created_date|date:"m/d/Y g:i a" }}
+                    </td>
+                    <td>
+                        <b>Modified Date:</b> {{ dataset.modified_date|date:"m/d/Y g:i a" }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Validated:</b> {{ dataset.is_valid }}
+                        {% if dataset.is_valid %}
+                            (<i class="fa fa-fw fa-check" style="color: green;"></i>)
+                        {% else %}
+                            (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+            <br>
+            <button class="btn btn-success mr-2">
+                <a href="{% url 'project_detail' uuid=project.uuid %}#project-dataset"
+                   class="unlink text-white">
+                    <i class="fa fa-hand-o-left mr-1"></i> Back
+                </a>
+            </button>
+        </div>
     {% else %}
         <div class="container">
             <p>You are not currently logged in or not authorized to view this page</p>

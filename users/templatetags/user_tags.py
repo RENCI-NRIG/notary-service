@@ -1,8 +1,9 @@
 from django import template
 from django.core.exceptions import ObjectDoesNotExist
 
-from users.models import Role, Affiliation, NotaryServiceUser
+from users.models import Role, Affiliation, NotaryServiceUser, CilogonCertificate
 from datetime import datetime, timedelta
+from cryptography.x509 import load_pem_x509_certificate
 
 register = template.Library()
 
@@ -38,7 +39,7 @@ def affiliation_uuid_to_name(uuid):
 @register.simple_tag(takes_context=True)
 def display_search(context):
     u = context['request'].user
-    if u.is_nsadmin or u.is_nsstaff or u.is_pi or u.is_piadmin or u.is_dp or u.is_inp or u.is_ig:
+    if u.is_nsadmin() or u.is_active and u.is_impact_user():
         return True
     else:
         return False
@@ -47,7 +48,7 @@ def display_search(context):
 @register.simple_tag(takes_context=True)
 def display_projects(context):
     u = context['request'].user
-    if u.is_nsadmin or u.is_nsstaff or u.is_pi or u.is_piadmin or u.is_dp or u.is_inp or u.is_ig:
+    if u.is_nsadmin() or u.is_active and u.is_impact_user():
         return True
     else:
         return False
@@ -56,7 +57,7 @@ def display_projects(context):
 @register.simple_tag(takes_context=True)
 def display_datasets(context):
     u = context['request'].user
-    if u.is_nsadmin or u.is_nsstaff or u.is_pi or u.is_piadmin or u.is_dp or u.is_inp or u.is_ig:
+    if u.is_nsadmin() or u.is_active and u.is_impact_user():
         return True
     else:
         return False
@@ -65,7 +66,7 @@ def display_datasets(context):
 @register.simple_tag(takes_context=True)
 def display_templates(context):
     u = context['request'].user
-    if u.is_nsadmin or u.is_piadmin or u.is_dp:
+    if u.is_nsadmin() or u.is_active and u.is_dp() and u.is_impact_user():
         return True
     else:
         return False
@@ -74,7 +75,7 @@ def display_templates(context):
 @register.simple_tag(takes_context=True)
 def display_workflows(context):
     u = context['request'].user
-    if u.is_nsadmin or u.is_nsstaff or u.is_pi or u.is_piadmin or u.is_dp or u.is_inp or u.is_ig:
+    if u.is_nsadmin() or u.is_active and u.is_impact_user():
         return True
     else:
         return False
@@ -83,7 +84,33 @@ def display_workflows(context):
 @register.simple_tag(takes_context=True)
 def display_infrastructure(context):
     u = context['request'].user
-    if u.is_nsadmin or u.is_nsstaff or u.is_pi or u.is_piadmin or u.is_dp or u.is_inp or u.is_ig:
+    if u.is_nsadmin() or u.is_inp() or u.is_pi():
         return True
     else:
         return False
+
+
+@register.simple_tag(takes_context=True)
+def display_nsadmin(context):
+    u = context['request'].user
+    if u.is_nsadmin():
+        return True
+    else:
+        return False
+
+
+@register.filter
+def cert_not_before_from_pubkey(uuid):
+    c = CilogonCertificate.objects.filter(uuid=uuid).first()
+    cert = load_pem_x509_certificate(str.encode(c.pubkey))
+
+    return cert.not_valid_before
+
+
+@register.filter
+def cert_not_after_from_pubkey(uuid):
+    c = CilogonCertificate.objects.filter(uuid=uuid).first()
+    cert = load_pem_x509_certificate(str.encode(c.pubkey))
+
+    return cert.not_valid_after
+

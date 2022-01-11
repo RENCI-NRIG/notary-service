@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static dataset_tags replace_tags %}
+{% load static dataset_tags %}
 
 {% block head %}
     <meta charset="utf-8">
@@ -23,138 +23,149 @@
 
 {% block content %}
     {% if user.is_authenticated %}
-        {% if not user.is_norole %}
-            {% if user.is_dp or user.is_nsadmin or user.is_piadmin %}
-                <div class="container">
-                    <div class="post">
-                        <h2>{{ template.name }}
-                            {% if user.is_dp or user.is_nsadmin %}
-                                <a href="{% url 'template_edit' uuid=template.uuid %}"
-                                   title="Edit template" class="fa fa-fw fa-pencil" style="color: green;"></a>
-                                <a href="{% url 'template_delete' uuid=template.uuid %}"
-                                   title="Delete template" class="fa fa-fw fa-trash" style="color: #B22222;"></a>
-                            {% endif %}
-                        </h2>
-                        {% if user.is_dp or user.is_nsadmin %}
-                            {% if not template.is_valid %}
-                                <form method="POST" class="post-form">
-                                    {% csrf_token %}
-                                    <input type="submit" name="validate-template" value="Validate Now"
-                                           style="color: darkgreen">
-                                </form>
-                            {% endif %}
-                        {% endif %}
-                        {% if template_error %}
-                            <div style="background-color: cornsilk;color:darkblue;font-family:Courier;
+        <div class="container">
+            <div class="post">
+                <h2>{{ template.name }}
+                    {% if user.is_nsadmin or user == template.created_by %}
+                        <button class="btn btn-success mr-2">
+                            <a href="{% url 'template_edit' uuid=template.uuid %}" class="unlink text-white">
+                                <i class="fa fa-pencil mr-1"></i> Edit
+                            </a>
+                        </button>
+                        <button class="btn btn-danger mr-2">
+                            <a href="{% url 'template_delete' uuid=template.uuid %}" class="unlink text-white">
+                                <i class="fa fa-fw fa-trash mr-1"></i> Delete
+                            </a>
+                        </button>
+                    {% endif %}
+                </h2>
+                {% if user.is_nsadmin or user == template.created_by %}
+                    {% if not template.is_valid %}
+                        <form method="POST" class="post-form">
+                            {% csrf_token %}
+                            <input type="submit" name="validate-template" value="Validate Now"
+                                   style="color: darkgreen">
+                        </form>
+                    {% endif %}
+                {% endif %}
+                {% if template_error %}
+                    <div style="background-color: cornsilk;color:darkblue;font-family:Courier;
                 font-size: 14px;overflow-y: scroll; border-style: solid; border-color: #B22222;
                 padding: 10px;">
-                                {{ template_error }}
-                            </div>
-                        {% endif %}
-                        <p>{{ template.description|linebreaksbr }}</p>
+                        {{ template_error }}
+                    </div>
+                {% endif %}
+                <p>{{ template.description|linebreaksbr }}</p>
+                <table width="100%">
+                    <tr>
+                        <td width="50%"><b>Owner:</b></td>
+                        <td>{{ template.owner }}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Type:</b></td>
+                        <td>{{ template.type }}</td>
+                    </tr>
+                    <tr>
+                        <td><b>File:</b></td>
+                        <td>
+                            {% if user.is_nsadmin or user == template.created_by %}
+                                <a href="{{ template.graphml_definition.url }}">{{ template.graphml_definition | getfilename }}</a>
+                            {% else %}
+                                {{ template.graphml_definition | getfilename }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>SAFE SCID:</b></td>
+                        <td>{{ template.safe_identifier_as_scid }}</td>
+                    </tr>
+                </table>
+                {% if user.is_nsadmin or user == template.created_by %}
+                    {% if template.is_valid %}
+                        <br>
                         <table width="100%">
                             <tr>
-                                <td width="50%"><b>Owner:</b></td>
-                                <td>{{ template.owner }}</td>
+                                <td width="20%">
+                                    <b>Graph template:</b>
+                                </td>
+                                <td width="20%"></td>
+                                <td width="20%"></td>
+                                <td width="20%"></td>
+                                <td width="20%"></td>
                             </tr>
                             <tr>
-                                <td><b>Type:</b></td>
-                                <td>{{ template.type }}</td>
-                            </tr>
-                            <tr>
-                                <td><b>File:</b></td>
-                                <td>
-                                    {% if user.is_dp or user.is_nsadmin %}
-                                        <a href="{{ template.graphml_definition.url }}">{{ template.graphml_definition | getfilename }}</a>
-                                    {% elif user.is_piadmin %}
-                                        {{ template.graphml_definition | getfilename }}
-                                    {% endif %}
+                                <td></td>
+                                <td align="left">
+                                    <i class="fa fa-circle" aria-hidden="true" style="color: darkgreen;"></i>
+                                    Start Node
+                                </td>
+                                <td align="left">
+                                    <i class="fa fa-circle" aria-hidden="true" style="color: firebrick;"></i>
+                                    Stop Node
+                                </td>
+                                <td align="left">
+                                    <i class="fa fa-circle" aria-hidden="true" style="color: goldenrod;"></i>
+                                    User Set Node
+                                </td>
+                                <td align="left">
+                                    <i class="fa fa-circle" aria-hidden="true" style="color: lightblue;"></i>
+                                    Common Set Node
                                 </td>
                             </tr>
-                            <tr>
-                                <td><b>SAFE SCID:</b></td>
-                                <td>{{ template.safe_identifier_as_scid }}</td>
-                            </tr>
                         </table>
-                        {% if template.is_valid %}
-                            <br>
-                            <table width="100%">
-                                <tr>
-                                    <td width="20%">
-                                        <b>Graph template:</b>
-                                    </td>
-                                    <td width="20%"></td>
-                                    <td width="20%"></td>
-                                    <td width="20%"></td>
-                                    <td width="20%"></td>
-                                </tr>
-                                <tr>
-                                    <td></td>
-                                    <td align="left">
-                                        <i class="fa fa-circle" aria-hidden="true" style="color: darkgreen;"></i>
-                                        Start Node
-                                    </td>
-                                    <td align="left">
-                                        <i class="fa fa-circle" aria-hidden="true" style="color: firebrick;"></i>
-                                        Stop Node
-                                    </td>
-                                    <td align="left">
-                                        <i class="fa fa-circle" aria-hidden="true" style="color: goldenrod;"></i>
-                                        User Set Node
-                                    </td>
-                                    <td align="left">
-                                        <i class="fa fa-circle" aria-hidden="true" style="color: lightblue;"></i>
-                                        Common Set Node
-                                    </td>
-                                </tr>
-                            </table>
-                            <div style="border:1px solid #434343;width:100%;height:600px;overflow:scroll;">
-                                <script type="text/javascript">
-                                    sub_graph = {{ workflow_graph | safe }};
-                                </script>
-                                {% include "workflow_graph.html" %}
-                            </div>
-                        {% endif %}
-                        <br>
-                        <b>File contents:</b><br>
-                        <div style="background-color: #DCDCDC;color:darkblue;font-family:Courier;
-                font-size: 14px;overflow-x: scroll; height: 600px;overflow-y: scroll">
-                            {% if template.graphml_definition.file %}
-                                <p>{{ template_file|linebreaksbr|spacify }}</p>
-                            {% endif %}
+                        <div style="border:1px solid #434343;width:100%;height:600px;overflow:scroll;">
+                            <script type="text/javascript">
+                                sub_graph = {{ workflow_graph | safe }};
+                            </script>
+                            {% include "workflow_graph.html" %}
                         </div>
-                    </div>
+                    {% endif %}
                     <br>
-                    <table width="100%" style="font-size: small">
-                        <tr>
-                            <td width="60%">
-                                <b>Created By:</b> {{ template.created_by }}
-                            </td>
-                            <td>
-                                <b>Modified By:</b> {{ template.modified_by }}
-                            </td>
-                        <tr>
-                            <td>
-                                <b>Created Date:</b> {{ template.created_date|date:"m/d/Y g:i a" }}
-                            </td>
-                            <td>
-                                <b>Modified Date:</b> {{ template.modified_date|date:"m/d/Y g:i a" }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <b>Validated:</b> {{ template.is_valid }}
-                                {% if template.is_valid %}
-                                    (<i class="fa fa-fw fa-check" style="color: green;"></i>)
-                                {% else %}
-                                    (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
-                                {% endif %}
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-            {% endif %}
-        {% endif %}
+                    <b>File contents:</b><br>
+                    <div style="background-color: #DCDCDC;color:darkblue;font-family:monospace;
+                font-size: 14px;overflow-x: scroll; height: 600px;overflow-y: scroll">
+                        {% if template.graphml_definition.file %}
+                            <p>{{ template_file|linebreaksbr }}</p>
+                        {% endif %}
+                    </div>
+                    </div>
+                {% endif %}
+            <br>
+            <table width="100%" style="font-size: small">
+                <tr>
+                    <td width="60%">
+                        <b>Created By:</b> {{ template.created_by }}
+                    </td>
+                    <td>
+                        <b>Modified By:</b> {{ template.modified_by }}
+                    </td>
+                <tr>
+                    <td>
+                        <b>Created Date:</b> {{ template.created_date|date:"m/d/Y g:i a" }}
+                    </td>
+                    <td>
+                        <b>Modified Date:</b> {{ template.modified_date|date:"m/d/Y g:i a" }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <b>Validated:</b> {{ template.is_valid }}
+                        {% if template.is_valid %}
+                            (<i class="fa fa-fw fa-check" style="color: green;"></i>)
+                        {% else %}
+                            (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+            <br>
+            <button class="btn btn-success mr-2">
+                <a href="{% url 'templates' %}"
+                   class="unlink text-white">
+                    <i class="fa fa-hand-o-left mr-1"></i> Back
+                </a>
+            </button>
+        </div>
     {% else %}
         <div class="container">
             <p>You are not currently logged in or not authorized to view this page</p>

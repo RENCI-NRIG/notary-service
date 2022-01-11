@@ -1,396 +1,465 @@
 {% extends 'base.html' %}
 {% load static user_tags project_tags %}
 
-{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
-
+{% block title %}ImPACT - Notary Service{% endblock %}
 {% block content %}
-    {% if user.is_authenticated %}
-        {% if not user.is_norole %}
-            <div class="container">
-                <div class="post">
-                    <h2>{{ project.name }}
-                        {% if user.is_piadmin or user.is_nsadmin %}
-                            <a href="{% url 'project_edit' uuid=project.uuid %}"
-                               title="Edit project" class="fa fa-fw fa-pencil" style="color: green;"></a>
-                            <a href="{% url 'project_delete' uuid=project.uuid %}"
-                               title="Delete project" class="fa fa-fw fa-trash" style="color: #B22222;"></a>
-                        {% endif %}
-                    </h2>
-                    {% if user.is_piadmin or user.is_nsadmin %}
-                        {% if not project.is_valid %}
-                            <form method="POST" class="post-form">
-                                {% csrf_token %}
-                                <input type="submit" name="validate" value="Validate"
-                                       style="color: darkgreen">
-                            </form>
-                        {% endif %}
-                    {% endif %}
-                    {% if project_error %}
-                        <div style="background-color: cornsilk;color:darkblue;font-family:Courier;
-                font-size: 14px;overflow-y: scroll; border-style: solid; border-color: #B22222;
-                padding: 10px;">
-                            {{ project_error }}
-                        </div>
-                    {% endif %}
-                    <p>{{ project.description|linebreaksbr }}</p>
-                    <h3>Affiliations</h3>
-                    <ul>
-                        {% for affiliation in affiliations %}
-                            <li>{{ affiliation | affiliation_uuid_to_name }}</li>
-                        {% endfor %}
-                    </ul>
-                    <form method="POST" class="post-form">
-                        <h3>Personnel </h3>
-                    </form>
-                    {% if user.is_piadmin or user.is_nsadmin %}
-                        <b>Project PI Admins</b>
-                        <table width="100%" border="1px solid black" cellpadding="5px">
-                            <tr>
-                                <td align="center"><b>Name</b></td>
-                                <td align="center"><b>Affiliation</b></td>
-                                <td align="center"><b>COmanage Group</b></td>
-                                <td align="center"><b>Email</b></td>
-                            </tr>
-                            {% for group, name, employee_number, eppn, email, uid in project_pi_admins %}
-                                <tr
-                                        {% if uid == user.sub %}
-                                            style="color: darkgreen"
-                                        {% else %}
-                                            style="color: darkgray"
-                                        {% endif %}
-                                >
-                                    <td>{{ name }}</td>
-                                    <td>{{ uid|affiliation_from_comanage_uid }}</td>
-                                    <td>{{ group|slice:"7:" }}</td>
-                                    <td>{{ email }}</td>
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <div class="container">
+        {% if user.is_nsadmin or user in project_pi_admins or user in project_pi_members or user in project_staff or user in dataset_owners or user in infrastructure_owner or user in institutional_governance %}
+            <div class="row">
+                <div class="col-3">
+                    <div class="list-group" id="profile-list-tab" role="tablist">
+                        <a class="list-group-item list-group-item-action" id="project-overview-list"
+                           data-toggle="list" href="#project-overview" role="tab" aria-controls="home">
+                            <i class="fa fa-fw fa-info-circle mr-2"></i>Overview</a>
+                        <a class="list-group-item list-group-item-action" id="project-members-list"
+                           data-toggle="list" href="#project-members" role="tab" aria-controls="profile">
+                            <i class="fa fa-user mr-2"></i>Members</a>
+                        <a class="list-group-item list-group-item-action" id="project-dataset-list"
+                           data-toggle="list" href="#project-dataset" role="tab" aria-controls="messages">
+                            <i class="fa fa-database mr-2"></i>Datasets /<br>
+                            <i class="fa fa-gears mr-2"></i>Infrastructure</a>
+                        <a class="list-group-item list-group-item-action" id="project-workflow-list"
+                           data-toggle="list" href="#project-workflow" role="tab" aria-controls="settings">
+                            <i class="fa fa-sitemap mr-2"></i>Workflows</a>
+                    </div>
+                </div>
+                <div class="col-9">
+                    <div class="tab-content profile-body" id="nav-tabContent">
+                        <!-- Overview -->
+                        <div class="tab-pane fade" id="project-overview" role="tabpanel"
+                             aria-labelledby="project-overview-list">
+                            <h1>
+                                {% if project.is_public %}
+                                    {{ project.name }} <a class="text-info" style="font-size: medium">(public)</a>
+                                {% else %}
+                                    {{ project.name }} <a class="text-info" style="font-size: medium">(private)</a>
+                                {% endif %}
+                            </h1>
+                            {% if user.is_nsadmin or user in project_pi_admins %}
+                                <button class="btn btn-success mr-2">
+                                    <a href="{% url 'project_edit' uuid=project.uuid %}" class="unlink text-white">
+                                        <i class="fa fa-pencil mr-1"></i> Edit
+                                    </a>
+                                </button>
+                            {% endif %}
+                            {% if user.is_nsadmin or user in project_pi_admins %}
+                                <button class="btn btn-danger mr-2">
+                                    <a href="{% url 'project_delete' uuid=project.uuid %}" class="unlink text-white">
+                                        <i class="fa fa-fw fa-trash mr-1"></i> Delete
+                                    </a>
+                                </button>
+                            {% endif %}
+                            <table class="table table-striped table-bordered my-4">
+                                <tr>
+                                    <td>Name</td>
+                                    <td><b>{{ project.name }}</b></td>
                                 </tr>
-                            {% endfor %}
-                        </table>
-                        <br>
-                    {% endif %}
-                    <b>Project PIs</b>
-                    <table width="100%" border="1px solid black" cellpadding="5px">
-                        <tr>
-                            <td align="center"><b>Name</b></td>
-                            <td align="center"><b>Affiliation</b></td>
-                            <td align="center"><b>COmanage Group</b></td>
-                            <td align="center"><b>Email</b></td>
-                        </tr>
-                        {% for group, name, employee_number, eppn, email, uid in project_pi_members %}
-                            <tr
-                                    {% if uid == user.sub %}
-                                        style="color: darkgreen"
-                                    {% else %}
-                                        style="color: darkgray"
-                                    {% endif %}
-                            >
-                                <td>{{ name }}</td>
-                                <td>{{ uid|affiliation_from_comanage_uid }}</td>
-                                <td>{{ group|slice:"7:" }}</td>
-                                <td>{{ email }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                    <br>
-                    <b>Project Members</b>
-                    <table width="100%" border="1px solid black" cellpadding="5px">
-                        <tr>
-                            <td align="center"><b>Name</b></td>
-                            <td align="center"><b>Affiliation</b></td>
-                            <td align="center"><b>COmanage Group</b></td>
-                            <td align="center"><b>Email</b></td>
-                        </tr>
-                        {% for group, name, employee_number, eppn, email, uid in project_staff %}
-                            <tr
-                                    {% if uid == user.sub %}
-                                        style="color: darkgreen"
-                                    {% else %}
-                                        style="color: darkgray"
-                                    {% endif %}
-                            >
-                                <td>{{ name }}</td>
-                                <td>{{ uid|affiliation_from_comanage_uid }}</td>
-                                <td>{{ group|slice:"7:" }}</td>
-                                <td>{{ email }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                    <br>
-                    <b>Infrastructure Providers</b>
-                    <table width="100%" border="1px solid black" cellpadding="5px">
-                        <tr>
-                            <td align="center"><b>Owner</b></td>
-                            <td align="center"><b>Infrastructure</b></td>
-                            <td align="center"><b>Email</b></td>
-                        </tr>
-                        {% for infra in infrastructure %}
-                            <tr
-                                    {% if infra.owner == user %}
-                                        style="color: darkgreen"
-                                    {% else %}
-                                        style="color: darkgray"
-                                    {% endif %}
-                            >
-                                <td>{{ infra.owner.name }}</td>
-                                <td>{{ infra.name }}</td>
-                                <td>{{ infra.owner }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                    <br>
-                    <b>Institutional Governance</b>
-                    <table width="100%" border="1px solid black" cellpadding="5px">
-                        <tr>
-                            <td align="center"><b>Name</b></td>
-                            <td align="center"><b>Affiliation</b></td>
-                            <td align="center"><b>Email</b></td>
-                        </tr>
-                        {% for affiliation_ig in institutional_governance %}
-                            <tr
-                                    {% if affiliation_ig == user %}
-                                        style="color: darkgreen"
-                                    {% else %}
-                                        style="color: darkgray"
-                                    {% endif %}
-                            >
-                                <td>{{ affiliation_ig.name }}</td>
-                                <td>{{ affiliation_ig.ns_affiliation|affiliation_uuid_to_name }}</td>
-                                <td>{{ affiliation_ig.email }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                    <br>
-                    <b>Data Providers</b>
-                    <table width="100%" border="1px solid black" cellpadding="5px">
-                        <tr>
-                            <td align="center"><b>Owner</b></td>
-                            <td align="center"><b>Dataset</b></td>
-                            <td align="center"><b>Email</b></td>
-                        </tr>
-                        {% for dataset in datasets %}
-                            <tr
-                                    {% if dataset.owner == user %}
-                                        style="color: darkgreen"
-                                    {% else %}
-                                        style="color: darkgray"
-                                    {% endif %}
-                            >
-                                <td>{{ dataset.owner.name }}</td>
-                                <td>{{ dataset.name }}</td>
-                                <td>{{ dataset.owner }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                    <br>
-                    <h3>Infrastructure</h3>
-                    <table width="100%" border="1px solid black" cellpadding="5px">
-                        <tr>
-                            <td align="center"><b>Name</b></td>
-                            <td align="center"><b>Validated</b></td>
-                            <td align="center"><b>
-                                {% if user.show_uuid %}
-                                    UUID
+                                <tr>
+                                    <td>Description</td>
+                                    <td><b>{{ project.description }}</b></td>
+                                </tr>
+                                <tr>
+                                    <td>Is Validated</td>
+                                    <td>
+                                        {% if not project.is_valid %}
+                                            {% if user.is_nsadmin or user in project_pi_admins %}
+                                                <form method="POST" class="post-form">
+                                                    {% csrf_token %}
+                                                    <b class="float-left">{{ project.is_valid }}</b>
+                                                    <input type="submit" name="validate"
+                                                           value="Validate / Generate Workflows"
+                                                           class="btn-info text-white float-right"
+                                                           style="color: darkgreen">
+                                                </form>
+                                            {% else %}
+                                                <b>{{ project.is_valid }}</b>
+                                            {% endif %}
+                                        {% else %}
+                                            <b>{{ project.is_valid }}</b>
+                                        {% endif %}
+                                    </td>
+                                <tr>
+                                    <td>Affiliation (count)</td>
+                                    <td>
+                                        {% for affiliation in affiliations %}
+                                            - <b>{{ affiliation.name }}</b> ({{ affiliation.n }})<br>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Created By</td>
+                                    <td>
+                                        <b>{{ project.created_by }}</b><br>
+                                        <a class="text-black-50" style="font-size: medium">{{ project.created }}</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Modified By</td>
+                                    <td>
+                                        <b>{{ project.modified_by }}</b><br>
+                                        <a class="text-black-50" style="font-size: medium">{{ project.modified }}</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <!-- Members -->
+                        <div class="tab-pane fade" id="project-members" role="tabpanel"
+                             aria-labelledby="project-members-list">
+                            <h1>
+                                {% if project.is_public %}
+                                    {{ project.name }} <a class="text-info" style="font-size: medium">(public)</a>
                                 {% else %}
-                                    Description
+                                    {{ project.name }} <a class="text-info" style="font-size: medium">(private)</a>
                                 {% endif %}
-                            </b></td>
-                            <td align="center"><b>Affiliation</b></td>
-                        </tr>
-                        {% for infra in infrastructure %}
-                            <tr>
-                            <td>{{ infra.name }}</td>
-                            <td align="center">{% if infra.is_valid %}
-                                <i class="fa fa-fw fa-check" style="color: green;"></i>
-                            {% else %}
-                                <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
+                            </h1>
+                            <h3>Project Admins</h3>
+                            {% if user.is_nsadmin or user in project_pi_admins %}
+                                <button class="btn btn-info mr-2">
+                                    <a href="{% url 'project_update_admin' uuid=project.uuid %}"
+                                       class="unlink; text-white">
+                                        <i class="fa fa-user mr-1"></i> Update Admins
+                                    </a>
+                                </button>
                             {% endif %}
-                            </td>
-                            <td style="font-family: Courier"><a href="{% url 'infrastructure_detail' uuid=infra.uuid %}"
-                                                                title="Infrastructure Details">
-                                {% if user.show_uuid %}
-                                    {{ infra.uuid }}
-                                {% else %}
-                                    {{ infra.description|truncatechars:"57" }}
-                                {% endif %}
-                            </a></td>
-                            <td>
-                                {{ infra.affiliation | affiliation_uuid_to_name }}
-                            </td>
-                        {% endfor %}
-                    </table>
-                    <br>
-                    <h3>Datasets</h3>
-                    <table width="100%" border="1px solid black" cellpadding="5px">
-                        <tr>
-                            <td align="center"><b>Action</b></td>
-                            <td align="center"><b>Name</b></td>
-                            <td align="center"><b>Validated</b></td>
-                            <td align="center"><b>
-                                {% if user.show_uuid %}
-                                    UUID
-                                {% else %}
-                                    Description
-                                {% endif %}
-                            </b></td>
-                        </tr>
-                        {% for dataset in datasets %}
-                            <tr>
-                            <td>
-                                {% if user.is_pi or user.is_nsstaff %}
-                                    {% if request|dataset_workflows_completed_button_status:dataset %}
-                                        <button
-                                                onclick="location.href = '{% url 'dataset_access' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
-                                                id="get-dataset-access"
-                                                style="color: deeppink;"
-                                        >Get Access
-                                        </button>
-                                    {% else %}
-                                        <button
-                                                onclick="location.href = '{% url 'dataset_access' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
-                                                id="get-dataset-access"
-                                                style="color: grey;"
-                                                disabled
-                                        >Get Access
-                                        </button>
-                                    {% endif %}
-                                {% else %}
-                                    <button
-                                            onclick="location.href = '{% url 'dataset_access' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
-                                            id="get-dataset-access"
-                                            style="color: grey;"
-                                            disabled
-                                    >Get Access
-                                    </button>
-                                {% endif %}
-                                {% if user.is_dp or user.is_pi or user.is_ig %}
-                                    <button
-                                            onclick="location.href = '{% url 'dataset_report' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
-                                            id="get-dataset-report"
-                                            style="color: deeppink;"
-                                    >Get Report
-                                    </button>
-                                {% else %}
-                                    <button
-                                            onclick="location.href = '{% url 'dataset_report' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
-                                            id="get-dataset-report"
-                                            style="color: grey;"
-                                            disabled
-                                    >Get Report
-                                    </button>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {{ dataset.name }}
-                            </td>
-                            <td align="center">{% if dataset.is_valid %}
-                                <i class="fa fa-fw fa-check" style="color: green;"></i>
-                            {% else %}
-                                <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
+                            <table class="table table-striped table-bordered my-4">
+                                <th>Name</th>
+                                {#                                <th>Affiliation</th>#}
+                                <th>Email</th>
+                                {% for a in project_pi_admins %}
+                                    <tr>
+                                        <td>{{ a.display_name }}</td>
+                                        {#                                        <td>{{ a.affiliation.name }}</td>#}
+                                        <td>{{ a.email }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                            <h3>Principal Investigators</h3>
+                            {% if user.is_nsadmin or user in project_pi_admins %}
+                                <button class="btn btn-info mr-2">
+                                    <a href="{% url 'project_update_pi' uuid=project.uuid %}"
+                                       class="unlink; text-white">
+                                        <i class="fa fa-user mr-1"></i> Update PIs
+                                    </a>
+                                </button>
                             {% endif %}
-                            </td>
-                            <td style="font-family: Courier"><a href="{% url 'dataset_detail' uuid=dataset.uuid %}"
-                                                                title="Dataset Details">
-                                {% if user.show_uuid %}
-                                    {{ dataset.uuid }}
-                                {% else %}
-                                    {{ dataset.description|truncatechars:"57" }}
+                            <table class="table table-striped table-bordered my-4">
+                                <th>Name</th>
+                                <th>Affiliation</th>
+                                <th>Email</th>
+                                {% for a in project_pi_members %}
+                                    <tr>
+                                        <td>{{ a.display_name }}</td>
+                                        <td>{{ a.affiliation.name }}</td>
+                                        <td>{{ a.email }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                            <h3>Staff</h3>
+                            {% if user.is_nsadmin or user in project_pi_admins or user in project_pi_members %}
+                                <button class="btn btn-info mr-2">
+                                    <a href="{% url 'project_update_staff' uuid=project.uuid %}"
+                                       class="unlink; text-white">
+                                        <i class="fa fa-user mr-1"></i> Update Staff
+                                    </a>
+                                </button>
+                            {% endif %}
+                            <table class="table table-striped table-bordered my-4">
+                                <th>Name</th>
+                                <th>Affiliation</th>
+                                <th>Email</th>
+                                {% for a in project_staff %}
+                                    <tr>
+                                        <td>{{ a.display_name }}</td>
+                                        <td>{{ a.affiliation.name }}</td>
+                                        <td>{{ a.email }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                            <h3>Data Providers</h3>
+                            <table class="table table-striped table-bordered my-4">
+                                <th>Name</th>
+                                <th>Affiliation</th>
+                                <th>Email</th>
+                                {% for d in datasets %}
+                                    <tr>
+                                        <td>{{ d.owner.display_name }}</td>
+                                        <td>{{ d.owner.affiliation.name }}</td>
+                                        <td>{{ d.owner.email }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                            <h3>Infrastructure Provider</h3>
+                            <table class="table table-striped table-bordered my-4">
+                                <th>Name</th>
+                                <th>Affiliation</th>
+                                <th>Email</th>
+                                {% if infrastructure %}
+                                    <tr>
+                                        <td>{{ infrastructure.owner.display_name }}</td>
+                                        <td>{{ infrastructure.owner.affiliation.name }}</td>
+                                        <td>{{ infrastructure.owner.email }}</td>
+                                    </tr>
                                 {% endif %}
-                            </a>
-                            </td>
-                        {% endfor %}
-                    </table>
-                    <br>
-                    <h3>Workflows</h3>
-                    <table width="100%" border="1px solid black" cellpadding="5px">
-                        <tr>
-                            <td align="center"><b>Status</b></td>
-                            <td align="center"><b>Name</b></td>
-                            <td align="center"><b>Affiliation</b></td>
-                            <td align="center"><b>
-                                {% if user.show_uuid %}
-                                    UUID
+                            </table>
+                            <h3>Institutional Governance</h3>
+                            <table class="table table-striped table-bordered my-4">
+                                <th>Name</th>
+                                <th>Affiliation</th>
+                                <th>Email</th>
+                                {% for ig in institutional_governance %}
+                                    <tr>
+                                        <td>{{ ig.display_name }}</td>
+                                        <td>{{ ig.affiliation.name }}</td>
+                                        <td>{{ ig.email }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                        <!-- Datasets / Infrastructure -->
+                        <div class="tab-pane fade" id="project-dataset" role="tabpanel"
+                             aria-labelledby="project-dataset-list">
+                            <h1>
+                                {% if project.is_public %}
+                                    {{ project.name }} <a class="text-info" style="font-size: medium">(public)</a>
                                 {% else %}
-                                    Description
+                                    {{ project.name }} <a class="text-info" style="font-size: medium">(private)</a>
                                 {% endif %}
-                            </b></td>
-                            <td align="center"><b>Roles</b></td>
-                        </tr>
-                        {% for workflow in workflows %}
-                            <tr>
-                                <td align="center">
-                                    {% if request|workflow_status_is_completed:workflow.uuid == 'True' %}
-                                        <i class="fa fa-fw fa-check" style="color: green;"></i>
-                                    {% elif request|workflow_status_is_completed:workflow.uuid == 'False' %}
-                                        {% if request|workflow_waiting_on_others:workflow.uuid == 'True' %}
+                            </h1>
+                            <h3>Datasets</h3>
+                            {% if user.is_nsadmin or user in project_pi_admins or user in project_pi_members %}
+
+                                <form method="POST" class="post-form">
+                                <button class="btn btn-info mr-2">
+                                    <a href="{% url 'project_update_dataset' uuid=project.uuid %}"
+                                       class="unlink; text-white">Add/Update Datasets</a>
+                                </button>
+                                    {% csrf_token %}
+                                    <input type="submit" name="clear-project-datasets" value="Clear All Datasets"
+                                           class="btn btn-secondary text-white mr-2"
+                                           style="color: darkgreen">
+                                </form>
+                            {% endif %}
+                            <table class="table table-striped table-bordered my-4">
+                                <tr>
+                                    <th>Action</th>
+                                    <th>Name</th>
+                                    <th>Validated</th>
+                                    <th>Description</th>
+                                </tr>
+                                {% for dataset in datasets %}
+                                    <tr>
+                                    <td>
+                                        {% if user in project_pi_members or user in staff %}
+                                            {% if request|dataset_workflows_completed_button_status:dataset %}
+                                                <button
+                                                        onclick="location.href = '{% url 'dataset_access' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
+                                                        id="get-dataset-access"
+                                                        style="color: deeppink;"
+                                                >Get Access
+                                                </button>
+                                            {% else %}
+                                                <button
+                                                        onclick="location.href = '{% url 'dataset_access' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
+                                                        id="get-dataset-access"
+                                                        style="color: grey;"
+                                                        disabled
+                                                >Get Access
+                                                </button>
+                                            {% endif %}
+                                        {% else %}
                                             <button
-                                                    onclick="location.href = '{% url 'workflow_access' uuid=workflow.uuid %}';"
-                                                    id="project-workflow"
+                                                    onclick="location.href = '{% url 'dataset_access' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
+                                                    id="get-dataset-access"
                                                     style="color: grey;"
                                                     disabled
-                                            >Waiting on Others
+                                            >Get Access
+                                            </button>
+                                        {% endif %}
+                                        {% if user.is_dp or user.is_pi or user.is_ig %}
+                                            <button
+                                                    onclick="location.href = '{% url 'dataset_report' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
+                                                    id="get-dataset-report"
+                                                    style="color: deeppink;"
+                                            >Get Report
                                             </button>
                                         {% else %}
                                             <button
-                                                    onclick="location.href = '{% url 'workflow_access' uuid=workflow.uuid %}';"
-                                                    id="project-workflow"
-                                                    style="color: deeppink;"
-                                            >Needs Input
+                                                    onclick="location.href = '{% url 'dataset_report' uuid=dataset.uuid %}?project_uuid={{ project.uuid | urlencode }}';"
+                                                    id="get-dataset-report"
+                                                    style="color: grey;"
+                                                    disabled
+                                            >Get Report
                                             </button>
                                         {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ dataset.name }}
+                                    </td>
+                                    <td align="center">{% if dataset.is_valid %}
+                                        <i class="fa fa-fw fa-check" style="color: green;"></i>
                                     {% else %}
-                                        <b style="color: firebrick">{{ request|workflow_status_is_completed:workflow.uuid }}</b>
+                                        <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
                                     {% endif %}
-                                </td>
-                                <td>{{ workflow.name }}</td>
-                                <td>{{ workflow.affiliation }}</td>
-                                <td style="font-family: Courier"><a
-                                        href="{% url 'workflow_detail' uuid=workflow.uuid %}"
-                                        title="Workflow Details">
-                                    {% if user.show_uuid %}
-                                        {{ workflow.uuid }}
-                                    {% else %}
-                                        {{ workflow.description|truncatechars:"57" }}
-                                    {% endif %}
-                                </a></td>
-                                <td>{{ workflow.uuid|workflow_rolenames }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                </div>
-                <br>
-                <table width="100%" style="font-size: small">
-                    <tr>
-                        <td width="60%">
-                            <b>Created By:</b> {{ project.created_by }}
-                        </td>
-                        <td>
-                            <b>Modified By:</b> {{ project.modified_by }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <b>Created Date:</b> {{ project.created_date|date:"m/d/Y g:i a" }}
-                        </td>
-                        <td>
-                            <b>Modified Date:</b> {{ project.modified_date|date:"m/d/Y g:i a" }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <b>Validated:</b> {{ project.is_valid }}
-                            {% if project.is_valid %}
-                                (<i class="fa fa-fw fa-check" style="color: green;"></i>)
-                            {% else %}
-                                (<i class="fa fa-fw fa-remove" style="color: #B22222;"></i>)
+                                    </td>
+                                    <td style="font-family: Courier"><a
+                                            href="{% url 'dataset_detail' uuid=dataset.uuid %}"
+                                            title="Dataset Details">
+                                        {% if user.show_uuid %}
+                                            {{ dataset.uuid }}
+                                        {% else %}
+                                            {{ dataset.description|truncatechars:"57" }}
+                                        {% endif %}
+                                    </a>
+                                    </td>
+                                {% endfor %}
+                            </table>
+                            <h3>Infrastructure</h3>
+                            {% if user.is_nsadmin or user in project_pi_admins or user in project_pi_members %}
+                                <button class="btn btn-info mr-2">
+                                    <a href="{% url 'project_update_infra' uuid=project.uuid %}"
+                                       class="unlink; text-white">Update Infrastructure</a>
+                                </button>
                             {% endif %}
-                        </td>
-                    </tr>
-                </table>
+                            <table class="table table-striped table-bordered my-4">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Validated</th>
+                                    <th>Description</th>
+                                    <th>Affiliation</th>
+                                </tr>
+                                {% if infrastructure %}
+                                    <tr>
+                                    <td>{{ infrastructure.name }}</td>
+                                    <td align="center">{% if infrastructure.is_valid %}
+                                        <i class="fa fa-fw fa-check" style="color: green;"></i>
+                                    {% else %}
+                                        <i class="fa fa-fw fa-remove" style="color: #B22222;"></i>
+                                    {% endif %}
+                                    </td>
+                                    <td style="font-family: Courier"><a
+                                            href="{% url 'infrastructure_detail' uuid=infrastructure.uuid %}"
+                                            title="Infrastructure Details">
+
+                                        {{ infrastructure.description|truncatechars:"57" }}
+
+                                    </a></td>
+                                    <td>
+                                        {{ infrastructure.affiliation.name }}
+                                    </td>
+                                {% endif %}
+                            </table>
+                        </div>
+                        <!-- Workflows -->
+                        <div class="tab-pane fade" id="project-workflow" role="tabpanel"
+                             aria-labelledby="project-workflow-list">
+                            <h1>
+                                {% if project.is_public %}
+                                    {{ project.name }} <a class="text-info" style="font-size: medium">(public)</a>
+                                {% else %}
+                                    {{ project.name }} <a class="text-info" style="font-size: medium">(private)</a>
+                                {% endif %}
+                            </h1>
+                            {% if project.is_valid %}
+                                <h3>Workflows</h3>
+                                <table class="table table-striped table-bordered my-4">
+                                    <tr>
+                                        <th>Status</th>
+                                        <th>Name</th>
+                                        <th>Affiliation</th>
+                                        <th>Description</th>
+                                        <th>Roles</th>
+                                    </tr>
+                                    {% for workflow in workflows %}
+                                        <tr>
+                                            <td align="center">
+                                                {% if request|workflow_status_is_completed:workflow.uuid == 'True' %}
+                                                    <i class="fa fa-fw fa-check" style="color: green;"></i>
+                                                {% elif request|workflow_status_is_completed:workflow.uuid == 'False' %}
+                                                    {% if request|workflow_waiting_on_others:workflow.uuid == 'True' %}
+                                                        <button
+                                                                onclick="location.href = '{% url 'workflow_access' uuid=workflow.uuid %}';"
+                                                                id="project-workflow"
+                                                                style="color: grey;"
+                                                                disabled
+                                                        >Waiting on Others
+                                                        </button>
+                                                    {% else %}
+                                                        <button
+                                                                onclick="location.href = '{% url 'workflow_access' uuid=workflow.uuid %}';"
+                                                                id="project-workflow"
+                                                                style="color: deeppink;"
+                                                        >Needs Input
+                                                        </button>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <b style="color: firebrick">{{ request|workflow_status_is_completed:workflow.uuid }}</b>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ workflow.name }}</td>
+                                            <td>{{ workflow.affiliation.name }}</td>
+                                            <td style="font-family: Courier"><a
+                                                    href="{% url 'workflow_detail' uuid=workflow.uuid %}"
+                                                    title="Workflow Details">
+                                                {% if user.show_uuid %}
+                                                    {{ workflow.uuid }}
+                                                {% else %}
+                                                    {{ workflow.description|truncatechars:"57" }}
+                                                {% endif %}
+                                            </a></td>
+                                            <td>{{ workflow.uuid|workflow_rolenames }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            {% else %}
+                                <h3>Workflows</h3>
+                                <a class="text-danger">Project has not been validated ...</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="container">
+                <p>You are not currently logged in or not authorized to view this page</p>
             </div>
         {% endif %}
-    {% else %}
-        <div class="container">
-            <p>You are not currently logged in or not authorized to view this page</p>
-        </div>
-    {% endif %}
+    </div>
+    <script type="text/javascript">
+        // add hash # to url without redirecting.
+        $(function () {
+            let hash = window.location.hash;
+            // set the default tab to show.
+            let el_to_show_id = hash || '#project-overview';
+            $(el_to_show_id).addClass('show active');
+
+            // set the default tab pane background color.
+            let active_tab_pane_id = `${el_to_show_id}-list`;
+            $(active_tab_pane_id).addClass('active');
+
+            // append hash # to url when toggling tabs.
+            $('.list-group a').click(function (e) {
+                $(this).tab('show');
+                let scrollmem = $('body').scrollTop() || $('html').scrollTop();
+                window.location.hash = this.hash;
+                $('html,body').scrollTop(scrollmem);
+            });
+        });
+        // add tooltip to identity attribute tables.
+        $('#cilogonTooltip')
+            .tooltip({
+                title: 'Aggregate identity attributes as provided by the institutional identity provider (based on dropdown selection at login) and CILogon.',
+                placement: "right"
+            });
+        $('#comanageTooltip')
+            .tooltip({
+                title: 'Group membership as defined within the COmanage registry in terms of Collaborative Organization Units (COUs).',
+                placement: "right"
+            });
+        $('#otherTooltip')
+            .tooltip({
+                title: 'Other LDAP attributes stored as read-only entries within the COmanage registry.',
+                placement: "right"
+            });
+    </script>
 {% endblock %}

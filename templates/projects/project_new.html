@@ -5,12 +5,18 @@
 
 {% block content %}
     {% if user.is_authenticated %}
-        {% if user.is_piadmin or user.is_nsadmin %}
+        {% if user.is_nsadmin or user.is_pi %}
             <div class="container">
                 <h2>Add Project
-                    <a href="{% url 'projects' %}"
-                       title="Cancel" class="fa fa-fw fa-ban" style="color: green;"></a>
+                    <button class="btn btn-success mr-2">
+                        <a href="{% url 'projects' %}" class="unlink text-white">
+                            <i class="fa fa-ban mr-1"></i> Cancel
+                        </a>
+                    </button>
                 </h2>
+                <p class="text-info">
+                    <b>NOTE</b>: Projects are considered public unless the "is_public" checkbox is un-checked
+                </p>
                 <form method="POST" class="post-form">
                     {% csrf_token %}
                     {{ form.as_p }}

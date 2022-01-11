@@ -8,8 +8,11 @@
         {% if user.is_dp or user.is_nsadmin %}
             <div class="container">
                 <h2>Add Dataset
-                    <a href="{% url 'datasets' %}"
-                       title="Cancel" class="fa fa-fw fa-ban" style="color: green;"></a>
+                    <button class="btn btn-success mr-2">
+                        <a href="{% url 'datasets' %}" class="unlink text-white">
+                            <i class="fa fa-ban mr-1"></i> Cancel
+                        </a>
+                    </button>
                 </h2>
                 <form method="POST" class="post-form" enctype="multipart/form-data">
 

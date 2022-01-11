@@ -86,7 +86,9 @@ def get_neo4j_workflow_by_uuid(workflow_uuid):
         entry['properties'] = properties
         nodes.append(entry)
         if node.labels:
-            entry['labels'] = node.labels
+            # TODO: figure out why "frozenset({'Node'})" is returned for node.labels
+            # entry['labels'] = node.labels
+            entry['labels'] = []
         else:
             entry['labels'] = []
     links = []

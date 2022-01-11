@@ -10,12 +10,13 @@ APPS_LIST=(
   "projects"
   "datasets"
   "workflows"
-  "apache_kafka"
+  "nsadmin"
   "infrastructure"
+  "nsmessages"
 )
 
 FIXTURES_LIST=(
-  "roles"
+  "workflowroles"
 )
 
 #APPS_LIST=()
@@ -31,6 +32,9 @@ for fixture in "${FIXTURES_LIST[@]}";do
     python manage.py loaddata $fixture
 done
 python manage.py collectstatic --noinput
+
+# COmanage sync on startup
+python manage.py sync_on_startup
 
 if [[ "${USE_DOT_VENV}" -eq 1 ]]; then
     uwsgi --uid ${UWSGI_UID:-1000} --gid ${UWSGI_GID:-1000}  --virtualenv ./.venv --ini ns_uwsgi.ini

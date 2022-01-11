@@ -1,23 +1,28 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.utils import timezone
-from django.contrib import messages
+import mimetypes
+import os
 
-from apache_kafka.models import Message
-from apache_kafka.views import index_page_messages, check_for_new_messages
-from comanage.models import IsMemberOf, LdapOther, NotaryServiceUser
-from .cilogon import generate_cilogon_certificates, get_authorization_url, download
-from .forms import UserPreferences, CILogonCertificateForm
-from .models import Role
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse, Http404
+from django.shortcuts import render, get_object_or_404
+
+from nsmessages.nsmessages import NsMessages
+from .cilogon import x509_generate_cilogon_certificate, \
+    user_cilogon_certificates_directory_path
+from .models import NotaryServiceUser, ns_roles
 
 
 def index(request):
     if request.user.is_authenticated:
-        if request.method == "POST":
-            if request.POST.get("delete-message"):
-                message = get_object_or_404(Message, uuid=request.POST.get('remove_message_uuid'))
-                message.is_active = False
-                message.save()
-        return index_page_messages(request)
+        nsmessages = NsMessages.objects.filter(
+            users_to__in=[request.user]
+        ).order_by('-created')[:3]
+        new_message_count = len(NsMessages.objects.filter(
+            users_to__in=[request.user],
+            is_read=False
+        ).distinct())
+        return render(request, 'index.html', {'index_page': 'active', 'nsmessages': nsmessages,
+                                              'new_messages': new_message_count})
     else:
         return render(request, 'index.html', {'index_page': 'active'})
 
@@ -57,91 +62,88 @@ def authresponse(request):
         }
     )
 
-def set_role_boolean(user):
-    user.is_nsadmin = (int(user.role) == int(getattr(Role, 'NSADMIN')))
-    user.is_nsstaff = (int(user.role) == int(getattr(Role, 'STAFF')))
-    user.is_pi = (int(user.role) == int(getattr(Role, 'PI_MEMBER')))
-    user.is_piadmin = (int(user.role) == int(getattr(Role, 'PI_ADMIN')))
-    user.is_dp = (int(user.role) == int(getattr(Role, 'DP')))
-    user.is_inp = (int(user.role) == int(getattr(Role, 'INP')))
-    user.is_ig = (int(user.role) == int(getattr(Role, 'IG')))
-    user.is_norole = (int(user.role) == int(getattr(Role, 'NO_ROLE')))
-    user.save()
 
-
+@login_required()
 def profile(request):
-    if request.user.is_authenticated:
-        user = get_object_or_404(NotaryServiceUser, id=request.user.id)
-        # for user profile
-        ismemberof = IsMemberOf.objects.filter(
-            membershipismemberof__user_id=request.user.id).order_by('value')
-        ldapother = LdapOther.objects.filter(
-            membershipldapother__user_id=request.user.id).order_by('attribute', 'value')
-        # for cilogon certificate
-        auth_url = get_authorization_url()
-        certificate_files = ''
-        # for identity attributes - cilogon claims
-        cilogon_claims_rows = ['name', 'email', 'given_name', 'family_name', 'idp', 'idp_name', 'sub', 
-        'aud', 'cert_subject_dn', 'iss', 'oidc', 'eppn', 'eptid', 'acr', 'affiliation']
-        if request.method == "POST":
-            # for user profile
-            preference_form = UserPreferences(request.POST, instance=user, user=request.user)
-            if preference_form.is_valid():
-                if request.POST.get("delete-message"):
-                    message = get_object_or_404(Message, uuid=request.POST.get('remove_message_uuid'))
-                    message.is_active = False
-                    message.save()
-                if request.POST.get("update-preferences"):
-                    user.show_uuid = preference_form.data.get('show_uuid')
-                    user.role = preference_form.data.get('role')
-                    user.save()
-                    set_role_boolean(user=user)
-                    messages.success(request, 'Preferences changed successfully!')
-                if request.POST.get("check-messages"):
-                    check_for_new_messages(str(request.user.uuid))
-                return redirect('profile')
-            # for cilogon certificate
-            if request.POST.get("download"):
-                if request.POST.get("path-cilogon.crt"):
-                    path = request.POST.get("path-cilogon.crt")
-                elif request.POST.get("path-cilogon.key"):
-                    path = request.POST.get("path-cilogon.key")
+    if request.POST.get("generate-cilogon-certificate"):
+        oidc_access_token = request.session.get('oidc_access_token')
+        p12_password = request.POST.get("p12-password")
+        try:
+            new_cert = x509_generate_cilogon_certificate(cilogon_access_token=oidc_access_token,
+                                                         p12_password=p12_password)
+            if new_cert:
+                if request.user.cilogon_cert:
+                    old_cert = request.user.cilogon_cert
+                    request.user.cilogon_cert = new_cert
+                    request.user.save()
+                    old_cert.delete()
                 else:
-                    path = request.POST.get("path-cilogon.p12")
-                return download(request, path=path)
-            certificate_form = CILogonCertificateForm(request.POST or None)
-            if certificate_form.is_valid():
-                if request.POST.get("generate-certificate"):
-                    if str(request.POST.get('use_my_key')) == "True":
-                        # TODO allow user to upload private key for CSR generation
-                        pass
-                    else:
-                        certificate_files = generate_cilogon_certificates(
-                            user=user,
-                            authorization_response=str(request.POST.get("authorization_response")),
-                            p12_password=str(request.POST.get("p12_password")),
-                        )
-                        user.cilogon_certificate_date = timezone.now()
-                        user.save()
-        else:
-            preference_form = UserPreferences(instance=user, user=request.user)
-            certificate_form = CILogonCertificateForm(request.POST)
-        
-        ns_messages = Message.objects.filter(
-            kafka_topic=str(request.user.uuid),
-            is_active=True
-        ).order_by('-created_date')[:5]
+                    request.user.cilogon_cert = new_cert
+                    request.user.save()
+                messages.success(request, '[INFO] A new CILogon Certificate has been generated')
+            else:
+                messages.error(request, '[ERROR] Unable to generate a new CILogon Certificate ...')
+        except Exception as e:
+            messages.error(request, '[ERROR] Unable to generate a new CILogon Certificate ... {0}'.format(e))
+
+    if request.POST.get("download-pubkey"):
+        return download_file(request,
+                             filename='cilogon.cer',
+                             cert_content=str.encode(request.user.cilogon_cert.pubkey))
+
+    if request.POST.get("download-privkey"):
+        return download_file(request,
+                             filename='cilogon.key',
+                             cert_content=str.encode(request.user.cilogon_cert.privkey))
+
+    if request.POST.get("download-p12"):
+        return download_file(request,
+                             filename='cilogon.p12',
+                             cert_content=request.user.cilogon_cert.p12)
+
+    if request.user.is_authenticated:
+        user = NotaryServiceUser.objects.filter(id=request.user.id).first()
+        roles = user.roles.all().order_by("co_cou__name")
+        sent_messages = NsMessages.objects.filter(users_from__in=[user]).order_by('-created')[:10]
+        received_messages = NsMessages.objects.filter(users_to__in=[user]).order_by('is_read', '-created')[:10]
+        new_message_count = len(NsMessages.objects.filter(
+            users_to__in=[user],
+            is_read=False
+        ).distinct())
         return render(request, 'profile.html',
-                      {'profile_page': 'active',
-                       'isMemberOf': ismemberof,
-                       'LDAPOther': ldapother,
-                       'preference_form': preference_form,
-                       'role': get_object_or_404(Role, id=user.role).get_id_display(),
-                       'ns_messages': ns_messages,
-                       'certificate_form': certificate_form,
-                       'auth_url': auth_url,
-                       'certificate_files': certificate_files,
-                       'cilogon_claims_rows': cilogon_claims_rows,
-                       })
+                      {'profile_page': 'active', 'user': user, 'roles': roles, 'ns_roles': ns_roles,
+                       'sent_messages': sent_messages, 'received_messages': received_messages,
+                       'new_messages': new_message_count})
     else:
         return render(request, 'profile.html', {'profile_page': 'active'})
+
+
+@login_required()
+def message_detail(request, uuid):
+    message = get_object_or_404(NsMessages, uuid=uuid)
+    users_to = message.users_to.all()
+    users_from = message.users_from.all()
+    if request.user in users_to:
+        message.is_read = True
+        message.save()
+
+    return render(request, 'message_detail.html',
+                  {'profile_page': 'active', 'user': request.user, 'message': message,
+                   'users_to': users_to, 'users_from': users_from})
+
+
+def download_file(request, filename: str, cert_content: bytes):
+    dirpath = os.path.dirname(user_cilogon_certificates_directory_path(request.user))
+    if not os.path.exists(dirpath):
+        os.makedirs(dirpath)
+    filepath = dirpath + '/' + filename
+    with open(filepath, 'wb') as fh:
+        fh.write(cert_content)
+    mime_type, _ = mimetypes.guess_type(filepath)
+    if os.path.exists(filepath):
+        with open(filepath, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type=mime_type)
+            response['Content-Disposition'] = "attachment; filename=%s" % filename
+            # response['Content-Disposition'] = 'inline; filename=' + os.path.basename(filepath)
+            return response
+    raise Http404

@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+{% load static user_tags %}
+
+{% block title %}ImPACT - Notary Service{% endblock %}
+{% block content %}
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <div class="container">
+        {% if user.is_authenticated %}
+            <div class="row">
+                <div class="col-3">
+                    <div class="list-group" id="profile-list-tab" role="tablist">
+                        <a class="list-group-item list-group-item-action" id="user-roles-list"
+                           data-toggle="list" href="#user-roles" role="tab" aria-controls="home">
+                            <i class="fa fa-users mr-2"></i>
+                            Notary Service Roles
+                        </a>
+                        <a class="list-group-item list-group-item-action" id="messages-list"
+                           data-toggle="list" href="#messages" role="tab" aria-controls="messages">
+                            <i class="fa fa-inbox mr-2"></i>
+                            All User Messages
+                        </a>
+                        <!-- TODO: determine if this is necessary
+                        <a class="list-group-item list-group-item-action" id="cilogon-certificate-list"
+                           data-toggle="list" href="#cilogon-certificate" role="tab" aria-controls="profile">
+                            <i class="fa fa-user mr-2"></i>
+                            Open User Requests
+                        </a>
+                        -->
+                    </div>
+                </div>
+                <div class="col-9">
+                    <div class="tab-content profile-body" id="nav-tabContent">
+                        <div class="tab-pane fade" id="user-roles" role="tabpanel"
+                             aria-labelledby="user-profile-list">
+                            <h1>Notary Service Roles</h1>
+                            <p class="text-info">
+                                Use the buttons below to change the state of the User's role. For example, if
+                                the User's role is marked as "True", clicking on it will make it "False" going forward
+                                (and vice-versa)
+                            </p>
+                            <form action="#" method="post">
+                                {% csrf_token %}
+                                <table class="table table-striped table-bordered my-4">
+                                    <th>User</th>
+                                    <th>Active</th>
+                                    <th>PI</th>
+                                    <th>DP</th>
+                                    <th>INP</th>
+                                    <th>IG</th>
+                                    <th>NSAdmin</th>
+                                    {% for person in people %}
+                                        <tr>
+                                            <td>
+                                                {{ person.display_name }}
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="submit"
+                                                       class={% if person.is_impact_user %}
+                                                           "btn btn-success mr-2"
+                                                       {% else %}
+                                                           "btn btn-danger mr-2"
+                                                       {% endif %}
+                                                name="ImpactUser_{{ person.id }}" value={{ person.is_impact_user }}>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="submit"
+                                                       class={% if person.is_pi %}
+                                                           "btn btn-success mr-2"
+                                                       {% else %}
+                                                           "btn btn-danger mr-2"
+                                                       {% endif %}
+                                                name="PrincipalInvestigator_{{ person.id }}" value={{ person.is_pi }}>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="submit"
+                                                       class={% if person.is_dp %}
+                                                           "btn btn-success mr-2"
+                                                       {% else %}
+                                                           "btn btn-danger mr-2"
+                                                       {% endif %}
+                                                name="DataProvider_{{ person.id }}" value={{ person.is_dp }}>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="submit"
+                                                       class={% if person.is_inp %}
+                                                           "btn btn-success mr-2"
+                                                       {% else %}
+                                                           "btn btn-danger mr-2"
+                                                       {% endif %}
+                                                name="InfrastructureProvider_{{ person.id }}" value={{ person.is_inp }}>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="submit"
+                                                       class={% if person.is_ig %}
+                                                           "btn btn-success mr-2"
+                                                       {% else %}
+                                                           "btn btn-danger mr-2"
+                                                       {% endif %}
+                                                name="InstitutionalGovernance_{{ person.id }}" value={{ person.is_ig }}>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="submit"
+                                                       class={% if person.is_nsadmin %}
+                                                           "btn btn-success mr-2"
+                                                       {% else %}
+                                                           "btn btn-danger mr-2"
+                                                       {% endif %}
+                                                name="NotaryServiceAdmin_{{ person.id }}" value={{ person.is_nsadmin }}>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </form>
+                            <!-- TODO: preferences not implemented
+                            <h2>Preferences</h2>
+                            <form method="POST" class="preference-form">
+                                {% csrf_token %}
+                                {{ preference_form.as_p }}
+                                <input
+                                        type="submit"
+                                        name="update-preferences"
+                                        value="Save Preferences"
+                                        class="btn btn-success"
+                                />
+                            </form>
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="alert alert-success alert-dismissible w-50 mt-4">
+                                        {{ message }}
+                                        <button type="button" class="close" data-dismiss="alert">
+                                            <i class="fa fa-times"></i>
+                                        </button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                            -->
+                        </div>
+
+                        <!-- All Messages -->
+                        <div class="tab-pane fade" id="messages" role="tabpanel" aria-labelledby="messages-list">
+                            <h1>All Messages</h1>
+                            <table class="table table-striped table-bordered text-center">
+                                <th>Subject</th>
+                                <th>To / From</th>
+                                <th>Created / Viewed</th>
+                                {% for message in nsmessages %}
+                                    <tr>
+                                        <td>
+                                            {% if message.is_read %}
+                                                <a class="text-black-50"
+                                                   href="{% url 'nsadminmessage_detail' uuid=message.uuid %}">
+                                                    {{ message.subject|truncatechars:"40"|safe }}
+                                                </a>
+                                            {% else %}
+                                                <a class="text-primary"
+                                                   href="{% url 'nsadminmessage_detail' uuid=message.uuid %}">
+                                                    {{ message.subject|truncatechars:"40"|safe }}
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                        <td class="small text-left">
+                                            <b>To</b>:
+                                            {% for u in message.users_to %}
+                                                {{ u }},
+                                            {% endfor %}
+                                            <br>
+                                            <b>From</b>:
+                                            {% for u in message.users_from %}
+                                                {{ u }},
+                                            {% endfor %}
+                                        </td>
+                                        <td class="small">{{ message.created }}
+                                            <br>
+                                            {% if message.is_read %}
+                                                <i class="text-center fa fa-fw fa-check" style="color: green;"></i>
+                                            {% else %}
+                                                <i class="text-center fa fa-fw fa-remove" style="color: firebrick;"></i>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                        <!-- All User Requests -->
+                        <!-- TODO: determine if this is necessary
+                        <div class="tab-pane fade" id="cilogon-certificate" role="tabpanel"
+                             aria-labelledby="cilogon-certificate-list">
+                            <h1>CILogon Certificate</h1>
+                            <div class="py-4 mb-4 border-bottom">
+                                Certificate last generated on:
+                                <mark class="font-weight-bold ml-2">
+                                    {{ user.cilogon_certificate_date|default:"Not generated yet" }}
+                                </mark>
+                            </div>
+                            <div>
+                                {% if certificate_files == '' %}
+                                    <div>
+                                        <h3>Steps to Generate Certificates</h3>
+                                        <ol>
+                                            <li class="my-4">Certificate generation requires you to
+                                                <a href="{{ auth_url }}" target="_blank"> make a new authorization
+                                                    request</a></li>
+                                            <li class="my-4">Copy the <b>Response Code</b> returned to you from part 1.
+                                                into the <b>Authorization response</b> box below
+                                            </li>
+                                            <li class="my-4">Set a password for the p12 certificate (certificate type
+                                                used by browsers)
+                                            </li>
+                                            <li class="my-4">Press the "<b>Generate My Certificate</b>" button</li>
+                                        </ol>
+                                        <form method="POST" class="post-form">
+                                            {% csrf_token %}
+                                            {{ certificate_form.as_p }}
+                                            <input
+                                                    type="submit"
+                                                    name="generate-certificate"
+                                                    value="Generate My Certificate"
+                                                    class="btn btn-success"
+                                            >
+                                            <input type="hidden" name="use_my_key" value="False">
+                                        </form>
+                                    </div>
+                                {% else %}
+                                    <h3>Download Certificates</h3>
+                                    <div class="my-4">
+                                        {% for file_ref in certificate_files %}
+                                            <form method="POST" class="post-form">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="path-{{ file_ref.name }}"
+                                                       value={{ file_ref.path }}>
+                                                {{ file_ref.name }} ({{ file_ref.description }})
+                                                <input
+                                                        type="submit"
+                                                        name="download"
+                                                        value="download"
+                                                        class="btn btn-success my-2"
+                                                />
+                                            </form>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="alert alert-warning alert-dismissible w-100 mt-4">
+                                        Download all desired certificates before leaving this page!
+                                        <button type="button" class="close" data-dismiss="alert">
+                                            <i class="fa fa-times"></i>
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        -->
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="container">
+                <p>You are not currently logged in or not authorized to view this page</p>
+            </div>
+        {% endif %}
+    </div>
+    <script type="text/javascript">
+        // add hash # to url without redirecting.
+        $(function () {
+            let hash = window.location.hash;
+            // set the default tab to show.
+            let el_to_show_id = hash || '#user-roles';
+            $(el_to_show_id).addClass('show active');
+
+            // set the default tab pane background color.
+            let active_tab_pane_id = `${el_to_show_id}-list`;
+            $(active_tab_pane_id).addClass('active');
+
+            // append hash # to url when toggling tabs.
+            $('.list-group a').click(function (e) {
+                $(this).tab('show');
+                let scrollmem = $('body').scrollTop() || $('html').scrollTop();
+                window.location.hash = this.hash;
+                $('html,body').scrollTop(scrollmem);
+            });
+        });
+        // add tooltip to identity attribute tables.
+        $('#cilogonTooltip')
+            .tooltip({
+                title: 'Aggregate identity attributes as provided by the institutional identity provider (based on dropdown selection at login) and CILogon.',
+                placement: "right"
+            });
+        $('#comanageTooltip')
+            .tooltip({
+                title: 'Group membership as defined within the COmanage registry in terms of Collaborative Organization Units (COUs).',
+                placement: "right"
+            });
+        $('#otherTooltip')
+            .tooltip({
+                title: 'Other LDAP attributes stored as read-only entries within the COmanage registry.',
+                placement: "right"
+            });
+    </script>
+{% endblock %}

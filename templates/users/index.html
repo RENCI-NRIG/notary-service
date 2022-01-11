@@ -4,79 +4,60 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-  <link rel="stylesheet" href="{% static 'css/profile.css' %}">
-  <div class="container">
-      <div class="text-center">
-          <h1>Infrastructure for Privacy-Assured CompuTations</h1>
-          <img class="rounded" width="300" src="{% static 'img/logo/impact-logo-1600x752.png' %}">
-      </div>
-      <br><br>
-      {% if user.is_authenticated %}
-          <div class="container">
-              <p>Hello <b>{{ user.name }}</b>, You are logged in as username: <b>{{ user.username }}</b></p>
-              <h2>My Messages</h2>
-              <div class="message-toolbar d-flex flex-row my-3">
-                <form method="POST" class="post-form">
-                    {% csrf_token %}
-                    <input
-                      type="submit"
-                      name="check-messages"
-                      value="&#xf021;&nbsp;&nbsp;Refresh"
-                      class="message-btn btn btn-info"
-                    />
-                </form>
-                <button
-                  onclick="location.href = 'messages'"
-                  class="message-btn btn btn-success"
-                >
-                  <i class="fa fa-inbox mr-1"></i> Mailbox
-                </button>
-              </div>
-              <table class="table table-striped table-bordered text-center">
-                <tr class="font-weight-bold">
-                    <td>Subject</td>
-                    <td>Body</td>
-                    <td>Created Date</td>
-                    <td>Modified Date</td>
-                    <td>View</td>
-                    <td>Delete</td>
-                </tr>
-                {% for message in ns_messages %}
-                    <tr>
-                        <td>
-                            <a href="{% url 'message_detail' uuid=message.uuid %}" style="color: #146885;">
-                                {{ message.subject|truncatechars:"37" }}
-                            </a>
-                        </td>
-                        <td>{{ message.body|truncatechars:"37" }}</td>
-                        <td>{{ message.created_date }}</td>
-                        <td>{{ message.modified_date }}</td>
-                        <td>
-                            <a href="{% url 'message_detail' uuid=message.uuid %}"
-                                title="View message" class="fa fa-fw fa-eye" style="color: #146885;"></a>
-                        </td>
-                        <td>
-                            <form method="POST" class="post-form">
-                                {% csrf_token %}
-                                {% if message.is_active %}
-                                    <input style="font-family: FontAwesome;color: #B22222;
-                                border: none; background: none" name="delete-message"
-                                            title="Move message to trash" value="&#xf1f8;" type="submit">
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <div class="container">
+        <div class="text-center">
+            <h1>Infrastructure for Privacy-Assured CompuTations</h1>
+            <img class="rounded" width="300" src="{% static 'img/logo/impact-logo-1600x752.png' %}">
+        </div>
+        <br><br>
+        {% if user.is_authenticated %}
+            <div class="container">
+                <p>Hello <b>{{ user.name }}</b>, You are logged in as username: <b>{{ user.username }}</b></p>
+                {% if new_messages > 0 %}
+                    <h3>Recent Messages ({{ new_messages }} unread)</h3>
+                {% else %}
+                    <h3>Recent Messages</h3>
+                {% endif %}
+                <table class="table table-striped table-bordered text-center">
+                    <th>Subject</th>
+                    <th>Created</th>
+                    <th>Viewed</th>
+                    {% for message in nsmessages %}
+                        <tr>
+                            <td>
+                                {% if message.is_read %}
+                                    <a class="text-black-50"
+                                       href="{% url 'message_detail' uuid=message.uuid %}">
+                                        {{ message.subject|truncatechars:"40"|safe }}
+                                    </a>
                                 {% else %}
-                                    <input style="font-family: FontAwesome;color: #B22222;
-                                border: none; background: none" name="delete-message"
-                                            title="Delete message" value="&#xf00d;" type="submit">
+                                    <a class="text-primary"
+                                       href="{% url 'message_detail' uuid=message.uuid %}">
+                                        {{ message.subject|truncatechars:"40"|safe }}
+                                    </a>
                                 {% endif %}
-                                <input type="hidden" name="remove_message_uuid" value="{{ message.uuid }}">
-                            </form>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </table>
-          </div>
-      {% else %}
-          <div class="container">
-              <p>You are not currently logged in or not authorized to view this page</p>
-          </div>
-      {% endif %}
+                            </td>
+                            <td>{{ message.created }}</td>
+                            <td class="text-center">
+                                {% if message.is_read %}
+                                    <i class="fa fa-fw fa-check" style="color: green;"></i>
+                                {% else %}
+                                    <i class="fa fa-fw fa-remove" style="color: firebrick;"></i>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                <button class="btn btn-success mr-2">
+                    <a href="{% url 'profile' %}#messages" class="unlink text-white">
+                        <i class="fa fa-inbox mr-1"></i> My Messages
+                    </a>
+                </button>
+            </div>
+        {% else %}
+            <div class="container">
+                <p>You are not currently logged in or not authorized to view this page</p>
+            </div>
+        {% endif %}
 {% endblock %}

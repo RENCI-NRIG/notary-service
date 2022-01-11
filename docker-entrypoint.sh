@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
+source .env
 virtualenv -p /usr/local/bin/python .venv
 source .venv/bin/activate
 pip install --upgrade pip
