@@ -57,10 +57,10 @@
                                 <tr>
                                     <td>NotaryService Roles</td>
                                     {% if not roles %}
-                                        <td class="text-info">
-                                            You do not have any Notary Service Roles at this time<br>
-                                        - Have you completed the Enrollment workflow?<br>
-                                        - Contact Notary Service personnel for further details
+                                        <td class="text-danger">
+                                            You do not have any Notary Service Roles at this time
+                                            - Have you completed the ImPACT Enrollment workflow?
+                                            - Contact Notary Service personnel for further details
                                         </td>
                                     {% else %}
                                         <td>
@@ -115,19 +115,31 @@
                             <div>
                                 <table class="table table-striped table-bordered text-center">
                                     <tr>
+                                        <th>P12</th>
                                         <th>Public Key</th>
                                         <th>Private Key</th>
-                                        <th>P12</th>
                                         <th>Not Valid Before (GMT)</th>
                                         <th>Not Valid After (GMT)</th>
                                     </tr>
                                     {% if user.cilogon_cert %}
                                         <tr>
                                             <td>
+                                                file: <b class="text-dark">cilogon.p12</b><br><br>
+                                                <form method="POST" class="post-form">
+                                                    {% csrf_token %}
+                                                    <input class="btn btn-success mr-2 text-white"
+                                                           type="submit"
+                                                           name="download-p12"
+                                                           value="Download"
+                                                           style="color: darkgreen">
+                                                    <input hidden name="cert_uuid" value="{{ user.cilogon_cert.uuid }}">
+                                                </form>
+                                            </td>
+                                            <td>
                                                 file: <b class="text-dark">cilogon.cer</b><br><br>
                                                 <form method="POST" class="post-form">
                                                     {% csrf_token %}
-                                                    <input class="btn btn-info mr-2 text-white"
+                                                    <input class="btn btn-secondary mr-2 text-white"
                                                            type="submit"
                                                            name="download-pubkey"
                                                            value="Download"
@@ -139,21 +151,9 @@
                                                 file: <b class="text-dark">cilogon.key</b><br><br>
                                                 <form method="POST" class="post-form">
                                                     {% csrf_token %}
-                                                    <input class="btn btn-info mr-2 text-white"
+                                                    <input class="btn btn-secondary mr-2 text-white"
                                                            type="submit"
                                                            name="download-privkey"
-                                                           value="Download"
-                                                           style="color: darkgreen">
-                                                    <input hidden name="cert_uuid" value="{{ user.cilogon_cert.uuid }}">
-                                                </form>
-                                            </td>
-                                            <td>
-                                                file: <b class="text-dark">cilogon.p12</b><br><br>
-                                                <form method="POST" class="post-form">
-                                                    {% csrf_token %}
-                                                    <input class="btn btn-info mr-2 text-white"
-                                                           type="submit"
-                                                           name="download-p12"
                                                            value="Download"
                                                            style="color: darkgreen">
                                                     <input hidden name="cert_uuid" value="{{ user.cilogon_cert.uuid }}">
