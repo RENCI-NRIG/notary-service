@@ -62,10 +62,22 @@ class ProjectUpdateDatasetForm(forms.ModelForm):
 
 
 class ProjectUpdateStaffForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request')
+        super(ProjectUpdateStaffForm, self).__init__(*args, **kwargs)
+        if self.request.user.is_nsadmin():
+            self.fields['comanage_pi_members'].queryset = NotaryServiceUser.objects.filter(
+                roles__co_cou__name__in=[os.getenv('ROLE_IMPACT_USER')]
+            ).order_by('display_name')
+        else:
+            self.fields['comanage_pi_members'].queryset = NotaryServiceUser.objects.filter(
+                roles__co_cou__name__in=[os.getenv('ROLE_IMPACT_USER')],
+                affiliation__name__in=[self.request.user.affiliation.name]
+            ).order_by('display_name')
+
     comanage_staff = forms.ModelMultipleChoiceField(
-        queryset=NotaryServiceUser.objects.filter(
-            roles__co_cou__name=os.getenv('ROLE_IMPACT_USER')
-        ).order_by('display_name'),
+        queryset=None,
         widget=FilteredSelectMultiple("Staff", is_stacked=False),
         required=False
     )
@@ -96,10 +108,22 @@ class ProjectUpdateStaffForm(forms.ModelForm):
 
 
 class ProjectUpdatePiForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request')
+        super(ProjectUpdatePiForm, self).__init__(*args, **kwargs)
+        if self.request.user.is_nsadmin():
+            self.fields['comanage_pi_members'].queryset = NotaryServiceUser.objects.filter(
+                roles__co_cou__name__in=[os.getenv('ROLE_IMPACT_USER')]
+            ).order_by('display_name')
+        else:
+            self.fields['comanage_pi_members'].queryset = NotaryServiceUser.objects.filter(
+                roles__co_cou__name__in=[os.getenv('ROLE_IMPACT_USER')],
+                affiliation__name__in=[self.request.user.affiliation.name]
+            ).order_by('display_name')
+
     comanage_pi_members = forms.ModelMultipleChoiceField(
-        queryset=NotaryServiceUser.objects.filter(
-            roles__co_cou__name=os.getenv('ROLE_PI')
-        ).order_by('display_name'),
+        queryset=None,
         widget=FilteredSelectMultiple("Principal Investigators", is_stacked=False),
         required=False
     )

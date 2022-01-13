@@ -113,12 +113,12 @@
                                     {{ project.name }} <a class="text-info" style="font-size: medium">(private)</a>
                                 {% endif %}
                             </h1>
-                            <h3>Project Admins</h3>
+                            <h3>Project Management</h3>
                             {% if user.is_nsadmin or user in project_pi_admins %}
                                 <button class="btn btn-info mr-2">
                                     <a href="{% url 'project_update_admin' uuid=project.uuid %}"
                                        class="unlink; text-white">
-                                        <i class="fa fa-user mr-1"></i> Update Admins
+                                        <i class="fa fa-user mr-1"></i> Update Management
                                     </a>
                                 </button>
                             {% endif %}
@@ -134,12 +134,12 @@
                                     </tr>
                                 {% endfor %}
                             </table>
-                            <h3>Principal Investigators</h3>
+                            <h3>PIs and Co-PIs</h3>
                             {% if user.is_nsadmin or user in project_pi_admins %}
                                 <button class="btn btn-info mr-2">
                                     <a href="{% url 'project_update_pi' uuid=project.uuid %}"
                                        class="unlink; text-white">
-                                        <i class="fa fa-user mr-1"></i> Update PIs
+                                        <i class="fa fa-user mr-1"></i> Update PIs/Co-PIs
                                     </a>
                                 </button>
                             {% endif %}

@@ -1,11 +1,10 @@
 import unicodedata
-from builtins import any
-import os
 from typing import Optional
 
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
+
 from comanage import api
-from comanage.comanage_api import add_co_person_roles, verify_ns_person_roles
+from comanage.comanage_api import add_co_person_roles, verify_ns_person_roles, add_co_affiliation, verify_ns_affiliation
 from nsmessages.nsmessages import send_welcome_message
 
 
@@ -35,7 +34,9 @@ class MyOIDCAB(OIDCAuthenticationBackend):
             user.is_active = True
             user.save()
             add_co_person_roles(co_person={'Id': user.co_person_id})
+            add_co_affiliation(co_person={'Id': user.co_person_id})
             verify_ns_person_roles(ns_person=user)
+            verify_ns_affiliation(ns_person=user)
         else:
             user.co_person_id = None
             user.is_active = True
@@ -62,7 +63,9 @@ class MyOIDCAB(OIDCAuthenticationBackend):
                 user.is_active = True
                 user.save()
                 add_co_person_roles(co_person={'Id': user.co_person_id})
+                add_co_affiliation(co_person={'Id': user.co_person_id})
                 verify_ns_person_roles(ns_person=user)
+                verify_ns_affiliation(ns_person=user)
             else:
                 user.co_person_id = None
                 user.is_active = True

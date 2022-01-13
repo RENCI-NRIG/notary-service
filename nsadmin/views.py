@@ -2,12 +2,11 @@ import os
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
 from comanage.comanage_api import create_co_person_role, remove_co_person_role
-from users.models import NotaryServiceUser, ComanageCou
 from nsmessages.nsmessages import send_nsmessage, NsMessages
-from django.shortcuts import render, get_object_or_404
+from users.models import NotaryServiceUser, ComanageCou
 
 
 @login_required()
