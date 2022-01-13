@@ -29,13 +29,13 @@
                         {% endfor %}
                     </ul>
                     <h3>Personnel</h3>
-                    <b>Project Admins</b>
+                    <b>Project Management</b>
                     <ul>
                         {% for p in project_pi_admins %}
                             <li>{{ p.display_name }} | {{ p.affiliation.name }}</li>
                         {% endfor %}
                     </ul>
-                    <b>Project PIs</b>
+                    <b>Project PIs and Co-PIs</b>
                     <ul>
                         {% for p in project_pi_members %}
                             <li>{{ p.display_name }} | {{ p.affiliation.name }}</li>

@@ -28,10 +28,12 @@ def send_welcome_message(user: NotaryServiceUser) -> bool:
         users_from=[],
         subject='[WELCOME] New member of the ImPACT Notary Service',
         body="""
-Welcome to the ImPACT Notary Service
+Hello, {0},
+
+Welcome to the ImPACT Notary Service!
 
 -NSAdmin
-"""
+""".format(user.display_name)
     )
 
     return True
@@ -47,14 +49,54 @@ def join_project_request(request, project: Project) -> bool:
     send_nsmessage(
         users_to=users_to,
         users_from=[request.user],
-        subject='[JOIN] Request to join Project "{0}"'.format(project.name),
+        subject='[REQUEST TO JOIN] Project "{0}"'.format(project.name),
         body="""
-User "{0}" is requesting to join Project "{1}"
+Hello,
+
+User "{0}" is requesting to join your Project "{1}"
 You can add them from: {2}.
 
-For further questions regarding this request send email to: {3}
+Any questions regarding this request should be directed to: {3}
 
 """.format(request.user.display_name, project.name, members_link, request.user.email)
+    )
+
+    return True
+
+
+def role_added_to_project(request, user: NotaryServiceUser, project: Project, role: str) -> bool:
+    project_link = request.scheme + '://' + request.get_host() + '/projects/' + str(project.uuid)
+    send_nsmessage(
+        users_to=[user],
+        users_from=[request.user],
+        subject='[PROJECT] Role added to project "{0}"'.format(project.name),
+        body="""
+Hello, {0},
+
+The Role of "{1}" has been added for you to Project "{2}" by User "{3}".
+Project details can be found at: {4}
+
+Any questions regarding this change should be directed to: {5}
+
+""".format(user.display_name, role, project.name, request.user.display_name, project_link, request.user.email)
+    )
+
+    return True
+
+
+def role_removed_from_project(request, user: NotaryServiceUser, project: Project, role: str) -> bool:
+    send_nsmessage(
+        users_to=[user],
+        users_from=[request.user],
+        subject='[PROJECT] Role removed from project "{0}"'.format(project.name),
+        body="""
+Hello, {0},
+
+The Role of "{1}" has been removed for you from Project "{2}" by User "{3}".
+
+Any questions regarding this change should be directed to: {4}
+
+""".format(user.display_name, role, project.name, request.user.display_name, request.user.email)
     )
 
     return True

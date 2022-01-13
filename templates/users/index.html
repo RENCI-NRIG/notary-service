@@ -56,8 +56,20 @@
                 </button>
             </div>
         {% else %}
-            <div class="container">
-                <p>You are not currently logged in or not authorized to view this page</p>
+            <div class="container text-center">
+                <p>
+                    <b class="text-danger">You are not currently logged in</b><br>
+                    Click the "Login" button at the upper-right or Sign-up as a new user below
+                </p>
+                <br><br>
+                <p>
+                    Click the <b>Sign-up</b> button to learn more about joining ImPACT
+                </p>
+                <button class="btn btn-info mr-2">
+                    <a href="{% url 'signup1' %}" class="unlink text-white">
+                        <i class="fa fa-hand-o-right mr-2"></i> Sign-up
+                    </a>
+                </button>
             </div>
         {% endif %}
 {% endblock %}

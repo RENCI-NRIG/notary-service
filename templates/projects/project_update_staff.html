@@ -2,7 +2,7 @@
 {% load static bootstrap4 %}
 
 {% block content %}
-        {% if user.is_ns_admin or user in project_pi_admins or user in project_pi_members %}
+        {% if user.is_nsadmin or user in project_pi_admins or user in project_pi_members %}
             <div class="container">
                 {% block extrastyle %}
                     {% bootstrap_javascript jquery='full' %}  {# Embed Bootstrap JS+jQuery #}

@@ -42,18 +42,18 @@
                         <i class="fa fa-fw fa-folder-open"></i> Projects</a>
                 </li>
             {% endif %}
-            {% display_datasets as show_datasets %}
-            {% if show_datasets %}
-                <li class="nav-item {{ datasets_page }}">
-                    <a class="nav-link" href="{% url 'datasets' %}">
-                        <i class="fa fa-fw fa-database"></i> Datasets</a>
-                </li>
-            {% endif %}
             {% display_templates as show_templates %}
             {% if show_templates %}
                 <li class="nav-item {{ templates_page }}">
                     <a class="nav-link" href="{% url 'templates' %}">
                         <i class="fa fa-fw fa-code"></i> Templates</a>
+                </li>
+            {% endif %}
+            {% display_datasets as show_datasets %}
+            {% if show_datasets %}
+                <li class="nav-item {{ datasets_page }}">
+                    <a class="nav-link" href="{% url 'datasets' %}">
+                        <i class="fa fa-fw fa-database"></i> Datasets</a>
                 </li>
             {% endif %}
             {% display_infrastructure as show_infrastructure %}

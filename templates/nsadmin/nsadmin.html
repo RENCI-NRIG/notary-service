@@ -49,65 +49,80 @@
                                     <th>IG</th>
                                     <th>NSAdmin</th>
                                     {% for person in people %}
-                                        <tr>
-                                            <td>
-                                                {{ person.display_name }}
-                                            </td>
-                                            <td class="text-center">
-                                                <input type="submit"
-                                                       class={% if person.is_impact_user %}
-                                                           "btn btn-success mr-2"
-                                                       {% else %}
-                                                           "btn btn-danger mr-2"
-                                                       {% endif %}
-                                                name="ImpactUser_{{ person.id }}" value={{ person.is_impact_user }}>
-                                            </td>
-                                            <td class="text-center">
-                                                <input type="submit"
-                                                       class={% if person.is_pi %}
-                                                           "btn btn-success mr-2"
-                                                       {% else %}
-                                                           "btn btn-danger mr-2"
-                                                       {% endif %}
-                                                name="PrincipalInvestigator_{{ person.id }}" value={{ person.is_pi }}>
-                                            </td>
-                                            <td class="text-center">
-                                                <input type="submit"
-                                                       class={% if person.is_dp %}
-                                                           "btn btn-success mr-2"
-                                                       {% else %}
-                                                           "btn btn-danger mr-2"
-                                                       {% endif %}
-                                                name="DataProvider_{{ person.id }}" value={{ person.is_dp }}>
-                                            </td>
-                                            <td class="text-center">
-                                                <input type="submit"
-                                                       class={% if person.is_inp %}
-                                                           "btn btn-success mr-2"
-                                                       {% else %}
-                                                           "btn btn-danger mr-2"
-                                                       {% endif %}
-                                                name="InfrastructureProvider_{{ person.id }}" value={{ person.is_inp }}>
-                                            </td>
-                                            <td class="text-center">
-                                                <input type="submit"
-                                                       class={% if person.is_ig %}
-                                                           "btn btn-success mr-2"
-                                                       {% else %}
-                                                           "btn btn-danger mr-2"
-                                                       {% endif %}
-                                                name="InstitutionalGovernance_{{ person.id }}" value={{ person.is_ig }}>
-                                            </td>
-                                            <td class="text-center">
-                                                <input type="submit"
-                                                       class={% if person.is_nsadmin %}
-                                                           "btn btn-success mr-2"
-                                                       {% else %}
-                                                           "btn btn-danger mr-2"
-                                                       {% endif %}
-                                                name="NotaryServiceAdmin_{{ person.id }}" value={{ person.is_nsadmin }}>
-                                            </td>
-                                        </tr>
+                                        {% if person.co_person_id > 0 %}
+                                            <tr>
+                                                <td>
+                                                    {{ person.display_name }}
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="submit"
+                                                           class={% if person.is_impact_user %}
+                                                               "btn btn-success mr-2"
+                                                           {% else %}
+                                                               "btn btn-danger mr-2"
+                                                           {% endif %}
+                                                    name="ImpactUser_{{ person.id }}" value={{ person.is_impact_user }}>
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="submit"
+                                                           class={% if person.is_pi %}
+                                                               "btn btn-success mr-2"
+                                                           {% else %}
+                                                               "btn btn-danger mr-2"
+                                                           {% endif %}
+                                                    name="PrincipalInvestigator_{{ person.id }}"
+                                                    value={{ person.is_pi }}>
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="submit"
+                                                           class={% if person.is_dp %}
+                                                               "btn btn-success mr-2"
+                                                           {% else %}
+                                                               "btn btn-danger mr-2"
+                                                           {% endif %}
+                                                    name="DataProvider_{{ person.id }}" value={{ person.is_dp }}>
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="submit"
+                                                           class={% if person.is_inp %}
+                                                               "btn btn-success mr-2"
+                                                           {% else %}
+                                                               "btn btn-danger mr-2"
+                                                           {% endif %}
+                                                    name="InfrastructureProvider_{{ person.id }}"
+                                                    value={{ person.is_inp }}>
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="submit"
+                                                           class={% if person.is_ig %}
+                                                               "btn btn-success mr-2"
+                                                           {% else %}
+                                                               "btn btn-danger mr-2"
+                                                           {% endif %}
+                                                    name="InstitutionalGovernance_{{ person.id }}"
+                                                    value={{ person.is_ig }}>
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="submit"
+                                                           class={% if person.is_nsadmin %}
+                                                               "btn btn-success mr-2"
+                                                           {% else %}
+                                                               "btn btn-danger mr-2"
+                                                           {% endif %}
+                                                    name="NotaryServiceAdmin_{{ person.id }}"
+                                                    value={{ person.is_nsadmin }}>
+                                                </td>
+                                            </tr>
+                                        {% else %}
+                                            <tr>
+                                                <td>
+                                                    {{ person.display_name }}
+                                                </td>
+                                                <td class="text-center text-danger mr-2" colspan="6">
+                                                    User has not completed Enrollment Workflow and re-signed into NS
+                                                </td>
+                                            </tr>
+                                        {% endif %}
                                     {% endfor %}
                                 </table>
                             </form>

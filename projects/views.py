@@ -11,6 +11,7 @@ from django.utils import timezone
 from comanage.comanage_api import create_co_person_role, remove_co_person_role, remove_co_cou
 from datasets.models import Dataset, NSTemplate
 from infrastructure.models import Infrastructure
+from nsmessages.nsmessages import join_project_request, role_added_to_project, role_removed_from_project
 from users.models import Affiliation
 from users.models import ComanageCou
 from users.models import NotaryServiceUser
@@ -21,7 +22,6 @@ from .forms import ProjectCreateForm, ProjectUpdateStaffForm, ProjectUpdatePiFor
 from .models import Project, MembershipProjectWorkflow
 from .projects import create_new_project
 from .workflows import create_base_project_workflows, generate_neo4j_user_workflow_status
-from nsmessages.nsmessages import join_project_request
 
 
 @login_required()
@@ -40,6 +40,8 @@ def projects(request):
                 if ns_project:
                     ns_project.project_igs.add(request.user)
                     ns_project.save()
+                    role_added_to_project(request=request, user=request.user,
+                                          project=ns_project, role='Institutional Governance')
             if request.POST.get("ig-self-unassign-project"):
                 ns_project = Project.objects.filter(
                     uuid=request.POST.get("project_uuid")
@@ -47,6 +49,8 @@ def projects(request):
                 if ns_project:
                     ns_project.project_igs.remove(request.user)
                     ns_project.save()
+                    role_removed_from_project(request=request, user=request.user,
+                                              project=ns_project, role='Institutional Governance')
         if request.POST.get("join-project-request"):
             ns_project = Project.objects.filter(
                 uuid=request.POST.get("project_uuid")
@@ -59,6 +63,7 @@ def projects(request):
         Q(comanage_pi_admins__in=[request.user]) |
         Q(comanage_pi_members__in=[request.user]) |
         Q(comanage_staff__in=[request.user]) |
+        Q(project_igs__in=[request.user]) |
         Q(datasets__created_by__in=[request.user]) |
         Q(infrastructure__created_by__in=[request.user])
     ).order_by('name').distinct()
@@ -357,7 +362,7 @@ def project_update_staff(request, uuid):
     comanage_staff_orig = list(project.comanage_staff.all())
 
     if request.method == "POST":
-        form = ProjectUpdateStaffForm(request.POST, instance=project)
+        form = ProjectUpdateStaffForm(request.POST, instance=project, request=request)
         if form.is_valid():
             comanage_staff = list(form.cleaned_data.get('comanage_staff'))
             comanage_staff_added = list(set(comanage_staff).difference(set(comanage_staff_orig)))
@@ -369,22 +374,24 @@ def project_update_staff(request, uuid):
                 if create_co_person_role(co_person_id=staff.co_person_id, co_cou_id=co_cou.co_cou_id):
                     # add user to comanage_staff
                     project.comanage_staff.add(staff)
+                    role_added_to_project(request=request, user=staff, project=project, role='Staff')
                     messages.success(
                         request,
-                        '[INFO] {0} added as STAFF to project {1}'.format(staff.display_name, project.name))
+                        '[INFO] "{0}" added as STAFF to project "{1}"'.format(staff.display_name, project.name))
             for staff in comanage_staff_removed:
                 # remove co_person role and add ns_role
                 if remove_co_person_role(co_person_id=staff.co_person_id, co_cou_id=co_cou.co_cou_id):
                     # remove user from comanage_staff
                     project.comanage_staff.remove(staff)
+                    role_removed_from_project(request=request, user=staff, project=project, role='Staff')
                     messages.success(
                         request,
-                        '[INFO] {0} removed as STAFF from project {1}'.format(staff.display_name, project.name))
+                        '[INFO] "{0}" removed as STAFF from project "{1}:'.format(staff.display_name, project.name))
             project.is_valid = False
             project.save()
             return redirect('project_detail', uuid=uuid)
     else:
-        form = ProjectUpdateStaffForm(instance=project)
+        form = ProjectUpdateStaffForm(instance=project, request=request)
 
     return render(request, 'project_update_staff.html', {
         'form': form,
@@ -403,7 +410,7 @@ def project_update_pi(request, uuid):
     comanage_pi_members_orig = list(project.comanage_pi_members.all())
 
     if request.method == "POST":
-        form = ProjectUpdatePiForm(request.POST, instance=project)
+        form = ProjectUpdatePiForm(request.POST, instance=project, request=request)
         if form.is_valid():
             comanage_pi_members = list(form.cleaned_data.get('comanage_pi_members'))
             comanage_pi_members_added = list(set(comanage_pi_members).difference(set(comanage_pi_members_orig)))
@@ -415,16 +422,24 @@ def project_update_pi(request, uuid):
                 if create_co_person_role(co_person_id=pi_member.co_person_id, co_cou_id=co_cou.co_cou_id):
                     # add user to comanage_staff
                     project.comanage_pi_members.add(pi_member)
+                    role_added_to_project(request=request, user=pi_member, project=project, role='PI or Co-PI')
+                    messages.success(
+                        request,
+                        '[INFO] "{0}" added as PI to project "{1}"'.format(pi_member.display_name, project.name))
             for pi_member in comanage_pi_members_removed:
                 # remove co_person role and add ns_role
                 if remove_co_person_role(co_person_id=pi_member.co_person_id, co_cou_id=co_cou.co_cou_id):
                     # remove user from comanage_staff
                     project.comanage_pi_members.remove(pi_member)
+                    role_removed_from_project(request=request, user=pi_member, project=project, role='PI or Co-PI')
+                    messages.success(
+                        request,
+                        '[INFO] "{0}" removed as PI from project "{1}:'.format(pi_member.display_name, project.name))
             project.is_valid = False
             project.save()
             return redirect('project_detail', uuid=uuid)
     else:
-        form = ProjectUpdatePiForm(instance=project)
+        form = ProjectUpdatePiForm(instance=project, request=request)
 
     return render(request, 'project_update_pi.html', {
         'form': form,
@@ -455,11 +470,20 @@ def project_update_admin(request, uuid):
                 if create_co_person_role(co_person_id=pi_admin.co_person_id, co_cou_id=co_cou.co_cou_id):
                     # add user to comanage_staff
                     project.comanage_pi_admins.add(pi_admin)
+                    role_added_to_project(request=request, user=pi_admin, project=project, role='Project Manager')
+                    messages.success(
+                        request,
+                        '[INFO] "{0}" added as MANAGER to project "{1}"'.format(pi_admin.display_name, project.name))
             for pi_admin in comanage_pi_admins_removed:
                 # remove co_person role and add ns_role
                 if remove_co_person_role(co_person_id=pi_admin.co_person_id, co_cou_id=co_cou.co_cou_id):
                     # remove user from comanage_staff
                     project.comanage_pi_admins.remove(pi_admin)
+                    role_removed_from_project(request=request, user=pi_admin, project=project, role='Project Manager')
+                    messages.success(
+                        request,
+                        '[INFO] "{0}" removed as MANAGER from project "{1}:'.format(pi_admin.display_name,
+                                                                                    project.name))
             project.is_valid = False
             project.save()
             return redirect('project_detail', uuid=uuid)
@@ -480,6 +504,7 @@ def project_update_infra(request, uuid):
     project = get_object_or_404(Project, uuid=uuid)
     project_pi_admins = project.comanage_pi_admins.all()
     project_pi_members = project.comanage_pi_members.all()
+    infra = project.infrastructure
     if request.method == "POST":
         form = ProjectUpdateInfrastructureForm(request.POST, instance=project)
         if form.is_valid():
@@ -488,6 +513,12 @@ def project_update_infra(request, uuid):
             if infra_choice is not None:
                 project.infrastructure = Infrastructure.objects.filter(id=infra_choice.id).first()
                 project.save()
+                role_added_to_project(request=request, user=project.infrastructure.owner,
+                                      project=project, role='Infrastructure Provider')
+                if infra:
+                    if infra.id != project.infrastructure.id:
+                        role_removed_from_project(request=request, user=infra.owner,
+                                                  project=project, role='Infrastructure Provider')
                 messages.success(request, '[INFO] Infrastructure "{0}" added to Project "{1}"'.format(infra_choice,
                                                                                                       project.name))
             else:
@@ -509,20 +540,27 @@ def project_update_dataset(request, uuid):
     project = get_object_or_404(Project, uuid=uuid)
     project_pi_admins = project.comanage_pi_admins.all()
     project_pi_members = project.comanage_pi_members.all()
+    dataset_choices_orig = list(project.datasets.all())
     if request.method == "POST":
         form = ProjectUpdateDatasetForm(request.POST, instance=project)
         if form.is_valid():
-            dataset_choices = form.cleaned_data['datasets']
-            # print(dataset_choices)
-            if dataset_choices:
-                for dataset in dataset_choices:
-                    project.datasets.add(dataset)
-                    messages.success(request, '[INFO] Infrastructure "{0}" added to Project "{1}"'.format(dataset,
-                                                                                                          project.name))
-                project.save()
-            else:
-                project.save()
-                messages.success(request, '[INFO] No Infrastructure assigned to Project "{0}"'.format(project.name))
+            dataset_choices = list[form.cleaned_data['datasets']]
+            dataset_choices_added = list(set(dataset_choices).difference(set(dataset_choices_orig)))
+            dataset_choices_removed = list(set(dataset_choices_orig).difference(set(dataset_choices)))
+            for dataset in dataset_choices_added:
+                project.datasets.add(dataset)
+                role_added_to_project(request=request, user=dataset.owner, project=project, role='Dataset Provider')
+                messages.success(request, '[INFO] Dataset "{0}" added to Project "{1}"'.format(dataset,
+                                                                                               project.name))
+            for dataset in dataset_choices_removed:
+                project.datasets.remove(dataset)
+                role_removed_from_project(request=request, user=dataset.owner, project=project, role='Dataset Provider')
+                messages.success(request, '[INFO] Removed Dataset "{0}" from Project "{1}"'.format(dataset,
+                                                                                                   project.name))
+            project.save()
+        else:
+            project.save()
+            messages.success(request, '[INFO] No Dataset assigned to Project "{0}"'.format(project.name))
             project.is_valid = False
             project.save()
             return redirect('project_detail', uuid=project.uuid)

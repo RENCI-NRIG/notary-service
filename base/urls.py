@@ -23,12 +23,15 @@ urlpatterns = [
     path('oidc/', include('mozilla_django_oidc.urls')),
     path('users/', include('django.contrib.auth.urls')),
     path('whoami', views.whoami, name='whoami'),
+    path('jwks', views.jwks, name='jwks'),
+    path('signup1', views.signup1, name='signup1'),
+    path('signup2', views.signup2, name='signup2'),
+    path('signup3', views.signup3, name='signup3'),
     path('', include('users.urls')),
     path('', include('projects.urls')),
     path('', include('nsadmin.urls')),
     path('', include('datasets.urls')),
     path('', include('workflows.urls')),
-    # path('', include('apache_kafka.urls')),
     path('', include('infrastructure.urls')),
 ]
 

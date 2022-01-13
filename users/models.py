@@ -7,7 +7,6 @@ from django.db import models
 from core.mixins import AuditModelMixin
 from core.models import BaseModel
 
-
 ns_roles = [
     os.getenv('ROLE_IMPACT_USER'),
     os.getenv('ROLE_DP'),
@@ -139,74 +138,3 @@ class WorkflowRole(models.Model):
 
     def __str__(self):
         return self.get_id_display()
-
-
-# class Affiliation(models.Model):
-#     """
-#     Affiliation of the user based on Identity Provider or Admin manual entry
-#     """
-#     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
-#     display_name = models.CharField(max_length=255)
-#     idp = models.CharField(max_length=255)
-#     idp_name = models.CharField(max_length=255)
-#
-#     def __str__(self):
-#         return self.display_name
-#
-#     def __len__(self):
-#         return len(self.display_name)
-#
-#
-# class CILogonCertificate(models.Model):
-#     use_my_key = models.BooleanField(default=False)
-#     public_key_path = models.FilePathField(null=True, blank=True, default=None)
-#     private_key_path = models.FilePathField(null=True, blank=True, default=None)
-#     pkcs12_file_path = models.FilePathField(null=True, blank=True, default=None)
-#     authorization_response = models.CharField(max_length=1024)
-#
-#
-# class NotaryServiceUser(AbstractUser):
-#     """
-#     Extends AbstractUser
-#     - username
-#     - first_name
-#     - last_name
-#     - email
-#     - is_staff
-#     - is_active
-#     """
-#     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
-#     display_name = models.CharField(max_length=255, blank=True, null=True)
-#     co_person_id = models.IntegerField(primary_key=False, blank=False, null=False)
-#     given_name = models.CharField(max_length=255)
-#     family_name = models.CharField(max_length=255)
-#     idp = models.CharField(max_length=255)
-#     idp_name = models.CharField(max_length=255)
-#     sub = models.CharField(max_length=255)
-#     aud = models.CharField(max_length=255)
-#     cert_subject_dn = models.CharField(max_length=255)
-#     iss = models.CharField(max_length=255)
-#     oidc = models.CharField(max_length=255)
-#     eppn = models.CharField(max_length=255)
-#     eptid = models.CharField(max_length=255)
-#     acr = models.CharField(max_length=255)
-#     affiliation = models.CharField(max_length=255)
-#     ns_affiliation = models.CharField(max_length=255)
-#     name = models.CharField(max_length=255)
-#     show_uuid = models.BooleanField(default=False)
-#     roles = models.ManyToManyField(Role)
-#     role = models.PositiveSmallIntegerField(default=Role.NO_ROLE)
-#     is_nsadmin = models.BooleanField(default=False)
-#     is_nsstaff = models.BooleanField(default=False)
-#     is_pi = models.BooleanField(default=False)
-#     is_piadmin = models.BooleanField(default=False)
-#     is_dp = models.BooleanField(default=False)
-#     is_inp = models.BooleanField(default=False)
-#     is_ig = models.BooleanField(default=False)
-#     is_norole = models.BooleanField(default=False)
-#     cilogon_certificate_date = models.DateTimeField(null=True, blank=True, default=None)
-#     cilogon_auth_code = models.CharField(max_length=1024)
-#     cilogon_auth_state = models.CharField(max_length=255)
-#
-#     def __str__(self):
-#         return self.email

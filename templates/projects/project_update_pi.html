@@ -2,7 +2,7 @@
 {% load static bootstrap4 %}
 
 {% block content %}
-        {% if user.is_ns_admin or user in project_pi_admins %}
+        {% if user.is_nsadmin or user in project_pi_admins %}
             <div class="container">
                 {% block extrastyle %}
                     {% bootstrap_javascript jquery='full' %}  {# Embed Bootstrap JS+jQuery #}
@@ -20,7 +20,7 @@
                     </style>
                 {% endblock extrastyle %}
                 <h2>{{ project.name }}</h2>
-                <p class="text-info">Update "{{ project.name }}" PIs</p>
+                <p class="text-info">Update "{{ project.name }}" PIs and Co-PIs</p>
                 <form method="POST" class="form-group">
                     {% csrf_token %}
                     <input class="btn btn-success mr-2" type="submit" value="Save"/>
