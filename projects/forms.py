@@ -67,11 +67,11 @@ class ProjectUpdateStaffForm(forms.ModelForm):
         self.request = kwargs.pop('request')
         super(ProjectUpdateStaffForm, self).__init__(*args, **kwargs)
         if self.request.user.is_nsadmin():
-            self.fields['comanage_pi_members'].queryset = NotaryServiceUser.objects.filter(
+            self.fields['comanage_staff'].queryset = NotaryServiceUser.objects.filter(
                 roles__co_cou__name__in=[os.getenv('ROLE_IMPACT_USER')]
             ).order_by('display_name')
         else:
-            self.fields['comanage_pi_members'].queryset = NotaryServiceUser.objects.filter(
+            self.fields['comanage_staff'].queryset = NotaryServiceUser.objects.filter(
                 roles__co_cou__name__in=[os.getenv('ROLE_IMPACT_USER')],
                 affiliation__name__in=[self.request.user.affiliation.name]
             ).order_by('display_name')
