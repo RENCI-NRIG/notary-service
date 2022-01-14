@@ -544,7 +544,7 @@ def project_update_dataset(request, uuid):
     if request.method == "POST":
         form = ProjectUpdateDatasetForm(request.POST, instance=project)
         if form.is_valid():
-            dataset_choices = list[form.cleaned_data['datasets']]
+            dataset_choices = list(form.cleaned_data['datasets'])
             dataset_choices_added = list(set(dataset_choices).difference(set(dataset_choices_orig)))
             dataset_choices_removed = list(set(dataset_choices_orig).difference(set(dataset_choices)))
             for dataset in dataset_choices_added:
@@ -563,7 +563,7 @@ def project_update_dataset(request, uuid):
             messages.success(request, '[INFO] No Dataset assigned to Project "{0}"'.format(project.name))
             project.is_valid = False
             project.save()
-            return redirect('project_detail', uuid=project.uuid)
+        return redirect('project_detail', uuid=project.uuid)
     else:
         form = ProjectUpdateDatasetForm(instance=project)
     return render(request, 'project_update_dataset.html',
