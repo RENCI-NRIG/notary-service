@@ -22,10 +22,7 @@ class MyOIDCAB(OIDCAuthenticationBackend):
         user.eppn = claims.get('eppn', '')
         user.name = claims.get('name', '')
         user.cert_subject_dn = claims.get('cert_subject_dn', '')
-        if claims.get('eppn', ''):
-            user.display_name = '{0} ({1})'.format(claims.get('name', ''), claims.get('eppn', ''))
-        else:
-            user.display_name = '{0} ({1})'.format(claims.get('name', ''), claims.get('email', ''))
+        user.display_name = '{0} ({1})'.format(claims.get('name', ''), claims.get('email', ''))
         user.save()
         co_person_id = self.get_user_co_person_id(
             given_name=user.first_name, family_name=user.last_name, mail=user.email)
@@ -53,7 +50,7 @@ class MyOIDCAB(OIDCAuthenticationBackend):
         user.name = claims.get('name', '')
         user.cert_subject_dn = claims.get('cert_subject_dn', '')
         if not user.display_name:
-            user.display_name = claims.get('name', '')
+            user.display_name = '{0} ({1})'.format(claims.get('name', ''), claims.get('email', ''))
         user.save()
         if not user.co_person_id:
             co_person_id = self.get_user_co_person_id(

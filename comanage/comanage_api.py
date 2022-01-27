@@ -113,17 +113,13 @@ def add_co_user(co_person: dict) -> None:
                 impactid = identifier.get('Identifier', '')
             if identifier.get('Type', None) == 'eppn':
                 eppn = identifier.get('Identifier', '')
-        if eppn:
-            username = eppn
-            email = eppn
-        else:
-            co_email = api.email_addresses_view_per_person(person_type='copersonid', person_id=co_person_id).get(
+        co_email = api.email_addresses_view_per_person(person_type='copersonid', person_id=co_person_id).get(
                 'EmailAddresses')
-            for e in co_email:
-                if e.get('Type', None) == 'official':
-                    email = e.get('Mail', '')
-                    break
-            username = email
+        for e in co_email:
+            if e.get('Type', None) == 'official':
+                email = e.get('Mail', '')
+                username = email
+                break
         kwargs = {
             'username': username,
             'first_name': first_name,

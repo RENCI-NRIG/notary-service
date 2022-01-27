@@ -14,29 +14,41 @@ from comanage.comanage_api import add_co_cou, verify_ns_cou, add_co_user, verify
 def add_comanage_cous():
     co_cous = api.cous_view_per_co().get('Cous', [])
     for co_cou in co_cous:
-        add_co_cou(co_cou=co_cou)
+        try:
+            add_co_cou(co_cou=co_cou)
+        except Exception as e:
+            logger.error('{0} - [ERROR]: {1}'.format(datetime.datetime.now().ctime(), e))
 
 
 def verify_notary_cous():
     ns_cous = ComanageCou.objects.all().order_by('id')
     for ns_cou in ns_cous:
-        verify_ns_cou(ns_cou=ns_cou)
+        try:
+            verify_ns_cou(ns_cou=ns_cou)
+        except Exception as e:
+            logger.error('{0} - [ERROR]: {1}'.format(datetime.datetime.now().ctime(), e))
 
 
 def add_comanage_users():
     co_people = api.copeople_view_per_co().get('CoPeople', [])
     for co_person in co_people:
-        add_co_user(co_person=co_person)
-        add_co_affiliation(co_person=co_person)
-        add_co_person_roles(co_person=co_person)
+        try:
+            add_co_user(co_person=co_person)
+            add_co_affiliation(co_person=co_person)
+            add_co_person_roles(co_person=co_person)
+        except Exception as e:
+            logger.error('{0} - [ERROR]: {1}'.format(datetime.datetime.now().ctime(), e))
 
 
 def verify_notary_users():
     ns_people = NotaryServiceUser.objects.all().order_by('id')
     for ns_person in ns_people:
-        verify_ns_user(ns_person=ns_person)
-        verify_ns_affiliation(ns_person=ns_person)
-        verify_ns_person_roles(ns_person=ns_person)
+        try:
+            verify_ns_user(ns_person=ns_person)
+            verify_ns_affiliation(ns_person=ns_person)
+            verify_ns_person_roles(ns_person=ns_person)
+        except Exception as e:
+            logger.error('{0} - [ERROR]: {1}'.format(datetime.datetime.now().ctime(), e))
 
 
 def add_comanage_projects():
@@ -45,19 +57,28 @@ def add_comanage_projects():
         ns_project_uuids = []
         ns_roles.append('Projects')
         for co_cou in co_cous:
-            if co_cou.get('Name') not in ns_roles:
-                project_uuid = str(co_cou.get('Name')).rsplit('-', 1)[0]
-                if project_uuid not in ns_project_uuids:
-                    ns_project_uuids.append(project_uuid)
+            try:
+                if co_cou.get('Name') not in ns_roles:
+                    project_uuid = str(co_cou.get('Name')).rsplit('-', 1)[0]
+                    if project_uuid not in ns_project_uuids:
+                        ns_project_uuids.append(project_uuid)
+            except Exception as e:
+                logger.error('{0} - [ERROR]: {1}'.format(datetime.datetime.now().ctime(), e))
         for ns_project_uuid in ns_project_uuids:
-            add_co_project(project_uuid=ns_project_uuid)
+            try:
+                add_co_project(project_uuid=ns_project_uuid)
+            except Exception as e:
+                logger.error('{0} - [ERROR]: {1}'.format(datetime.datetime.now().ctime(), e))
 
 
 def verify_notary_projects():
     ns_projects = Project.objects.all().order_by('id')
     if ns_projects:
         for ns_project in ns_projects:
-            verify_ns_project(ns_project=ns_project)
+            try:
+                verify_ns_project(ns_project=ns_project)
+            except Exception as e:
+                logger.error('{0} - [ERROR]: {1}'.format(datetime.datetime.now().ctime(), e))
 
 
 class Command(BaseCommand):
