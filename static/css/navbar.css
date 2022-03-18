@@ -1,4 +1,6 @@
 .navbar {
+  padding-top: 0;
+  padding-bottom: 0;
   background-color: #326bb3;
   padding: 0 1rem 0 0;
 }
