@@ -2,15 +2,22 @@
 
 /* Set backgound color of navbar */
 .ns-navbar {
-  background-color: #555;
+  color: rgba(0, 0, 0, 0.5);
+  background-color: #f8f9fa !important;
 }
 
 /* Set hover color for navbar item */
 .ns-navbar a:hover {
-  background-color: #D67B0B;
+  background-color: #326bb3;
 }
 
 /* Set active color for navbar selected/active item */
-.active {
-  background-color: #107B97;
+.nav-item a.active,
+.nav-item a:hover {
+  border-bottom: 3px #326bb3 solid;
+}
+
+.nav-item .dropdown-menu a.active,
+.nav-item .dropdown-menu a:hover {
+  border-bottom: none;
 }

@@ -2,9 +2,8 @@
 # - all ports are exposed using host mapping
 # - riak container is included for development (normally it would be elsewhere)
 
-version: '3.9'
+version: "3.9"
 services:
-
   database:
     image: postgres:14
     container_name: database
@@ -55,15 +54,15 @@ services:
     container_name: neo4j
     user: ${NEO4J_UID:-1000}:${NEO4J_GID:-1000}
     ports:
-      - "7474:7474"  # for HTTP
-      - "7473:7473"  # for HTTPS
-      - "7687:7687"  # for Bolt
+      - "7474:7474" # for HTTP
+      - "7473:7473" # for HTTPS
+      - "7687:7687" # for Bolt
     volumes:
       - ${NEO4J_DATA_PATH_HOST:-./neo4j/data}:${NEO4J_DATA_PATH_DOCKER:-/data}
       - ${NEO4J_IMPORTS_PATH_HOST:-./neo4j/imports}:${NEO4J_IMPORTS_PATH_DOCKER:-/imports}
       - ${NEO4J_LOGS_PATH_HOST:-./neo4j/logs}:${NEO4J_LOGS_PATH_DOCKER:-/logs}
-      - ${NGINX_SSL_CERTS_DIR:-./ssl}/fullchain.pem:/ssl/neo4j.cert:ro  # SSL development certificate
-      - ${NGINX_SSL_CERTS_DIR:-./ssl}/privkey.pem:/ssl/neo4j.key:ro     # SSL development key
+      - ${NGINX_SSL_CERTS_DIR:-./ssl}/fullchain.pem:/ssl/neo4j.cert:ro # SSL development certificate
+      - ${NGINX_SSL_CERTS_DIR:-./ssl}/privkey.pem:/ssl/neo4j.key:ro # SSL development key
     environment:
       - NEO4J_AUTH=${NEO4J_USER:-neo4j}/${NEO4J_PASS:-password}
 

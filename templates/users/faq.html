@@ -4,8 +4,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         .collapsible {
-            background-color: #555;
-            color: #BBB;
+            background-color: #f8f9fa!important;
+            color: #424242;
             cursor: pointer;
             padding: 12px;
             width: 100%;
@@ -16,18 +16,13 @@
         }
 
         .collapsible:hover {
-            background-color: #D67B0B;
+            background-color: #326bb3;
             color: #CCC;
-        }
-
-        .active {
-            background-color: #107B97;
-            color: #FFF;
         }
 
         .content {
             padding: 0 18px;
-            display: none;
+            display: block;
             overflow: hidden;
             background-color: #f1f1f1;
         }
@@ -38,7 +33,7 @@
 
 {% block content %}
     <div class="container">
-        <h1>Frequently Asked Questions</h1>
+        <h1 class="my-4">Frequently Asked Questions</h1>
         <button class="collapsible">
             {#            <h3>What does Role mean?</h3>#}
             <i class="fa fa-fw fa-question-circle"></i> What does Role mean?

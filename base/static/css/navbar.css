@@ -1,34 +1,33 @@
-/* Style the navigation bar */
 .navbar {
-  width: 100%;
-  background-color: #555;
-  overflow: auto;
+  padding-top: 0;
+  padding-bottom: 0;
+  background-color: #326bb3;
+  padding: 0 1rem 0 0;
 }
 
-/* Navbar links */
 .navbar a {
-  float: left;
-  text-align: center;
-  padding: 12px;
-  color: white;
-  text-decoration: none;
-  font-size: 17px;
+  padding: 0.5rem;
 }
 
-/* Navbar links on mouse-over */
-.navbar a:hover {
-  background-color: #D67B0B;
+.navbar-brand {
+  margin-right: 0;
+  font-size: 1.2rem;
 }
 
-/* Current/active navbar link */
-.active {
-  background-color: #107B97;
+.dropdown-menu {
+  background-color: #326bb3;
 }
 
-/* Add responsiveness - will automatically display the navbar vertically instead of horizontally on screens less than 500 pixels */
-@media screen and (max-width: 500px) {
-  .navbar a {
-    float: none;
-    display: block;
-  }
+.dropdown-item {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dropdown-item:focus,
+.dropdown-item:hover {
+  color: #fff;
+  background-color: #326bb3;
+}
+
+.nav-link {
+  color: rgba(0, 0, 0, 0.9);
 }

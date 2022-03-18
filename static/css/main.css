@@ -1,36 +1,189 @@
 /* main styling */
 
 ul.errorlist {
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
 }
 
 .errorlist li {
-    border: 1px solid red;
-    color: red;
-    background: rgba(255, 0, 0, 0.15);
-    list-style-position: inside;
-    display: block;
-    font-size: 1.2em;
-    margin: 0 0 3px;
-    padding: 4px 5px;
-    text-align: center;
-    border-radius: 3px;
+  border: 1px solid red;
+  color: red;
+  background: rgba(255, 0, 0, 0.15);
+  list-style-position: inside;
+  display: block;
+  font-size: 1.2em;
+  margin: 0 0 3px;
+  padding: 4px 5px;
+  text-align: center;
+  border-radius: 3px;
 }
 
-input:not([type="submit"], [type="checkbox"]), textarea, select {
-    width: 100%;
-    padding: 5px !important;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
+input:not([type="submit"], [type="checkbox"]),
+textarea,
+select {
+  width: 100%;
+  padding: 5px !important;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 .success {
-    background-color: rgba(0, 128, 0, 0.15);
-    padding: 10px;
-    text-align: center;
-    color: green;
-    border: 1px solid green;
-    border-radius: 3px;
+  background-color: rgba(0, 128, 0, 0.15);
+  padding: 10px;
+  text-align: center;
+  color: green;
+  border: 1px solid green;
+  border-radius: 3px;
+}
+
+/* main styling */
+html {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+body {
+  position: relative;
+  min-height: 100%;
+  padding-bottom: 8em;
+  margin: 0;
+}
+
+main {
+  margin: 2rem;
+  bottom: 5rem;
+}
+
+ul.errorlist {
+  margin: 0;
+  padding: 0;
+}
+
+.errorlist li {
+  border: 1px solid red;
+  color: red;
+  background: rgba(255, 0, 0, 0.15);
+  list-style-position: inside;
+  display: block;
+  font-size: 1.2em;
+  margin: 0 0 3px;
+  padding: 4px 5px;
+  text-align: center;
+  border-radius: 3px;
+}
+
+input:not([type="submit"], [type="checkbox"]),
+textarea,
+select {
+  width: 100%;
+  padding: 5px !important;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.success {
+  background-color: rgba(0, 128, 0, 0.15);
+  padding: 10px;
+  text-align: center;
+  color: green;
+  border: 1px solid green;
+  border-radius: 3px;
+}
+
+/* main styling */
+
+.profile-body {
+  margin: 1rem 0;
+  padding-left: 2rem;
+}
+
+.message-body {
+  margin-top: 1rem;
+}
+
+.profile-body .active {
+  background-color: #fff;
+}
+
+.list-group-item.active {
+  background-color: #326bb3;
+  border: none;
+}
+
+#profile-list-tab {
+  margin-top: 5.5rem;
+}
+
+h4[aria-expanded="true"] .fa-plus {
+  display: none;
+}
+
+h4[aria-expanded="false"] .fa-minus {
+  display: none;
+}
+
+.preference-form p {
+  margin: 0.8rem 0;
+}
+
+.preference-form p label {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.preference-form ul {
+  list-style-type: none;
+  display: inline;
+}
+
+.preference-form ul li {
+  display: inline;
+}
+
+.preference-form ul li label {
+  padding-right: 1rem;
+}
+
+#id_role,
+#id_show_uuid {
+  padding-left: 0;
+}
+
+.tooltip-inner {
+  max-width: 25rem;
+  text-align: left;
+  border-radius: 0.25rem;
+}
+
+.errorlist {
+  display: none;
+}
+
+.message-btn {
+  font-family: FontAwesome;
+  padding: 0.35rem 1rem;
+  margin-right: 0.5rem;
+}
+
+.unlink {
+  font-family: FontAwesome;
+  color: #fff;
+  text-decoration: none;
+}
+
+.unlink:hover,
+.unlink:focus {
+  color: #fff;
+  text-decoration: none;
+}
+
+.courier-font-link {
+  font-family: Courier;
+}
+
+.card-header a {
+  color: #326bb3;
 }
