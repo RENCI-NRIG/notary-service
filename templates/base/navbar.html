@@ -1,9 +1,9 @@
 {% load static user_tags %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="{% static 'css/ns-navbar.css' %}" type="text/css">
+<link rel="stylesheet" href="{% static 'css/navbar.css' %}" type="text/css">
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand text-secondary" href="{% url 'index' %}">
-      <img src="{% static 'img/logo/impact-logo.png' %}" height="40" class="mr-1">
+    <a class="navbar-brand" href="{% url 'index' %}">
+      <img src="{% static 'img/logo/impact-logo.png' %}" height="40" class="mx-2">
       <span>Notary Service</span>
     </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">

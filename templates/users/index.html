@@ -4,16 +4,14 @@
 {% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
 
 {% block content %}
-    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <div class="container">
         <div class="text-center">
-            <h1>Infrastructure for Privacy-Assured CompuTations</h1>
-            <img class="rounded" width="300" src="{% static 'img/logo/impact-logo.png' %}">
+            <h1 >Infrastructure for Privacy-Assured CompuTations</h1>
+            <img class="rounded my-4" width="300" src="{% static 'img/logo/impact-logo.png' %}">
         </div>
-        <br><br>
         {% if user.is_authenticated %}
             <div class="container">
-                <p>Hello <b>{{ user.name }}</b>, You are logged in as username: <b>{{ user.username }}</b></p>
                 {% if new_messages > 0 %}
                     <h3>Recent Messages ({{ new_messages }} unread)</h3>
                 {% else %}
@@ -49,25 +47,26 @@
                         </tr>
                     {% endfor %}
                 </table>
-                <button class="btn btn-success mr-2">
+                <button class="btn btn-primary mr-2">
                     <a href="{% url 'profile' %}#messages" class="unlink text-white">
                         <i class="fa fa-inbox mr-1"></i> My Messages
                     </a>
                 </button>
             </div>
         {% else %}
-            <div class="container text-center">
-                <p>
-                    <b class="text-danger">You are not currently logged in</b><br>
-                    Click the "Login" button at the upper-right or Sign-up as a new user below
-                </p>
-                <br><br>
-                <p>
-                    Click the <b>Sign-up</b> button to learn more about joining ImPACT
-                </p>
-                <button class="btn btn-info mr-2">
+            <div class="container d-flex flex-column">
+                <div class="bd-callout bd-callout-info w-75 align-self-center">
+                  <p>You are not currently logged in:</p>
+                  <p>
+                    <ul>
+                      <li class="mb-1">Click the <b>Login</b> button at the upper-right;</li>
+                      <li>or click the <b>Sign-up</b> button to learn more about joining ImPACT as a new user.</li>
+                    </ul>
+                  </p>
+                </div>
+                <button class="btn btn-primary mr-2 align-self-center">
                     <a href="{% url 'signup1' %}" class="unlink text-white">
-                        <i class="fa fa-hand-o-right mr-2"></i> Sign-up
+                        <i class="fa fa-hand-o-right mr-1"></i> Sign-up
                     </a>
                 </button>
             </div>

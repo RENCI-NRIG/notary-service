@@ -1,5 +1,4 @@
 /* main styling */
-
 ul.errorlist {
   margin: 0;
   padding: 0;
@@ -186,4 +185,21 @@ h4[aria-expanded="false"] .fa-minus {
 
 .card-header a {
   color: #326bb3;
+}
+
+.bd-callout {
+  padding: 1.25rem;
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  border: 1px solid #e9ecef;
+  border-left-width: 0.25rem;
+  border-radius: 0.25rem;
+}
+
+.bd-callout-info {
+  border-left-color: #326bb3;
+}
+
+.btn-primary {
+  background-color: #326bb3 !important;
 }

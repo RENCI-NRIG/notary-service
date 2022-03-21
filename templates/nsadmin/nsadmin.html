@@ -3,7 +3,7 @@
 
 {% block title %}ImPACT - Notary Service{% endblock %}
 {% block content %}
-    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <div class="container">
         {% if user.is_authenticated %}
             <div class="row">
@@ -57,18 +57,18 @@
                                                 <td class="text-center">
                                                     <input type="submit"
                                                            class={% if person.is_impact_user %}
-                                                               "btn btn-success mr-2"
+                                                               "btn btn-sm btn-success mr-2"
                                                            {% else %}
-                                                               "btn btn-danger mr-2"
+                                                               "btn btn-sm btn-danger mr-2"
                                                            {% endif %}
                                                     name="ImpactUser_{{ person.id }}" value={{ person.is_impact_user }}>
                                                 </td>
                                                 <td class="text-center">
                                                     <input type="submit"
                                                            class={% if person.is_pi %}
-                                                               "btn btn-success mr-2"
+                                                               "btn btn-sm btn-success mr-2"
                                                            {% else %}
-                                                               "btn btn-danger mr-2"
+                                                               "btn btn-sm btn-danger mr-2"
                                                            {% endif %}
                                                     name="PrincipalInvestigator_{{ person.id }}"
                                                     value={{ person.is_pi }}>
@@ -76,18 +76,18 @@
                                                 <td class="text-center">
                                                     <input type="submit"
                                                            class={% if person.is_dp %}
-                                                               "btn btn-success mr-2"
+                                                               "btn btn-sm btn-success mr-2"
                                                            {% else %}
-                                                               "btn btn-danger mr-2"
+                                                               "btn btn-sm btn-danger mr-2"
                                                            {% endif %}
                                                     name="DataProvider_{{ person.id }}" value={{ person.is_dp }}>
                                                 </td>
                                                 <td class="text-center">
                                                     <input type="submit"
                                                            class={% if person.is_inp %}
-                                                               "btn btn-success mr-2"
+                                                               "btn btn-sm btn-success mr-2"
                                                            {% else %}
-                                                               "btn btn-danger mr-2"
+                                                               "btn btn-sm btn-danger mr-2"
                                                            {% endif %}
                                                     name="InfrastructureProvider_{{ person.id }}"
                                                     value={{ person.is_inp }}>
@@ -95,9 +95,9 @@
                                                 <td class="text-center">
                                                     <input type="submit"
                                                            class={% if person.is_ig %}
-                                                               "btn btn-success mr-2"
+                                                               "btn btn-sm btn-success mr-2"
                                                            {% else %}
-                                                               "btn btn-danger mr-2"
+                                                               "btn btn-sm btn-danger mr-2"
                                                            {% endif %}
                                                     name="InstitutionalGovernance_{{ person.id }}"
                                                     value={{ person.is_ig }}>
@@ -105,9 +105,9 @@
                                                 <td class="text-center">
                                                     <input type="submit"
                                                            class={% if person.is_nsadmin %}
-                                                               "btn btn-success mr-2"
+                                                               "btn btn-sm btn-success mr-2"
                                                            {% else %}
-                                                               "btn btn-danger mr-2"
+                                                               "btn btn-sm btn-danger mr-2"
                                                            {% endif %}
                                                     name="NotaryServiceAdmin_{{ person.id }}"
                                                     value={{ person.is_nsadmin }}>

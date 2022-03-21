@@ -5,13 +5,16 @@
   padding: 0 1rem 0 0;
 }
 
-.navbar a {
-  padding: 0.5rem;
+.navbar-brand {
+  margin-right: 0.75rem;
+  font-size: 1.1rem;
+  color: rgba(0, 0, 0, 0.8) !important;
+  font-weight: 500;
 }
 
-.navbar-brand {
-  margin-right: 0;
-  font-size: 1.2rem;
+.navbar-text {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 .dropdown-menu {
@@ -29,5 +32,9 @@
 }
 
 .nav-link {
-  color: rgba(0, 0, 0, 0.9);
+  color: rgba(0, 0, 0, 0.8) !important;
+}
+
+.navbar-nav li.active {
+  border-bottom: 3px solid #326bb3;
 }
