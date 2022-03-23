@@ -9,8 +9,10 @@
         {% if show_templates %}
             <div class="container">
                 <h1>Templates</h1>
-                <p class="text-info">Templates are directed acyclic graphs (DAGs) that provide the basis for permission
-                    based workflows. The graphs are defined using graphml and are stored in a Neo4j database.</p>
+                <div class="bd-callout bd-callout-info">
+                  Templates are directed acyclic graphs (DAGs) that provide the basis for permission
+                  based workflows. The graphs are defined using graphml and are stored in a Neo4j database.
+                </div>
                 <h3>My Templates
                     {% if user.is_dp or user.is_nsadmin %}
                         <button class="btn btn-success mr-2">

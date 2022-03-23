@@ -12,11 +12,11 @@
                 <div class="d-flex flex-row align-items-center justify-content-between">
                     <h1>ImPACT Projects</h1>
                 </div>
-                <p class="text-info">
+                <div class="bd-callout bd-callout-info">
                     Projects are created by Principal Investigators (PIs) and define membership via roles
                     registered within the ImPACT COmanage registry as well as Datasets as defined by data providers
                     using Notary Service tools.
-                </p>
+                </div>
                 <h3>My Projects
                     {% if user.is_nsadmin or user.is_pi %}
                         <button class="btn btn-success mr-2">

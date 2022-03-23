@@ -13,13 +13,13 @@
                     </a>
                 </button>
             </h2>
-            <p class="text-info">
-                <b>NOTE</b>: Projects are considered public unless the "is_public" checkbox is un-checked
-            </p>
+            <div class="bd-callout bd-callout-info">
+                <b>NOTE</b>: &nbsp; Projects are considered public unless the "is_public" checkbox is un-checked
+            </div>
             <form method="POST" class="post-form">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <input type="submit" value="Save" style="color: darkgreen">
+                <input type="submit" value="Save"  class="btn btn-success">
             </form>
         </div>
     {% else %}
