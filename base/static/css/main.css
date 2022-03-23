@@ -203,3 +203,19 @@ h4[aria-expanded="false"] .fa-minus {
 .btn-primary {
   background-color: #326bb3 !important;
 }
+
+.btn-info {
+  background-color: #8777d2 !important;
+  border-color: #8777d2 !important;
+}
+
+.text-info {
+  color: #8777d2 !important;
+}
+
+.alert {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 100;
+}
