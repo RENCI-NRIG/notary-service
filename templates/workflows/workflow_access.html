@@ -70,7 +70,7 @@
                                         <input type="submit" name="assert_{{ assertion.ID }}"
                                                onclick="return confirm('Are you sure?')"
                                                value="Submit"
-                                               style="color: darkgreen">
+                                               class="btn btn-success mr-2">
                                     {% endwith %}
                                 {% endif %}
                             {% endif %}
@@ -99,7 +99,7 @@
                                                 <input type="submit" name="assert_{{ assertion.ID }}"
                                                        onclick="return confirm('Are you sure?')"
                                                        value="Submit"
-                                                       style="color: darkgreen">
+                                                       class="btn btn-success mr-2">
                                             {% endwith %}
                                         {% elif safe_parameters.type == 'MultiSelection' %}
                                             {{ assertion.description }} (Check all that apply)<br>
@@ -123,7 +123,7 @@
                                             <input type="submit" name="assert_{{ assertion.ID }}"
                                                    onclick="return confirm('Are you sure?')"
                                                    value="Submit"
-                                                   style="color: darkgreen">
+                                                   class="btn btn-success mr-2">
                                         {% elif safe_parameters.type == 'String' %}
                                             {{ assertion.description }}<br>
                                             <textarea name="assert_string_{{ assertion.ID }}"
@@ -140,7 +140,7 @@
                                             <input type="submit" name="assert_{{ assertion.ID }}"
                                                    onclick="return confirm('Are you sure?')"
                                                    value="Submit"
-                                                   style="color: darkgreen">
+                                                   class="btn btn-success mr-2">
                                         {% elif safe_parameters.type == 'StringList' %}
                                             {{ assertion.description }} (one item per line):<br>
                                             <textarea name="assert_stringlist_{{ assertion.ID }}"
@@ -157,7 +157,7 @@
                                             <input type="submit" name="assert_{{ assertion.ID }}"
                                                    onclick="return confirm('Are you sure?')"
                                                    value="Submit"
-                                                   style="color: darkgreen">
+                                                   class="btn btn-success mr-2">
                                         {% elif safe_parameters.type == 'IPv4List' %}
                                             {{ assertion.description }} (one FQDN or IP per line):<br>
                                             <textarea name="assert_ipv4list_{{ assertion.ID }}"
@@ -174,7 +174,7 @@
                                             <input type="submit" name="assert_{{ assertion.ID }}"
                                                    onclick="return confirm('Are you sure?')"
                                                    value="Submit"
-                                                   style="color: darkgreen">
+                                                   class="btn btn-success mr-2">
                                         {% endif %}
                                     {% endwith %}
                                 {% else %}
@@ -190,7 +190,7 @@
                                     <input type="submit" name="assert_{{ assertion.ID }}"
                                            onclick="return confirm('Are you sure?')"
                                            value="I Agree"
-                                           style="color: darkgreen">
+                                           class="btn btn-success mr-2">
                                 {% endif %}
                             {% else %}
                                 <input type="checkbox" name="checkbox_{{ assertion.ID }}"/>
@@ -205,7 +205,7 @@
                                 <input type="submit" name="assert_{{ assertion.ID }}"
                                        onclick="return confirm('Are you sure?')"
                                        value="I Agree"
-                                       style="color: darkgreen">
+                                       class="btn btn-success mr-2">
                             {% endif %}
                         {% else %}
                             {% if assertion.ID == 'IS_COMPLETE' %}

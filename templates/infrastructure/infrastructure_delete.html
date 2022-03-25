@@ -24,10 +24,9 @@
             <form method="POST" class="post-form">
                 {% csrf_token %}
                 {% if used_by %}
-                    <input type="submit" value="Delete" style="color: grey" disabled>
+                    <input type="submit" value="Delete" class="btn btn-secondary mr-2" disabled>
                 {% else %}
-
-                    <input type="submit" value="Delete" style="color: #B22222;">
+                    <input type="submit" value="Delete" class="btn btn-danger mr-2">
                 {% endif %}
             </form>
             {% if used_by %}
