@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load static bootstrap4 %}
 
+{% block title %}
+    ImPACT Notary Service - Projects
+{% endblock %}
+
 {% block content %}
         {% if user.is_nsadmin or user in project_pi_admins %}
             <div class="container">
