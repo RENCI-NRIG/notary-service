@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% load static user_tags %}
 
-{% block title %}ImPACT - Notary Service{% endblock %}
+{% block title %}ImPACT Notary Service - User Profile{% endblock %}
 {% block content %}
-    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <div class="container">
         {% if user.is_authenticated %}
             <div class="row">
@@ -83,13 +83,13 @@
                         <div class="tab-pane fade" id="cilogon-certificate" role="tabpanel"
                              aria-labelledby="cilogon-certificate-list">
                             <h1>CILogon Certificate</h1>
-                            <p class="text-info text-left">
+                            <div class="bd-callout bd-callout-info">
                                 Generate a CILogon Identity Certificate for use with Presidio.
                                 <br>
                                 - Each time a new certificate is successfully generated the prior one will be deleted.
                                 <br>
-                                - Enter ".p12 password" prior to pressing the Generate New Certificate button.
-                            </p>
+                                - Enter <b>.p12 password</b> prior to pressing the Generate New Certificate button.
+                            </div>
                             <form method="POST" class="post-form">
                                 {% csrf_token %}
                                 <table class="table">
@@ -131,7 +131,7 @@
                                                            type="submit"
                                                            name="download-p12"
                                                            value="Download"
-                                                           style="color: darkgreen">
+                                                           class="btn btn-success mr-2">
                                                     <input hidden name="cert_uuid" value="{{ user.cilogon_cert.uuid }}">
                                                 </form>
                                             </td>
@@ -143,7 +143,7 @@
                                                            type="submit"
                                                            name="download-pubkey"
                                                            value="Download"
-                                                           style="color: darkgreen">
+                                                           class="btn btn-success mr-2">
                                                     <input hidden name="cert_uuid" value="{{ user.cilogon_cert.uuid }}">
                                                 </form>
                                             </td>
@@ -155,7 +155,7 @@
                                                            type="submit"
                                                            name="download-privkey"
                                                            value="Download"
-                                                           style="color: darkgreen">
+                                                           class="btn btn-success mr-2">
                                                     <input hidden name="cert_uuid" value="{{ user.cilogon_cert.uuid }}">
                                                 </form>
                                             </td>

@@ -2,7 +2,7 @@
 {% load static project_tags %}
 
 {% block title %}
-    ImPACT Projects
+    ImPACT Notary Service - Projects
 {% endblock %}
 
 {% block content %}
@@ -12,11 +12,11 @@
                 <div class="d-flex flex-row align-items-center justify-content-between">
                     <h1>ImPACT Projects</h1>
                 </div>
-                <p class="text-info">
+                <div class="bd-callout bd-callout-info">
                     Projects are created by Principal Investigators (PIs) and define membership via roles
                     registered within the ImPACT COmanage registry as well as Datasets as defined by data providers
                     using Notary Service tools.
-                </p>
+                </div>
                 <h3>My Projects
                     {% if user.is_nsadmin or user.is_pi %}
                         <button class="btn btn-success mr-2">
@@ -48,7 +48,7 @@
                                                 <input type="submit"
                                                        name="ig-self-assign-project"
                                                        value="Self Assign"
-                                                       style="color: darkgreen">
+                                                       class="btn btn-success mr-2">
                                                 <input hidden name="project_uuid" value="{{ project.uuid }}">
                                             </form>
                                         {% else %}
@@ -111,7 +111,7 @@
                                                     <input type="submit"
                                                            name="ig-self-assign-project"
                                                            value="Self Assign"
-                                                           style="color: darkgreen">
+                                                           class="btn btn-success mr-2">
                                                     <input hidden name="project_uuid" value="{{ project.uuid }}">
                                                 </form>
                                             {% else %}
@@ -155,11 +155,11 @@
                                 <td class="text-center">
                                     <form method="POST" class="post-form">
                                         {% csrf_token %}
-                                        <input class="btn btn-info mr-2 text-white"
+                                        <input class="btn btn-info btn-sm mr-2 text-white"
                                                type="submit"
                                                name="join-project-request"
                                                value="Join"
-                                               style="color: darkgreen">
+                                               class="btn btn-success mr-2">
                                         <input hidden name="project_uuid" value="{{ project.uuid }}">
                                     </form>
                                 </td>
@@ -192,7 +192,7 @@
                                                         <input type="submit"
                                                                name="ig-self-assign-project"
                                                                value="Self Assign"
-                                                               style="color: darkgreen">
+                                                               class="btn btn-success mr-2">
                                                         <input hidden name="project_uuid" value="{{ project.uuid }}">
                                                     </form>
                                                 {% else %}

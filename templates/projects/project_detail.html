@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
 {% load static user_tags project_tags %}
 
-{% block title %}ImPACT - Notary Service{% endblock %}
+{% block title %}ImPACT Notary Service - Projects{% endblock %}
+
 {% block content %}
-    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <div class="container">
         {% if user.is_nsadmin or user in project_pi_admins or user in project_pi_members or user in project_staff or user in dataset_owners or user in infrastructure_owner or user in institutional_governance %}
             <div class="row">
@@ -37,14 +38,14 @@
                                 {% endif %}
                             </h1>
                             {% if user.is_nsadmin or user in project_pi_admins %}
-                                <button class="btn btn-success mr-2">
+                                <button class="btn btn-success btn-sm mr-2">
                                     <a href="{% url 'project_edit' uuid=project.uuid %}" class="unlink text-white">
                                         <i class="fa fa-pencil mr-1"></i> Edit
                                     </a>
                                 </button>
                             {% endif %}
                             {% if user.is_nsadmin or user in project_pi_admins %}
-                                <button class="btn btn-danger mr-2">
+                                <button class="btn btn-danger btn-sm mr-2">
                                     <a href="{% url 'project_delete' uuid=project.uuid %}" class="unlink text-white">
                                         <i class="fa fa-fw fa-trash mr-1"></i> Delete
                                     </a>
@@ -69,8 +70,7 @@
                                                     <b class="float-left">{{ project.is_valid }}</b>
                                                     <input type="submit" name="validate"
                                                            value="Validate / Generate Workflows"
-                                                           class="btn-info text-white float-right"
-                                                           style="color: darkgreen">
+                                                           class="btn-info text-white float-right">
                                                 </form>
                                             {% else %}
                                                 <b>{{ project.is_valid }}</b>
@@ -115,7 +115,7 @@
                             </h1>
                             <h3>Project Management</h3>
                             {% if user.is_nsadmin or user in project_pi_admins %}
-                                <button class="btn btn-info mr-2">
+                                <button class="btn btn-info btn-sm mr-2">
                                     <a href="{% url 'project_update_admin' uuid=project.uuid %}"
                                        class="unlink; text-white">
                                         <i class="fa fa-user mr-1"></i> Update Management
@@ -136,7 +136,7 @@
                             </table>
                             <h3>PIs and Co-PIs</h3>
                             {% if user.is_nsadmin or user in project_pi_admins %}
-                                <button class="btn btn-info mr-2">
+                                <button class="btn btn-info btn-sm mr-2">
                                     <a href="{% url 'project_update_pi' uuid=project.uuid %}"
                                        class="unlink; text-white">
                                         <i class="fa fa-user mr-1"></i> Update PIs/Co-PIs
@@ -157,7 +157,7 @@
                             </table>
                             <h3>Staff</h3>
                             {% if user.is_nsadmin or user in project_pi_admins or user in project_pi_members %}
-                                <button class="btn btn-info mr-2">
+                                <button class="btn btn-info btn-sm mr-2">
                                     <a href="{% url 'project_update_staff' uuid=project.uuid %}"
                                        class="unlink; text-white">
                                         <i class="fa fa-user mr-1"></i> Update Staff
@@ -230,14 +230,13 @@
                             {% if user.is_nsadmin or user in project_pi_admins or user in project_pi_members %}
 
                                 <form method="POST" class="post-form">
-                                <button class="btn btn-info mr-2">
+                                <button class="btn btn-info btn-sm mr-2">
                                     <a href="{% url 'project_update_dataset' uuid=project.uuid %}"
                                        class="unlink; text-white">Add/Update Datasets</a>
                                 </button>
                                     {% csrf_token %}
                                     <input type="submit" name="clear-project-datasets" value="Clear All Datasets"
-                                           class="btn btn-secondary text-white mr-2"
-                                           style="color: darkgreen">
+                                           class="btn btn-secondary btn-sm text-white mr-2">
                                 </form>
                             {% endif %}
                             <table class="table table-striped table-bordered my-4">
@@ -316,7 +315,7 @@
                             </table>
                             <h3>Infrastructure</h3>
                             {% if user.is_nsadmin or user in project_pi_admins or user in project_pi_members %}
-                                <button class="btn btn-info mr-2">
+                                <button class="btn btn-info btn-sm mr-2">
                                     <a href="{% url 'project_update_infra' uuid=project.uuid %}"
                                        class="unlink; text-white">Update Infrastructure</a>
                                 </button>

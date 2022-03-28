@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static user_tags %}
 
-{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+{% block title %}ImPACT Notary Service - Workflows{% endblock %}
 
 {% block content %}
     {% if user.is_authenticated %}
@@ -9,9 +9,9 @@
         {% if show_workflows %}
             <div class="container">
                 <h1>Workflows</h1>
-                <p class="text-info">Workflows are Neo4j graphs where nodes represent the state of personnel or
+                <div class="bd-callout bd-callout-info">Workflows are Neo4j graphs where nodes represent the state of personnel or
                     infrastructure
-                    decision points and relationships represent completed actions between states.</p>
+                    decision points and relationships represent completed actions between states.</div>
                 {% if user.is_nsadmin %}
                     <h3>Neo4j Browser</h3>
                     <a href="{{ neo4j_vars.neo4j_https }}" target="_blank">{{ neo4j_vars.neo4j_https }}/</a>

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static user_tags %}
 
-{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+{% block title %}ImPACT Notary Service - Projects{% endblock %}
 
 {% block content %}
     {% if user.is_authenticated %}
@@ -158,7 +158,7 @@
                 </div>
                 <form method="POST" class="post-form">
                     {% csrf_token %}
-                    <input type="submit" value="Delete" style="color: #B22222;">
+                    <input type="submit" value="Delete" class="btn btn-danger mr-2">
                 </form>
                 <br>
                 <table width="100%" style="font-size: small">

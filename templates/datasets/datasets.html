@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static dataset_tags user_tags %}
 
-{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+{% block title %}ImPACT Notary Service - Datasets{% endblock %}
 
 {% block content %}
     {% if user.is_authenticated %}
@@ -9,9 +9,10 @@
         {% if show_datasets %}
             <div class="container">
                 <h1>Datasets</h1>
-                <p class="text-info">Datasets are composed from a URL dataset identifier, a SAFE SCID, and one or more
-                    notary service templates which define the permission workflow.
-                </p>
+                <div class="bd-callout bd-callout-info">
+                  Datasets are composed from a URL dataset identifier, a SAFE SCID, and one or more
+                  notary service templates which define the permission workflow.
+                </div>
                 <h3>My Datasets
                     {% if user.is_dp or user.is_nsadmin %}
                         <button class="btn btn-success mr-2">

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static user_tags %}
 
-{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+{% block title %}ImPACT Notary Service - Infrastructure{% endblock %}
 
 {% block content %}
     {% if user.is_inp or user.is_nsadmin %}
@@ -13,13 +13,13 @@
                     </a>
                 </button>
             </h2>
-            <p class="text-info">
-                <b>NOTE</b>: Infrastructure will automatically inherit the "Affiliation" of the user creating it
-            </p>
+            <div class="bd-callout bd-callout-info">
+                <b>NOTE</b>: &nbsp; Infrastructure will automatically inherit the "Affiliation" of the user creating it.
+            </div>
             <form method="POST" class="post-form" enctype="multipart/form-data">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <input type="submit" value="Save" style="color: darkgreen">
+                <input type="submit" value="Save" class="btn btn-success mr-2">
             </form>
         </div>
     {% else %}

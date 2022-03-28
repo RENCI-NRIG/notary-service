@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+{% block title %}ImPACT Notary Service - Datasets{% endblock %}
 
 {% block content %}
     {% if user.is_nsadmin or user == dataset.created_by %}
@@ -14,10 +14,9 @@
                 </button>
             </h2>
             <form method="POST" class="post-form" enctype="multipart/form-data">
-
                 {% csrf_token %}
                 {{ form.as_p }}
-                <input type="submit" value="Save" style="color: darkgreen">
+                <input type="submit" value="Save" class="btn btn-success mr-2">
             </form>
         </div>
     {% else %}

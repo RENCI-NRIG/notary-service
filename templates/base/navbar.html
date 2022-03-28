@@ -1,91 +1,74 @@
 {% load static user_tags %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="{% static 'css/ns-navbar.css' %}" type="text/css">
-<nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-white">
-    <a class="navbar-brand text-secondary" href="{% url 'index' %}">
-        <img src="{% static 'img/logo/impact-logo-1600x752.png' %}" height="40">
-        NotaryService
+<link rel="stylesheet" href="{% static 'css/navbar.css' %}" type="text/css">
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="{% url 'index' %}">
+      <img src="{% static 'img/logo/impact-logo.png' %}" height="40" class="mx-2">
+      <span>Notary Service</span>
     </a>
-    <ul class="navbar-nav ns-navbar">
-        {#        <li class="nav-item {{ index_page }}">#}
-        {#            <a class="nav-link" href="{% url 'index' %}">#}
-        {#                <i class="fa fa-fw fa-home"></i> Home</a>#}
-        {#        </li>#}
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarToggler">
+      <ul class="navbar-nav mr-auto">
         <li class="nav-item {{ about_page }}">
-            <a class="nav-link" href="{% url 'about' %}">
+            <a class="nav-link mr-1" href="{% url 'about' %}">
                 <i class="fa fa-fw fa-info-circle"></i> About</a>
         </li>
         <li class="nav-item {{ faq_page }}">
-            <a class="nav-link" href="{% url 'faq' %}">
+            <a class="nav-link mr-1" href="{% url 'faq' %}">
                 <i class="fa fa-fw fa-question-circle"></i> FAQ</a>
         </li>
-        {#        <li class="nav-item {{ contact_page }}">#}
-        {#            <a class="nav-link" href="{% url 'contact' %}">#}
-        {#                <i class="fa fa-fw fa-envelope"></i> Contact</a>#}
-        {#        </li>#}
-    </ul>
-    {% if user.is_authenticated %}
-        <ul class="navbar-nav ns-navbar">
-            <!-- TODO: search not implemented
-            {% display_search as show_search %}
-            {% if show_search %}
-                <li class="nav-item {{ search_page }}">
-                    <a class="nav-link" href="{% url 'search' %}">
-                        <i class="fa fa-fw fa-search"></i> Search</a>
-                </li>
-            {% endif %}
-            -->
+        {% if user.is_authenticated %}
             {% display_projects as show_projects %}
             {% if show_projects %}
                 <li class="nav-item {{ projects_page }}">
-                    <a class="nav-link" href="{% url 'projects' %}">
+                    <a class="nav-link mr-1" href="{% url 'projects' %}">
                         <i class="fa fa-fw fa-folder-open"></i> Projects</a>
                 </li>
             {% endif %}
             {% display_templates as show_templates %}
             {% if show_templates %}
                 <li class="nav-item {{ templates_page }}">
-                    <a class="nav-link" href="{% url 'templates' %}">
+                    <a class="nav-link mr-1" href="{% url 'templates' %}">
                         <i class="fa fa-fw fa-code"></i> Templates</a>
                 </li>
             {% endif %}
             {% display_datasets as show_datasets %}
             {% if show_datasets %}
                 <li class="nav-item {{ datasets_page }}">
-                    <a class="nav-link" href="{% url 'datasets' %}">
+                    <a class="nav-link mr-1" href="{% url 'datasets' %}">
                         <i class="fa fa-fw fa-database"></i> Datasets</a>
                 </li>
             {% endif %}
             {% display_infrastructure as show_infrastructure %}
             {% if show_infrastructure %}
                 <li class="nav-item {{ infrastructure_page }}">
-                    <a class="nav-link" href="{% url 'infrastructure' %}">
+                    <a class="nav-link mr-1" href="{% url 'infrastructure' %}">
                         <i class="fa fa-fw fa-gears"></i> Infrastructure</a>
                 </li>
             {% endif %}
             <li class="nav-item {{ profile_page }}">
-                <a class="nav-link" href="{% url 'profile' %}">
+                <a class="nav-link mr-1" href="{% url 'profile' %}">
                     <i class="fa fa-fw fa-user"></i> {{ user.display_name }}</a>
             </li>
             {% if user.is_nsadmin %}
                 <li class="nav-item {{ nsadmin_page }}">
-                    <a class="nav-link" href="{% url 'nsadmin' %}">
+                    <a class="nav-link mr-1" href="{% url 'nsadmin' %}">
                         <i class="fa fa-fw fa-users"></i> UserAdmin</a>
                 </li>
             {% endif %}
-        </ul>
-        <ul class="navbar-nav ml-auto ns-navbar">
-            <li class="nav-item {{ logout_page }}">
+            </ul>
+            <span class="navbar-text {{ logout_page }}">
                 <a class="nav-link" href="{% url 'logout' %}">
                     <i class="fa fa-fw fa-sign-out"></i> Logout</a>
-            </li>
-        </ul>
-    {% else %}
-        <ul class="navbar-nav ml-auto ns-navbar">
-            <li class="nav-item {{ login_page }}">
+            </span>
+          {% else %}
+            </ul>
+            <span class="navbar-text {{ login_page }}">
                 <a class="nav-link" href="{% url 'oidc_authentication_init' %}">
                     <i class="fa fa-fw fa-sign-in"></i> Login</a>
-            </li>
-        </ul>
-    {% endif %}
+            </span>
+          {% endif %}
+    </div>
 </nav>

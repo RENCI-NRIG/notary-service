@@ -1,143 +1,124 @@
 {% extends 'base.html' %}
-
-{% block head %}
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        .collapsible {
-            background-color: #555;
-            color: #BBB;
-            cursor: pointer;
-            padding: 12px;
-            width: 100%;
-            border: none;
-            text-align: left;
-            outline: none;
-            font-size: 24px;
-        }
-
-        .collapsible:hover {
-            background-color: #D67B0B;
-            color: #CCC;
-        }
-
-        .active {
-            background-color: #107B97;
-            color: #FFF;
-        }
-
-        .content {
-            padding: 0 18px;
-            display: none;
-            overflow: hidden;
-            background-color: #f1f1f1;
-        }
-    </style>
-{% endblock %}
-
-{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+{% load static user_tags %}
+{% block title %}ImPACT Notary Service - Frequently Asked Questions{% endblock %}
 
 {% block content %}
-    <div class="container">
-        <h1>Frequently Asked Questions</h1>
-        <button class="collapsible">
-            {#            <h3>What does Role mean?</h3>#}
-            <i class="fa fa-fw fa-question-circle"></i> What does Role mean?
-        </button>
-        <div class="content">
-            <p><br>
-                The user's Role determines their ability to create, read, update and delete various items within Notary
-                Service. Role's are selected from the Preferences section of the user's profile page. A user can only
-                operate as one role at a time. If a user has multiple roles available to them, they can switch
-                between the available roles to accomplish different tasks.
-            </p>
-            <p><b>Possible Roles:</b></p>
-            <ul>
-                <li>
-                    <b>Administrator</b><br>
-                    Full administrative rights over notary service deployment<br>
-                    - Can create, read, update, and delete templates<br>
-                    - Can create, read, update, and delete datasets<br>
-                    - Can create, read, update, and delete infrastructure<br>
-                    - Can create, read, update, and delete projects<br>
-                    - Can create, read, update, and delete workflows<br>
-                </li>
-                <li>
-                    <b>Data Provider</b><br>
-                    Can create, read, update, and delete templates<br>
-                    Can create, read, update, and delete datasets<br>
-                    Per project association where dataset is used<br>
-                    - Can read templates<br>
-                    - Can read datasets<br>
-                    - Can read infrastructure<br>
-                    - Can read projects<br>
-                    - Can complete workflows<br>
-                </li>
-                <li>
-                    <b>Infrastructure Provider</b><br>
-                    Can create, read, update, and delete infrastructure<br>
-                    Per project association where infrastructure is used<br>
-                    - Can read datasets<br>
-                    - Can read infrastructure<br>
-                    - Can read projects<br>
-                    - Can complete workflows<br>
-                </li>
-                <li>
-                    <b>Institutional Governance</b><br>
-                    Per project association where institution/organization contains PI member<br>
-                    - Can create read datasets<br>
-                    - Can create read infrastructure<br>
-                    - Can create read projects<br>
-                    - Can create complete workflows<br>
-                </li>
-                <li>
-                    <b>No Role</b><br>
-                    Access limited to About, FAQ and profile page<br>
-                </li>
-                <li>
-                    <b>Project Member</b><br>
-                    Per project association that contains Project Member<br>
-                    - Can read datasets<br>
-                    - Can read infrastructure<br>
-                    - Can read projects<br>
-                    - Can complete workflows<br>
-                </li>
-                <li>
-                    <b>Project PI</b><br>
-                    Per project association that contains Project PI<br>
-                    - Can read datasets<br>
-                    - Can read infrastructure<br>
-                    - Can read projects<br>
-                    - Can complete workflows<br>
-                </li>
-                <li>
-                    <b>Project PI Admin</b><br>
-                    Can create, read, update, and delete projects<br>
-                    Can create, read, update, and delete workflows<br>
-                    Per project association that contains Project PI Admin<br>
-                    - Can read templates<br>
-                    - Can read datasets<br>
-                    - Can read infrastructure<br>
-                    - Can read projects<br>
-                    - Can complete workflows<br>
-                </li>
-            </ul>
-        </div>
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <div class="container">
+    <h1 class="mt-4">Frequently Asked Questions</h1>
+    <h4
+      id="question"
+      class="card-header my-4"
+      data-toggle="collapse"
+      data-target="#answer1"
+      aria-expanded="true"
+      aria-controls="answer1"
+    >
+      What does Role mean?
+      <span class="attributes-collapse pull-right">
+        <i class="fa fa-plus"></i>
+        <i class="fa fa-minus"></i>
+      </span>
+    </h4>
+    <div
+      id="answer1"
+      class="collapse show table table-striped table-bordered py-2 px-4"
+      aria-labelledby="answer1"
+    >
+      <p><br>
+          The user's Role determines their ability to create, read, update and delete various items within Notary
+          Service. Role's are selected from the Preferences section of the user's profile page. A user can only
+          operate as one role at a time. If a user has multiple roles available to them, they can switch
+          between the available roles to accomplish different tasks.
+      </p>
+      <table class="table table-striped table-bordered">
+        <tr class="font-weight-bold">
+            <td>Possible Roles</td>
+            <td>Privileges</td>
+        </tr>
+        <tr>
+          <td>Administrator</td>
+          <td>
+            Full administrative rights over notary service deployment<br>
+            - Can create, read, update, and delete templates<br>
+            - Can create, read, update, and delete datasets<br>
+            - Can create, read, update, and delete infrastructure<br>
+            - Can create, read, update, and delete projects<br>
+            - Can create, read, update, and delete workflows<br>
+          </td>
+        </tr>
+        <tr>
+          <td>Data Provider</td>
+          <td>
+            Can create, read, update, and delete templates<br>
+            Can create, read, update, and delete datasets<br>
+            Per project association where dataset is used<br>
+            - Can read templates<br>
+            - Can read datasets<br>
+            - Can read infrastructure<br>
+            - Can read projects<br>
+            - Can complete workflows<br>
+          </td>
+        </tr>
+        <tr>
+          <td>Infrastructure Provider</td>
+          <td>
+            Can create, read, update, and delete infrastructure<br>
+            Per project association where infrastructure is used<br>
+            - Can read datasets<br>
+            - Can read infrastructure<br>
+            - Can read projects<br>
+            - Can complete workflows<br>
+          </td>
+        </tr>
+        <tr>
+          <td>Institutional Governance</td>
+          <td>
+            Per project association where institution/organization contains PI member<br>
+            - Can create read datasets<br>
+            - Can create read infrastructure<br>
+            - Can create read projects<br>
+            - Can create complete workflows<br>
+          </td>
+        </tr>
+        <tr>
+          <td>Project Member</td>
+          <td>
+            Per project association that contains Project Member<br>
+            - Can read datasets<br>
+            - Can read infrastructure<br>
+            - Can read projects<br>
+            - Can complete workflows<br>
+          </td>
+        </tr>
+        <tr>
+          <td>Project PI</td>
+          <td>
+            Per project association that contains Project PI<br>
+            - Can read datasets<br>
+            - Can read infrastructure<br>
+            - Can read projects<br>
+            - Can complete workflows<br>
+          </td>
+        </tr>
+        <tr>
+          <td>Project PI Admin</td>
+          <td>
+            Can create, read, update, and delete projects<br>
+            Can create, read, update, and delete workflows<br>
+            Per project association that contains Project PI Admin<br>
+            - Can read templates<br>
+            - Can read datasets<br>
+            - Can read infrastructure<br>
+            - Can read projects<br>
+            - Can complete workflows<br>
+          </td>
+        </tr>
+        <tr>
+          <td>No Role</td>
+          <td>Access limited to About, FAQ and profile page</td>
+        </tr>        
+      </table>
     </div>
-
-    <script>
-        var coll = document.getElementsByClassName("collapsible");
-        var i;
-
-        for (i = 0; i < coll.length; i++) {
-            coll[i].addEventListener("click", function () {
-                this.classList.toggle("active");
-                var content = this.nextElementSibling;
-                if (content.style.display === "block") {
-                    content.style.display = "none";
-                } else {
-                    content.style.display = "block";
-                }
-            });
-        }
-    </script>
+  </div>
 {% endblock %}

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static dataset_tags user_tags %}
 
-{% block title %}Infrastructure for Privacy-Assured CompuTations{% endblock %}
+{% block title %}ImPACT Notary Service - Infrastructure{% endblock %}
 
 {% block content %}
     {% if user.is_authenticated %}
@@ -27,7 +27,7 @@
                     {% if not infrastructure.is_valid %}
                         <form method="POST" class="post-form">
                             {% csrf_token %}
-                            <input type="submit" value="Validate Now" style="color: darkgreen">
+                            <input type="submit" value="Validate Now" class="btn btn-success mr-2">
                         </form>
                     {% endif %}
                 {% endif %}
