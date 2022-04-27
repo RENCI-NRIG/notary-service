@@ -24,7 +24,7 @@
                     </style>
                 {% endblock extrastyle %}
                 <h2>{{ project.name }}</h2>
-                <p class="text-info">Choose the Infrastructure for "{{ project.name }}"</p>
+                <p class="text-info">Choose Datasets for "{{ project.name }}"</p>
                 <form method="POST" class="form-group">
                     {% csrf_token %}
                     <input class="btn btn-success mr-2" type="submit" value="Save"/>
